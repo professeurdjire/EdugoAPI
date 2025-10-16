@@ -1,0 +1,16 @@
+package com.example.edugo.model;
+
+public enum ClasseEleve {
+    PREMIEREANNEE,
+    DEUXIEMEANNEE,
+    TROISIEMEANNEE,
+    QUATRIEMEANNEE,
+    CINQUIEMEANNEE,
+    SIXEMEANNEE,
+    SEPTIEMEANNEE,
+    HUITEMEANNEE,
+    NEUVEMEANNEE,
+    DIXIEMEANNEE,
+    ONZEMEANNEE,
+    TERMINALE
+}
