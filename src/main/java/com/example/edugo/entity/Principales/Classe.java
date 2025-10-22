@@ -1,4 +1,4 @@
-package com.example.edugo.entity;
+package com.example.edugo.entity.Principales.;
 
 import jakarta.persistence.*;
 import java.util.ArrayList;
@@ -13,8 +13,6 @@ public class Classe {
 
     @Column(nullable = false)
     private String nom;
-
-    private ClasseEleve classEleve;
 
     @ManyToOne
     @JoinColumn(name = "niveau_id", nullable = false)

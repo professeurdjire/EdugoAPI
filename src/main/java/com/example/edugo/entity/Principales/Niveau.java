@@ -1,4 +1,4 @@
-package com.example.edugo.entity;
+package com.example.edugo.entity.Principales;
 
 import jakarta.persistence.*;
 import java.util.ArrayList;
@@ -14,12 +14,6 @@ public class Niveau {
     @Column(nullable = false, unique = true)
     private String nom;
 
-    private String description;
-
-    @ManyToOne
-    @JoinColumn(name = "id_niveau_scolaire", nullable = false)
-    private NiveauScolaire niveauScolaire;
-
     @OneToMany(mappedBy = "niveau", cascade = CascadeType.ALL)
     private List<Classe> classes = new ArrayList<>();
 
@@ -31,7 +25,6 @@ public class Niveau {
 
     public Niveau(String nom, String description) {
         this.nom = nom;
-        this.description = description;
     }
 
     // Getters et Setters
@@ -41,12 +34,10 @@ public class Niveau {
     public String getNom() { return nom; }
     public void setNom(String nom) { this.nom = nom; }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-
     public List<Classe> getClasses() { return classes; }
     public void setClasses(List<Classe> classes) { this.classes = classes; }
 
     public List<Livre> getLivres() { return livres; }
     public void setLivres(List<Livre> livres) { this.livres = livres; }
+
 }

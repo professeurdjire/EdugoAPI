@@ -1,5 +1,6 @@
 package com.example.edugo.entity;
 
+import com.example.edugo.entity.Principales.Livre;
 import jakarta.persistence.*;
 
 @Entity

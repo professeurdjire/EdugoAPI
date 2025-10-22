@@ -34,4 +34,5 @@ public class Parametre {
 
     @Column(name = "date_modification")
     private java.util.Date dateModification;
+
 }

@@ -1,4 +1,4 @@
-package com.example.edugo.entity;
+package com.example.edugo.entity.Principales;
 
 import jakarta.persistence.*;
 import java.util.ArrayList;
@@ -16,6 +16,8 @@ public class Matiere {
 
     @OneToMany(mappedBy = "matiere", cascade = CascadeType.ALL)
     private List<Livre> livres = new ArrayList<>();
+    @OneToMany(mappedBy = "matiere", cascade = CascadeType.ALL)
+    private List<Exercice> Exercice = new ArrayList<>();
 
     // Constructeurs
     public Matiere() {}
@@ -33,4 +35,9 @@ public class Matiere {
 
     public List<Livre> getLivres() { return livres; }
     public void setLivres(List<Livre> livres) { this.livres = livres; }
+    public List<Exercice> getExercice() { return Exercice; }
+
+    public void setExercice(List<Exercice> exercice) {
+        Exercice = exercice;
+    }
 }

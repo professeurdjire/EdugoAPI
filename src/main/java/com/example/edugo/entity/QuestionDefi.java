@@ -1,5 +1,6 @@
 package com.example.edugo.entity;
 
+import com.example.edugo.entity.Principales.TypeQuestion;
 import jakarta.persistence.*;
 
 @Entity
@@ -22,12 +23,12 @@ public class QuestionDefi {
 
     @ManyToOne
     @JoinColumn(name = "defi_id", nullable = false)
-    private Defi defi;
+    private TypeQuestion.Defi defi;
 
     // Constructeurs
     public QuestionDefi() {}
 
-    public QuestionDefi(String texte, String type, Defi defi) {
+    public QuestionDefi(String texte, String type, TypeQuestion.Defi defi) {
         this.texte = texte;
         this.type = type;
         this.defi = defi;
@@ -49,6 +50,6 @@ public class QuestionDefi {
     public String getBonneReponse() { return bonneReponse; }
     public void setBonneReponse(String bonneReponse) { this.bonneReponse = bonneReponse; }
 
-    public Defi getDefi() { return defi; }
-    public void setDefi(Defi defi) { this.defi = defi; }
+    public TypeQuestion.Defi getDefi() { return defi; }
+    public void setDefi(TypeQuestion.Defi defi) { this.defi = defi; }
 }

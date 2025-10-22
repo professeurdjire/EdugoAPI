@@ -1,4 +1,4 @@
-package com.example.edugo.entity;
+package com.example.edugo.entity.Principales;
 
 import jakarta.persistence.*;
 import java.util.ArrayList;

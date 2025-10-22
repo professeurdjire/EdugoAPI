@@ -1,5 +1,6 @@
-package com.example.edugo.entity;
+package com.example.edugo.entity.Principales;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,25 +13,19 @@ public class Quiz {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String titre;
-
-    private String description;
-
-    private Integer duree; // en minutes
-
     @Enumerated(EnumType.STRING)
     private StatutQuiz statut = StatutQuiz.ACTIF;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "livre_id", nullable = false)
+    // --- Relation inverse OneToOne avec Livre ---
+    @OneToOne(mappedBy = "quiz")
+    @JsonBackReference(value = "livre-quiz")
     private Livre livre;
 
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
-    private List<QuestionQuiz> questions = new ArrayList<>();
+    private List<Question> questionsQuiz = new ArrayList<>();
 
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
     private List<Participation> participations = new ArrayList<>();
@@ -46,34 +41,22 @@ public class Quiz {
     public Quiz() {}
 
     public Quiz(String titre, String description, Integer duree, Livre livre) {
-        this.titre = titre;
-        this.description = description;
-        this.duree = duree;
-        this.livre = livre;
+               this.livre = livre;
     }
 
     // Méthodes utilitaires
     public void ajouterQuestion(QuestionQuiz question) {
-        questions.add(question);
+        Question.add(questionsQuiz);
         question.setQuiz(this);
     }
 
     public int getNombreQuestions() {
-        return questions.size();
+        return questionsQuiz.size();
     }
 
     // Getters et Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
-    public String getTitre() { return titre; }
-    public void setTitre(String titre) { this.titre = titre; }
-
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-
-    public Integer getDuree() { return duree; }
-    public void setDuree(Integer duree) { this.duree = duree; }
 
     public StatutQuiz getStatut() { return statut; }
     public void setStatut(StatutQuiz statut) { this.statut = statut; }
@@ -84,8 +67,8 @@ public class Quiz {
     public Livre getLivre() { return livre; }
     public void setLivre(Livre livre) { this.livre = livre; }
 
-    public List<QuestionQuiz> getQuestions() { return questions; }
-    public void setQuestions(List<QuestionQuiz> questions) { this.questions = questions; }
+    public List<Question> getQuestionsQuiz() { return questionsQuiz; }
+    public void setQuestions(List<Question> questionsQuiz) { this.questionsQuiz = questionsQuiz; }
 
     public List<Participation> getParticipations() { return participations; }
     public void setParticipations(List<Participation> participations) { this.participations = participations; }

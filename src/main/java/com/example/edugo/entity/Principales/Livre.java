@@ -1,5 +1,8 @@
-package com.example.edugo.entity;
+package com.example.edugo.entity.Principales;
 
+import com.example.edugo.entity.FichierLivre;
+import com.example.edugo.entity.Langue;
+import com.example.edugo.entity.Tag;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -56,8 +59,10 @@ public class Livre {
     @OneToMany(mappedBy = "livre", cascade = CascadeType.ALL)
     private List<FichierLivre> fichiers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "livre", cascade = CascadeType.ALL)
-    private List<Quiz> quizzes = new ArrayList<>();
+    // --- Relation OneToOne avec Quiz ---
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "quiz_id", referencedColumnName = "id")
+    private Quiz quiz;
 
     @OneToMany(mappedBy = "livre", cascade = CascadeType.ALL)
     private List<Progression> progressions = new ArrayList<>();
@@ -137,12 +142,17 @@ public class Livre {
     public List<FichierLivre> getFichiers() { return fichiers; }
     public void setFichiers(List<FichierLivre> fichiers) { this.fichiers = fichiers; }
 
-    public List<Quiz> getQuizzes() { return quizzes; }
-    public void setQuizzes(List<Quiz> quizzes) { this.quizzes = quizzes; }
-
     public List<Progression> getProgressions() { return progressions; }
     public void setProgressions(List<Progression> progressions) { this.progressions = progressions; }
 
     public List<Tag> getTags() { return tags; }
     public void setTags(List<Tag> tags) { this.tags = tags; }
+
+    public Quiz getQuiz() {
+        return quiz;
+    }
+
+    public void setQuiz(Quiz quiz) {
+        this.quiz = quiz;
+    }
 }

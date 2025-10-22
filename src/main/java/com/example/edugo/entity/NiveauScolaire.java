@@ -37,4 +37,20 @@ public class NiveauScolaire {
         this.dateCreation = LocalDateTime.now();
         this.dateModification = LocalDateTime.now();
     }
+
+    public Long getId() {return id;}
+
+    public void setId(Long id) {this.id = id;}
+
+    public String getNom() {return nom;}
+
+    public void setNom(String nom) {this.nom = nom;}
+    public String getDescription() {return description;}
+    public void setDescription(String description) {this.description = description;}
+    public Boolean getActive() {return active;}
+    public void setActive(Boolean active) {this.active = active;}
+    public LocalDateTime getDateCreation() {return dateCreation;}
+    public void setDateCreation(LocalDateTime dateCreation) {this.dateCreation = dateCreation;}
+    public LocalDateTime getDateModification() {return dateModification;}
+    public void setDateModification(LocalDateTime dateModification) {this.dateModification = dateModification;}
 }
