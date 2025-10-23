@@ -1,5 +1,6 @@
 package com.example.edugo.entity;
 
+import com.example.edugo.entity.Principales.Livre;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;

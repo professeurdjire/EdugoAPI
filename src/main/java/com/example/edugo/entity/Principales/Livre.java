@@ -31,6 +31,9 @@ public class Livre {
 
     private String auteur;
 
+    @Column(name = "total_pages")
+    private Integer totalPages;
+
     @Column(name = "image_couverture")
     private String imageCouverture;
 
@@ -78,10 +81,11 @@ public class Livre {
     // Constructeurs
     public Livre() {}
 
-    public Livre(String titre, String isbn, String description) {
+    public Livre(String titre, String isbn, String description, Integer totalPages) {
         this.titre = titre;
         this.isbn = isbn;
         this.description = description;
+        this.totalPages = totalPages;
     }
 
     // Méthodes utilitaires
@@ -117,6 +121,9 @@ public class Livre {
     public String getAuteur() { return auteur; }
     public void setAuteur(String auteur) { this.auteur = auteur; }
 
+    public Integer getTotalPages() { return totalPages; }
+    public void setTotalPages(Integer totalPages) { this.totalPages = totalPages; }
+
     public String getImageCouverture() { return imageCouverture; }
     public void setImageCouverture(String imageCouverture) { this.imageCouverture = imageCouverture; }
 
@@ -151,7 +158,6 @@ public class Livre {
     public Quiz getQuiz() {
         return quiz;
     }
-
     public void setQuiz(Quiz quiz) {
         this.quiz = quiz;
     }

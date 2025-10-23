@@ -22,7 +22,7 @@ public class Eleve extends User {
     private List<Progression> progressions = new ArrayList<>();
 
     @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL)
-    private List<Defi> defis = new ArrayList<>();
+    private List<TypeQuestion.Defi> defis = new ArrayList<>();
 
     // Constructeurs
     public Eleve() {}
@@ -45,6 +45,11 @@ public class Eleve extends User {
     public List<Progression> getProgressions() { return progressions; }
     public void setProgressions(List<Progression> progressions) { this.progressions = progressions; }
 
-    public List<Defi> getDefis() { return defis; }
-    public void setDefis(List<Defi> defis) { this.defis = defis; }
+    public List<TypeQuestion.Defi> getDefis() { return defis; }
+    public void setDefis(List<TypeQuestion.Defi> defis) { this.defis = defis; }
+
+    @Override
+    public String getPassword() {
+        return "";
+    }
 }

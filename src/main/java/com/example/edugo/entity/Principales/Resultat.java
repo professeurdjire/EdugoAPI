@@ -1,6 +1,7 @@
 package com.example.edugo.entity.Principales;
 
-import com.example.edugo.entity.Eleve;
+import com.example.edugo.entity.Principales.Eleve;
+import com.example.edugo.entity.QuestionQuiz;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 

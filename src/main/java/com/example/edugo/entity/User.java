@@ -49,10 +49,14 @@ public abstract class User implements UserDetails {
     @Column(name = "photo_profil")
     private String photoProfil;
 
+    public User(String email, String password, String firstName, String lastName) {
+    }
+
     // Méthodes de sécurité
     public Collection<? extends org.springframework.security.core.GrantedAuthority> getAuthorities() {
         return Collections.singletonList(() -> "ROLE_" + role);
     }
+    public User(){}
 
     public String getUsername() {
         return email;

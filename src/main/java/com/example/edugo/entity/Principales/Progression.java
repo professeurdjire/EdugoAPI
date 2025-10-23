@@ -19,9 +19,6 @@ public class Progression {
     @Column(name = "page_actuelle")
     private Integer pageActuelle = 0;
 
-    @Column(name = "total_pages")
-    private Integer totalPages;
-
     @Column(name = "date_derniere_lecture")
     private LocalDateTime dateDerniereLecture;
 

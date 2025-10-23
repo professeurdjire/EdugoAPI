@@ -1,6 +1,6 @@
 package com.example.edugo.repository;
 
-import com.example.edugo.entity.Question;
+import com.example.edugo.entity.Principales.Question;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
