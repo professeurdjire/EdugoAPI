@@ -1,5 +1,6 @@
 package com.example.edugo.entity.Principales;
 
+import com.example.edugo.entity.StatutQuiz;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -40,14 +41,8 @@ public class Quiz {
     // Constructeurs
     public Quiz() {}
 
-    public Quiz(String titre, String description, Integer duree, Livre livre) {
+    public Quiz(  Livre livre) {
                this.livre = livre;
-    }
-
-    // Méthodes utilitaires
-    public void ajouterQuestion(QuestionQuiz question) {
-        Question.add(questionsQuiz);
-        question.setQuiz(this);
     }
 
     public int getNombreQuestions() {
@@ -68,8 +63,9 @@ public class Quiz {
     public void setLivre(Livre livre) { this.livre = livre; }
 
     public List<Question> getQuestionsQuiz() { return questionsQuiz; }
-    public void setQuestions(List<Question> questionsQuiz) { this.questionsQuiz = questionsQuiz; }
+    public void setQuestionsQuiz(List<Question> questionsQuiz) { this.questionsQuiz = questionsQuiz; }
 
     public List<Participation> getParticipations() { return participations; }
     public void setParticipations(List<Participation> participations) { this.participations = participations; }
+
 }

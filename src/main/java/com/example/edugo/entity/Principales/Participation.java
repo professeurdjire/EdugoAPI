@@ -13,9 +13,14 @@ public class Participation {
     private Integer score;
 
     private Integer rang;
+    @Column(nullable = false)
+    private Integer tempsPasse;
 
     @Column(name = "date_participation")
     private LocalDateTime dateParticipation;
+
+    @Column(name = "aParticiper")
+    private boolean aParticiper;
 
     @ManyToOne
     @JoinColumn(name = "eleve_id", nullable = false)
@@ -24,10 +29,6 @@ public class Participation {
     @ManyToOne
     @JoinColumn(name = "challenge_id")
     private Challenge challenge;
-
-    @ManyToOne
-    @JoinColumn(name = "quiz_id")
-    private Quiz quiz;
 
     @ManyToOne
     @JoinColumn(name = "badge_id")
@@ -41,9 +42,10 @@ public class Participation {
     // Constructeurs
     public Participation() {}
 
-    public Participation(Eleve eleve, Integer score) {
+    public Participation(Eleve eleve, Integer score, Integer tempsPasse) {
         this.eleve = eleve;
         this.score = score;
+        this.tempsPasse = tempsPasse;
     }
 
     // Méthodes utilitaires
@@ -61,6 +63,12 @@ public class Participation {
     public Integer getRang() { return rang; }
     public void setRang(Integer rang) { this.rang = rang; }
 
+    public Integer getTempsPasse() { return tempsPasse; }
+    public void setTempsPasse(Integer tempsPasse) {this.tempsPasse = tempsPasse; }
+
+    public boolean isaParticiper() {return aParticiper;}
+    public void setaParticiper(boolean aParticiper) {this.aParticiper = aParticiper;}
+
     public LocalDateTime getDateParticipation() { return dateParticipation; }
     public void setDateParticipation(LocalDateTime dateParticipation) { this.dateParticipation = dateParticipation; }
 
@@ -70,9 +78,7 @@ public class Participation {
     public Challenge getChallenge() { return challenge; }
     public void setChallenge(Challenge challenge) { this.challenge = challenge; }
 
-    public Quiz getQuiz() { return quiz; }
-    public void setQuiz(Quiz quiz) { this.quiz = quiz; }
-
     public Badge getBadge() { return badge; }
     public void setBadge(Badge badge) { this.badge = badge; }
+
 }

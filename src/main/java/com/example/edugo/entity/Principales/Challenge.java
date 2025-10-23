@@ -29,6 +29,8 @@ public class Challenge {
     @Column(name = "categorie_challenge")
     private TypeChallenge typeChallenge;
 
+
+
     @ManyToMany
     @JoinTable(
             name = "challenge_badges",
@@ -38,7 +40,7 @@ public class Challenge {
     private List<Badge> rewards = new ArrayList<>();
 
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL)
-    private List<QuestionChallenge> questions = new ArrayList<>();
+    private List<Question> questionsChallenge = new ArrayList<>();
 
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL)
     private List<Participation> participations = new ArrayList<>();
@@ -75,15 +77,19 @@ public class Challenge {
     public LocalDateTime getEndDate() { return endDate; }
     public void setEndDate(LocalDateTime endDate) { this.endDate = endDate; }
 
+    public TypeChallenge getTypeChallenge() {return typeChallenge;}
+    public void setTypeChallenge(TypeChallenge typeChallenge) {this.typeChallenge = typeChallenge;}
+
+    public List<Question> getQuestionsChallenge() { return questionsChallenge; }
+    public void setQuestionsChallenge(List<Question> questionsChallenge) {this.questionsChallenge = questionsChallenge;}
+
     public String getRewardMode() { return rewardMode; }
     public void setRewardMode(String rewardMode) { this.rewardMode = rewardMode; }
 
     public List<Badge> getRewards() { return rewards; }
     public void setRewards(List<Badge> rewards) { this.rewards = rewards; }
 
-    public List<QuestionChallenge> getQuestions() { return questions; }
-    public void setQuestions(List<QuestionChallenge> questions) { this.questions = questions; }
-
     public List<Participation> getParticipations() { return participations; }
     public void setParticipations(List<Participation> participations) { this.participations = participations; }
+
 }

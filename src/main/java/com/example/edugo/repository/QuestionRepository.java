@@ -12,6 +12,10 @@ import java.util.Optional;
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, Long> {
 
+    List<Question> findByExerciceId(Long exerciceId);
+
+    List<Question> findByChallengeId(Long challengeId);
+
     // Trouver les questions d'un quiz
     List<Question> findByQuizId(Long quizId);
 

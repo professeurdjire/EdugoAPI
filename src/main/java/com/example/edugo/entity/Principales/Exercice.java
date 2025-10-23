@@ -51,6 +51,10 @@ public class Exercice {
     @JsonManagedReference(value = "exercice-questions")
     private List<Question> questionsExercice;
 
+    @OneToMany(mappedBy = "exercice", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FaireExercice> faireExercices;
+
+
 
     // Constructeur
     public Exercice(String titre, String description, String contenu, Integer niveauDifficulte, Integer tempsAlloue, Boolean active, Matiere matiere, Niveau niveauScolaire) {
@@ -66,18 +70,19 @@ public class Exercice {
     }
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
     public String getTitre() { return titre; }
     public void setTitre(String titre) { this.titre = titre; }
+
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
     public Integer getNiveauDifficulte() { return niveauDifficulte; }
-    public void setNiveauDifficulte(Integer niveauDifficulte) {
-        this.niveauDifficulte = niveauDifficulte;}
+    public void setNiveauDifficulte(Integer niveauDifficulte) {this.niveauDifficulte = niveauDifficulte;}
 
     public Boolean getActive() {
         return active;
     }
-
     public void setActive(Boolean active) {
         this.active = active;
     }
@@ -85,7 +90,6 @@ public class Exercice {
     public LocalDateTime getDateCreation() {
         return dateCreation;
     }
-
     public void setDateCreation(LocalDateTime dateCreation) {
         this.dateCreation = dateCreation;
     }
@@ -93,7 +97,6 @@ public class Exercice {
     public Integer getTempsAlloue() {
         return tempsAlloue;
     }
-
     public void setTempsAlloue(Integer tempsAlloue) {
         this.tempsAlloue = tempsAlloue;
     }
@@ -101,7 +104,6 @@ public class Exercice {
     public LocalDateTime getDateModification() {
         return dateModification;
     }
-
     public void setDateModification(LocalDateTime dateModification) {
         this.dateModification = dateModification;
     }
@@ -109,7 +111,6 @@ public class Exercice {
     public Matiere getMatiere() {
         return matiere;
     }
-
     public void setMatiere(Matiere matiere) {
         this.matiere = matiere;
     }
@@ -117,7 +118,6 @@ public class Exercice {
     public Niveau getNiveauScolaire() {
         return niveauScolaire;
     }
-
     public void setNiveauScolaire(Niveau niveauScolaire) {
         this.niveauScolaire = niveauScolaire;
     }
@@ -125,8 +125,10 @@ public class Exercice {
     public List<Question> getQuestionsExercice() {
         return questionsExercice;
     }
-
     public void setQuestionsExercice(List<Question> questionsExercice) {
         this.questionsExercice = questionsExercice;
     }
+
+    public List<FaireExercice> getFaireExercices() {return faireExercices;}
+    public void setFaireExercices(List<FaireExercice> faireExercices) {this.faireExercices = faireExercices;}
 }

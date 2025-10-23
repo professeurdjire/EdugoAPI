@@ -21,19 +21,8 @@ public class Badge {
 
     private String icone;
 
-    @Column(name = "applique_a")
-    private String appliqueA; // QUIZ/DEFI/CHALLENGE
-
-    @ManyToMany(mappedBy = "rewards")
-    private List<Challenge> challenges = new ArrayList<>();
-
     @OneToMany(mappedBy = "badge", cascade = CascadeType.ALL)
     private List<Participation> participations = new ArrayList<>();
-
-    // Enum pour le type de badge
-    public enum TypeBadge {
-        OR, ARGENT, BRONZE, SPECIAL
-    }
 
     // Constructeurs
     public Badge() {}
@@ -59,12 +48,6 @@ public class Badge {
 
     public String getIcone() { return icone; }
     public void setIcone(String icone) { this.icone = icone; }
-
-    public String getAppliqueA() { return appliqueA; }
-    public void setAppliqueA(String appliqueA) { this.appliqueA = appliqueA; }
-
-    public List<Challenge> getChallenges() { return challenges; }
-    public void setChallenges(List<Challenge> challenges) { this.challenges = challenges; }
 
     public List<Participation> getParticipations() { return participations; }
     public void setParticipations(List<Participation> participations) { this.participations = participations; }

@@ -1,6 +1,5 @@
-package com.example.edugo.entity;
+package com.example.edugo.entity.Principales;
 
-import com.example.edugo.entity.Principales.Livre;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +12,7 @@ public class Langue {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String nom;
+    private String libelle;
 
     @Column(name = "code_iso")
     private String codeIso;
@@ -25,7 +24,7 @@ public class Langue {
     public Langue() {}
 
     public Langue(String nom, String codeIso) {
-        this.nom = nom;
+        this.libelle = nom;
         this.codeIso = codeIso;
     }
 
@@ -33,8 +32,8 @@ public class Langue {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public String getNom() { return nom; }
-    public void setNom(String nom) { this.nom = nom; }
+    public String getNom() { return libelle; }
+    public void setNom(String nom) { this.libelle = nom; }
 
     public String getCodeIso() { return codeIso; }
     public void setCodeIso(String codeIso) { this.codeIso = codeIso; }

@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -60,6 +61,10 @@ public class Question {
     @JsonManagedReference(value = "question-reponses")
     private List<ReponsePossible> reponsesPossibles;
 
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReponseUtilisateur> reponsesEleves = new ArrayList<>();
+
+
 
     // Constructeur
     public Question(String enonce, Integer points, Quiz quiz) {
@@ -72,7 +77,6 @@ public class Question {
     public Long getId() {
         return id;
     }
-
     public void setId(Long id) {
         this.id = id;
     }
@@ -80,7 +84,6 @@ public class Question {
     public String getEnonce() {
         return enonce;
     }
-
     public void setEnonce(String enonce) {
         this.enonce = enonce;
     }
@@ -88,7 +91,6 @@ public class Question {
     public Integer getPoints() {
         return points;
     }
-
     public void setPoints(Integer points) {
         this.points = points;
     }
@@ -96,7 +98,6 @@ public class Question {
     public LocalDateTime getDateCreation() {
         return dateCreation;
     }
-
     public void setDateCreation(LocalDateTime dateCreation) {
         this.dateCreation = dateCreation;
     }
@@ -104,7 +105,6 @@ public class Question {
     public LocalDateTime getDateModification() {
         return dateModification;
     }
-
     public void setDateModification(LocalDateTime dateModification) {
         this.dateModification = dateModification;
     }
@@ -112,7 +112,6 @@ public class Question {
     public Challenge getChallenge() {
         return challenge;
     }
-
     public void setChallenge(Challenge challenge) {
         this.challenge = challenge;
     }
@@ -120,7 +119,6 @@ public class Question {
     public Quiz getQuiz() {
         return quiz;
     }
-
     public void setQuiz(Quiz quiz) {
         this.quiz = quiz;
     }
@@ -128,7 +126,6 @@ public class Question {
     public Exercice getExercice() {
         return exercice;
     }
-
     public void setExercice(Exercice exercice) {
         this.exercice = exercice;
     }
@@ -136,7 +133,6 @@ public class Question {
     public TypeQuestion getType() {
         return type;
     }
-
     public void setType(TypeQuestion type) {
         this.type = type;
     }
@@ -144,8 +140,8 @@ public class Question {
     public List<ReponsePossible> getReponsesPossibles() {
         return reponsesPossibles;
     }
+    public void setReponsesPossibles(List<ReponsePossible> reponsesPossibles) {this.reponsesPossibles = reponsesPossibles;}
 
-    public void setReponsesPossibles(List<ReponsePossible> reponsesPossibles) {
-        this.reponsesPossibles = reponsesPossibles;
-    }
+    public List<ReponseUtilisateur> getReponsesEleves() {return reponsesEleves;}
+    public void setReponsesEleves(List<ReponseUtilisateur> reponsesEleves) {this.reponsesEleves = reponsesEleves;}
 }
