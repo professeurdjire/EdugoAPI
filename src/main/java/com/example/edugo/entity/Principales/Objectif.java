@@ -1,10 +1,11 @@
 package com.example.edugo.entity.Principales;
 
-import com.example.edugo.entity.enums.TypeObjectif;
+
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
+@Table(name = "objectifs")
 public class Objectif {
 
     @Id

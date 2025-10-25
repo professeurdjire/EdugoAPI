@@ -19,11 +19,11 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     // Trouver les questions d'un quiz
     List<Question> findByQuizId(Long quizId);
 
-    // Trouver par type de question
-    List<Question> findByTypeQuestionId(Long typeQuestionId);
+    // Trouver toutes les questions d’un type spécifique
+    List<Question> findByType_Id(Long id);
 
     // Trouver les questions avec un nombre minimum de points
-    List<Question> findByPointGreaterThanEqual(Integer minPoints);
+    List<Question> findByPointsGreaterThanEqual(Integer minPoints);
 
     // Compter les questions par quiz
     @Query("SELECT COUNT(q) FROM Question q WHERE q.quiz.id = :quizId")

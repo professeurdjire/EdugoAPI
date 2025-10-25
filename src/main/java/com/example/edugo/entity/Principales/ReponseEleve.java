@@ -5,7 +5,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-public class ReponseUtilisateur {
+@Table(name = "reponseEleve")
+public class ReponseEleve {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -25,6 +25,6 @@ public interface AdminRepository extends JpaRepository<Admin, Long> {
     Long countAdmins();
 
     // Trouver les admins avec leurs classes validées
-    @Query("SELECT a FROM Admin a LEFT JOIN FETCH a.classesValidees WHERE a.id = :adminId")
-    Optional<Admin> findByIdWithClassesValidees(@Param("adminId") Long adminId);
+    //@Query("SELECT a FROM Admin a LEFT JOIN FETCH a.classesValidees WHERE a.id = :adminId")
+   // Optional<Admin> findByIdWithClassesValidees(@Param("adminId") Long adminId);
 }

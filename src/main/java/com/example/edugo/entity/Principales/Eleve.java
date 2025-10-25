@@ -30,7 +30,12 @@ public class Eleve extends User {
     @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FaireExercice> faireExercices;
     @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ReponseUtilisateur> reponsesUtilisateurs = new ArrayList<>();
+    private List<ReponseEleve> reponsesUtilisateurs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ConversionEleve> conversions = new ArrayList<>();
+    @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Suggestion> suggestions = new ArrayList<>();
 
     // Constructeurs
     public Eleve() {}
@@ -65,8 +70,14 @@ public class Eleve extends User {
     public List<FaireExercice> getFaireExercices() {return faireExercices;}
     public void setFaireExercices(List<FaireExercice> faireExercices) {this.faireExercices = faireExercices;}
 
-    public List<ReponseUtilisateur> getReponsesUtilisateurs() {return reponsesUtilisateurs;}
-    public void setReponsesUtilisateurs(List<ReponseUtilisateur> reponsesUtilisateurs) {this.reponsesUtilisateurs = reponsesUtilisateurs;}
+    public List<ReponseEleve> getReponsesUtilisateurs() {return reponsesUtilisateurs;}
+    public void setReponsesUtilisateurs(List<ReponseEleve> reponsesUtilisateurs) {this.reponsesUtilisateurs = reponsesUtilisateurs;}
+
+    public List<ConversionEleve> getConversions() {return conversions;}
+    public void setConversions(List<ConversionEleve> conversions) {this.conversions = conversions;}
+
+    public List<Suggestion> getSuggestions() {return suggestions;}
+    public void setSuggestions(List<Suggestion> suggestions) {this.suggestions = suggestions;}
 
     @Override
     public String getPassword() {

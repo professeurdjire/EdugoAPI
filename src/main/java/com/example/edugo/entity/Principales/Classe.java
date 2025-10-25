@@ -24,6 +24,11 @@ public class Classe {
     @OneToMany(mappedBy = "classe", cascade = CascadeType.ALL)
     private List<Livre> livres = new ArrayList<>();
 
+    @OneToMany(mappedBy = "classe")
+    private List<Challenge> challenges = new ArrayList<>();
+
+
+
     // Constructeurs
     public Classe() {}
 
@@ -47,4 +52,8 @@ public class Classe {
 
     public List<Livre> getLivres() { return livres; }
     public void setLivres(List<Livre> livres) { this.livres = livres; }
+
+    public List<Challenge> getChallenges() { return challenges; }
+    public void setChallenges(List<Challenge> challenges) { this.challenges = challenges; }
+
 }

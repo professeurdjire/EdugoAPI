@@ -13,6 +13,6 @@ import java.util.Optional;
 public interface ClasseRepository extends JpaRepository<Classe, Long> {
 
     // Trouver par nom
-    Optional<Classe> findByNomClasse(String nomClasse);
+    Optional<Classe> findByNom(String nom);
 
 }

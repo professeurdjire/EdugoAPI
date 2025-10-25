@@ -17,19 +17,27 @@ public class Challenge {
 
     private String description;
 
-    @Column(name = "start_date")
-    private LocalDateTime startDate;
+    @Column(name = "date_debut")
+    private LocalDateTime dateDebut;
 
-    @Column(name = "end_date")
-    private LocalDateTime endDate;
+    @Column(name = "date_fin")
+    private LocalDateTime dateFin;
 
     @Column(name = "reward_mode")
     private String rewardMode;
 
-    @Column(name = "categorie_challenge")
+    @Column(name = "type_challenge")
     private TypeChallenge typeChallenge;
 
+    // Relation optionnelle avec Niveau
+    @ManyToOne
+    @JoinColumn(name = "niveau_id", nullable = true)
+    private Niveau niveau;
 
+    // Relation optionnelle avec Classe
+    @ManyToOne
+    @JoinColumn(name = "classe_id", nullable = true)
+    private Classe classe;
 
     @ManyToMany
     @JoinTable(
@@ -48,20 +56,21 @@ public class Challenge {
     // Constructeurs
     public Challenge() {}
 
-    public Challenge(String titre, String description, LocalDateTime startDate, LocalDateTime endDate) {
+    public Challenge(String titre, String description, LocalDateTime dateDebut, LocalDateTime dateFin) {
         this.titre = titre;
         this.description = description;
-        this.startDate = startDate;
-        this.endDate = endDate;
+        this.dateDebut = dateDebut;
+        this.dateFin = dateFin;
     }
 
     // Méthodes utilitaires
     public boolean estActif() {
         LocalDateTime now = LocalDateTime.now();
-        return now.isAfter(startDate) && now.isBefore(endDate);
+        return now.isAfter(dateDebut) && now.isBefore(dateFin);
     }
 
     // Getters et Setters
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -71,11 +80,11 @@ public class Challenge {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public LocalDateTime getStartDate() { return startDate; }
-    public void setStartDate(LocalDateTime startDate) { this.startDate = startDate; }
+    public LocalDateTime getDateDebut() { return dateDebut; }
+    public void setDateDebut(LocalDateTime dateDebut) { this.dateDebut = dateDebut; }
 
-    public LocalDateTime getEndDate() { return endDate; }
-    public void setEndDate(LocalDateTime endDate) { this.endDate = endDate; }
+    public LocalDateTime getDateFin() { return dateFin; }
+    public void setDateFin(LocalDateTime dateFin) { this.dateFin = dateFin; }
 
     public TypeChallenge getTypeChallenge() {return typeChallenge;}
     public void setTypeChallenge(TypeChallenge typeChallenge) {this.typeChallenge = typeChallenge;}
@@ -86,10 +95,30 @@ public class Challenge {
     public String getRewardMode() { return rewardMode; }
     public void setRewardMode(String rewardMode) { this.rewardMode = rewardMode; }
 
-    public List<Badge> getRewards() { return rewards; }
-    public void setRewards(List<Badge> rewards) { this.rewards = rewards; }
-
     public List<Participation> getParticipations() { return participations; }
     public void setParticipations(List<Participation> participations) { this.participations = participations; }
 
+    public Niveau getNiveau() {
+        return niveau;
+    }
+
+    public void setNiveau(Niveau niveau) {
+        this.niveau = niveau;
+    }
+
+    public Classe getClasse() {
+        return classe;
+    }
+
+    public void setClasse(Classe classe) {
+        this.classe = classe;
+    }
+
+    public List<Badge> getRewards() {
+        return rewards;
+    }
+
+    public void setRewards(List<Badge> rewards) {
+        this.rewards = rewards;
+    }
 }

@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "progressions")
+@Table(name = "progressionsLecture")
 public class Progression {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,19 +38,14 @@ public class Progression {
     // Constructeurs
     public Progression() {}
 
-    public Progression(Eleve eleve, Livre livre) {
+    public Progression(Eleve eleve, Livre livre, Integer pourcentageCompletion, Integer tempsLecture, Integer pageActuelle, LocalDateTime dateDerniereLecture  ) {
         this.eleve = eleve;
         this.livre = livre;
-    }
-
-    // Méthodes utilitaires
-    public void mettreAJourProgression(Integer pageActuelle, Integer totalPages) {
+        this.pourcentageCompletion = pourcentageCompletion;
+        this.tempsLecture = tempsLecture;
         this.pageActuelle = pageActuelle;
-        this.totalPages = totalPages;
-        if (totalPages != null && totalPages > 0) {
-            this.pourcentageCompletion = (int) ((pageActuelle * 100.0) / totalPages);
-        }
-        this.dateDerniereLecture = LocalDateTime.now();
+        this.dateDerniereLecture = dateDerniereLecture;
+
     }
 
     public void ajouterTempsLecture(Integer minutes) {
@@ -70,8 +65,6 @@ public class Progression {
     public Integer getPageActuelle() { return pageActuelle; }
     public void setPageActuelle(Integer pageActuelle) { this.pageActuelle = pageActuelle; }
 
-    public Integer getTotalPages() { return totalPages; }
-    public void setTotalPages(Integer totalPages) { this.totalPages = totalPages; }
 
     public LocalDateTime getDateDerniereLecture() { return dateDerniereLecture; }
     public void setDateDerniereLecture(LocalDateTime dateDerniereLecture) { this.dateDerniereLecture = dateDerniereLecture; }

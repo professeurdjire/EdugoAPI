@@ -3,6 +3,7 @@ package com.example.edugo.service;
 
 import com.example.edugo.dto.LoginRequest;
 import com.example.edugo.dto.RegisterRequest;
+import com.example.edugo.entity.Principales.Eleve;
 import com.example.edugo.entity.Role;
 import com.example.edugo.entity.User;
 import com.example.edugo.repository.UserRepository;
@@ -25,7 +26,7 @@ public class AuthService {
             throw new RuntimeException("Email déjà utilisé");
         }
 
-        User user = new User();
+        Eleve user = new Eleve();
         user.setNom(request.getNom());
         user.setPrenom(request.getPrenom());
         user.setEmail(request.getEmail());

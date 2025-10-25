@@ -28,11 +28,6 @@ public class Quiz {
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
     private List<Question> questionsQuiz = new ArrayList<>();
 
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
-    private List<Participation> participations = new ArrayList<>();
-
-
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -65,7 +60,5 @@ public class Quiz {
     public List<Question> getQuestionsQuiz() { return questionsQuiz; }
     public void setQuestionsQuiz(List<Question> questionsQuiz) { this.questionsQuiz = questionsQuiz; }
 
-    public List<Participation> getParticipations() { return participations; }
-    public void setParticipations(List<Participation> participations) { this.participations = participations; }
 
 }

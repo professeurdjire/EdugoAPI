@@ -12,32 +12,20 @@ import java.util.Optional;
 @Repository
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
 
-    // Trouver par titre
-    List<Quiz> findByTitreContainingIgnoreCase(String titre);
+    // Trouver un quiz par son ID
+    Optional<Quiz> findById(Long id);
 
-    // Trouver les quiz publiés
-    List<Quiz> findByEstPublieTrue();
-
-    // Trouver les quiz d'une classe
-    List<Quiz> findByClasseIdClasse(Long classeId);
-
-    // Trouver les quiz publiés d'une classe
-    List<Quiz> findByClasseIdClasseAndEstPublieTrue(Long classeId);
+    //  Trouver le quiz d’un livre spécifique
+    Optional<Quiz> findByLivre_Id(Long livreId);
 
     // Recherche avancée
-    @Query("SELECT q FROM Quiz q WHERE " +
-            "LOWER(q.titre) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(q.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
-    List<Quiz> searchByKeyword(@Param("searchTerm") String searchTerm);
-
-    // Compter les quiz par classe
-    @Query("SELECT COUNT(q) FROM Quiz q WHERE q.classe.idClasse = :classeId")
-    Long countByClasseId(@Param("classeId") Long classeId);
+   // @Query("SELECT q FROM Quiz q WHERE " +
+            //"LOWER(q.titre) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+            //"LOWER(q.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+   // List<Quiz> searchByKeyword(@Param("searchTerm") String searchTerm);
 
     // Trouver un quiz avec ses questions
     @Query("SELECT q FROM Quiz q LEFT JOIN FETCH q.questionsQuiz WHERE q.id = :quizId")
     Optional<Quiz> findByIdWithQuestions(@Param("quizId") Long quizId);
 
-    // Trouver les quiz par durée maximale
-    List<Quiz> findByDureeLessThanEqual(Integer dureeMax);
 }

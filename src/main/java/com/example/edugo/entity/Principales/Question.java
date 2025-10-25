@@ -62,7 +62,7 @@ public class Question {
     private List<ReponsePossible> reponsesPossibles;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ReponseUtilisateur> reponsesEleves = new ArrayList<>();
+    private List<ReponseEleve> reponsesEleves = new ArrayList<>();
 
 
 
@@ -142,6 +142,6 @@ public class Question {
     }
     public void setReponsesPossibles(List<ReponsePossible> reponsesPossibles) {this.reponsesPossibles = reponsesPossibles;}
 
-    public List<ReponseUtilisateur> getReponsesEleves() {return reponsesEleves;}
-    public void setReponsesEleves(List<ReponseUtilisateur> reponsesEleves) {this.reponsesEleves = reponsesEleves;}
+    public List<ReponseEleve> getReponsesEleves() {return reponsesEleves;}
+    public void setReponsesEleves(List<ReponseEleve> reponsesEleves) {this.reponsesEleves = reponsesEleves;}
 }

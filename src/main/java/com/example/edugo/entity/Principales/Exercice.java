@@ -47,7 +47,7 @@ public class Exercice {
     @JoinColumn(name = "id_niveau", nullable = false)
     private Niveau niveauScolaire;
 
-    @OneToMany(mappedBy = "type", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "exercice", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference(value = "exercice-questions")
     private List<Question> questionsExercice;
 

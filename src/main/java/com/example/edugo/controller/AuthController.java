@@ -35,7 +35,7 @@ public class AuthController {
                 .email(user.getEmail())
                 .nom(user.getNom())
                 .prenom(user.getPrenom())
-                .role(user.getRole())
+                .role(user.getRole().name())
                 .build();
 
         return ResponseEntity.ok(response);

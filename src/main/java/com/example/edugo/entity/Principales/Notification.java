@@ -1,5 +1,6 @@
 package com.example.edugo.entity.Principales;
 
+import com.example.edugo.entity.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 

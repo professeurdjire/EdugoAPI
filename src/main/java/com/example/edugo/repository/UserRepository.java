@@ -1,5 +1,6 @@
 package com.example.edugo.repository;
 
+import com.example.edugo.entity.Role;
 import com.example.edugo.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -22,7 +23,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Boolean existsByEmail(String email);
 
     // Trouver par rôle
-    List<User> findByRole(String role);
+    List<User> findByRole(Role role);
 
     // Trouver les utilisateurs actifs
     List<User> findByEstActiveTrue();

@@ -1,35 +1,66 @@
 package com.example.edugo.entity.Principales;
 
-
 import jakarta.persistence.*;
-import lombok.Data;
 import java.time.LocalDateTime;
 
-@Data
 @Entity
-@Table(name = "suggestions")
+@Table(name = "suggestion")
 public class Suggestion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 2000)
-    private String description;
+    private String contenu;
 
-    private LocalDateTime date;
-    private String statut = "EN_ATTENTE"; // EN_ATTENTE, APPROUVÉ, REJETÉ
-    private Integer note; // 1-5
+    private LocalDateTime dateEnvoie;
 
-    // === RELATIONS ===
+    @ManyToOne
+    @JoinColumn(name = "id_eleve", nullable = false)
+    private Eleve eleve;
 
-    // Utilisateur qui a fait la suggestion
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User utilisateur;
+    // --- Constructeurs ---
+    public Suggestion() {
+        this.dateEnvoie = LocalDateTime.now(); // date automatique à la création
+    }
 
-    // Classe concernée
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "classe_id")
-    private Classe classe;
+    public Suggestion(String contenu, Eleve eleve) {
+        this.contenu = contenu;
+        this.eleve = eleve;
+        this.dateEnvoie = LocalDateTime.now();
+    }
+
+    // --- Getters et Setters ---
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getContenu() {
+        return contenu;
+    }
+
+    public void setContenu(String contenu) {
+        this.contenu = contenu;
+    }
+
+    public LocalDateTime getDateEnvoie() {
+        return dateEnvoie;
+    }
+
+    public void setDateEnvoie(LocalDateTime dateEnvoie) {
+        this.dateEnvoie = dateEnvoie;
+    }
+
+    public Eleve getEleve() {
+        return eleve;
+    }
+
+    public void setEleve(Eleve eleve) {
+        this.eleve = eleve;
+    }
+
 }
