@@ -3,6 +3,8 @@ package com.example.edugo.entity.Principales;
 import com.example.edugo.entity.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "notifications")
@@ -18,33 +20,24 @@ public class Notification {
     private String message;
 
     @Column(name = "date_notification")
-    private LocalDateTime dateNotification;
+    private LocalDateTime dateAjout;
 
-    @Column(name = "lu")
-    private Boolean lu = false;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
+    @OneToMany(mappedBy = "notification", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NotificationsEleve> notificationsEleves = new ArrayList<>();
     @PrePersist
     protected void onCreate() {
-        dateNotification = LocalDateTime.now();
+        dateAjout = LocalDateTime.now();
     }
 
     // Constructeurs
     public Notification() {}
 
-    public Notification(String titre, String message, User user) {
+    public Notification(String titre, String message) {
         this.titre = titre;
         this.message = message;
-        this.user = user;
     }
 
-    // Méthodes utilitaires
-    public void marquerCommeLu() {
-        this.lu = true;
-    }
+
 
     // Getters et Setters
     public Long getId() { return id; }
@@ -56,12 +49,14 @@ public class Notification {
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
 
-    public LocalDateTime getDateNotification() { return dateNotification; }
-    public void setDateNotification(LocalDateTime dateNotification) { this.dateNotification = dateNotification; }
+    public LocalDateTime getDateAjout() { return dateAjout; }
+    public void setDateAjout(LocalDateTime dateAjout) { this.dateAjout = dateAjout; }
 
-    public Boolean getLu() { return lu; }
-    public void setLu(Boolean lu) { this.lu = lu; }
+    public List<NotificationsEleve> getNotificationsEleves() {
+        return notificationsEleves;
+    }
 
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public void setNotificationsEleves(List<NotificationsEleve> notificationsEleves) {
+        this.notificationsEleves = notificationsEleves;
+    }
 }

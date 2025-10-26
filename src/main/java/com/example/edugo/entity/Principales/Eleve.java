@@ -34,8 +34,12 @@ public class Eleve extends User {
 
     @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ConversionEleve> conversions = new ArrayList<>();
+
     @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Suggestion> suggestions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NotificationsEleve> notificationsRecues = new ArrayList<>();
 
     // Constructeurs
     public Eleve() {}
@@ -78,6 +82,9 @@ public class Eleve extends User {
 
     public List<Suggestion> getSuggestions() {return suggestions;}
     public void setSuggestions(List<Suggestion> suggestions) {this.suggestions = suggestions;}
+
+    public List<NotificationsEleve> getNotificationsRecues() {return notificationsRecues;}
+    public void setNotificationsRecues(List<NotificationsEleve> notificationsRecues) {this.notificationsRecues = notificationsRecues;}
 
     @Override
     public String getPassword() {
