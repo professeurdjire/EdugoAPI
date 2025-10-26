@@ -27,10 +27,11 @@ public class Badge {
     // Constructeurs
     public Badge() {}
 
-    public Badge(String nom, String description, TypeBadge type) {
+    public Badge(String nom, String description, TypeBadge type, String icone) {
         this.nom = nom;
         this.description = description;
         this.type = type;
+        this.icone = icone;
     }
 
     // Getters et Setters

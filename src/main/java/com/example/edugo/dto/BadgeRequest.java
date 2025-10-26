@@ -22,7 +22,7 @@ public class BadgeRequest {
     // Constructeurs
     public BadgeRequest() {}
 
-    public BadgeRequest(Long id, String nom, String description, TypeBadge type, String icone, String appliqueA) {
+    public BadgeRequest(Long id, String nom, String description, TypeBadge type, String icone) {
         this.id = id;
         this.nom = nom;
         this.description = description;

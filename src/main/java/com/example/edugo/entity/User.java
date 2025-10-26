@@ -46,10 +46,12 @@ public abstract class User implements UserDetails {
     @Column(name = "est_active")
     private Boolean estActive = true;
 
-    @Column(name = "photo_profil")
-    private String photoProfil;
 
-    public User(String email, String password, String firstName, String lastName) {
+    public User(String email, String motDePasse, String prenom,  String nom) {
+        this.email = email;
+        this.motDePasse = motDePasse;
+        this.prenom = prenom;
+        this.nom = nom;
     }
 
     // Méthodes de sécurité
@@ -76,5 +78,77 @@ public abstract class User implements UserDetails {
 
     public boolean isEnabled() {
         return estActive;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNom() {
+        return nom;
+    }
+
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+
+    public String getPrenom() {
+        return prenom;
+    }
+
+    public void setPrenom(String prenom) {
+        this.prenom = prenom;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getMotDePasse() {
+        return motDePasse;
+    }
+
+    public void setMotDePasse(String motDePasse) {
+        this.motDePasse = motDePasse;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public LocalDateTime getDateCreation() {
+        return dateCreation;
+    }
+
+    public void setDateCreation(LocalDateTime dateCreation) {
+        this.dateCreation = dateCreation;
+    }
+
+    public LocalDateTime getDateModification() {
+        return dateModification;
+    }
+
+    public void setDateModification(LocalDateTime dateModification) {
+        this.dateModification = dateModification;
+    }
+
+    public Boolean getEstActive() {
+        return estActive;
+    }
+
+    public void setEstActive(Boolean estActive) {
+        this.estActive = estActive;
     }
 }

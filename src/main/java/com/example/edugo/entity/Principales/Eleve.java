@@ -17,6 +17,8 @@ public class Eleve extends User {
 
     private Integer pointAccumule;
 
+    private String avatarUrl;
+
     @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL)
     private List<Participation> participations = new ArrayList<>();
 
@@ -44,11 +46,12 @@ public class Eleve extends User {
     // Constructeurs
     public Eleve() {}
 
-    public Eleve(String email, String password, String firstName, String lastName, String dateNaissance, Classe classe, Integer pointAccumule) {
-        super(email, password, firstName, lastName);
+    public Eleve(String email, String motPasse, String prenom, String nom, String dateNaissance, Classe classe, Integer pointAccumule, String avatarUrl) {
+        super(email, motPasse, prenom, nom);
         this.dateNaissance = dateNaissance;
         this.classe = classe;
         this.pointAccumule = pointAccumule;
+        this.avatarUrl = avatarUrl;
 
     }
 
@@ -61,6 +64,9 @@ public class Eleve extends User {
 
     public Integer getPointAccumule() { return pointAccumule; }
     public void setPointAccumule(Integer pointAccumule) {this.pointAccumule = pointAccumule;}
+
+    public String getAvatarUrl() {return avatarUrl;}
+    public void setAvatarUrl(String avatarUrl) {this.avatarUrl = avatarUrl;}
 
     public List<Participation> getParticipations() { return participations; }
     public void setParticipations(List<Participation> participations) { this.participations = participations; }
@@ -90,4 +96,6 @@ public class Eleve extends User {
     public String getPassword() {
         return "";
     }
+
+
 }

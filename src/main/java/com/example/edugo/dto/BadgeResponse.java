@@ -1,21 +1,23 @@
 package com.example.edugo.dto;
 
-public class BadgeReponse {
+import com.example.edugo.entity.Principales.TypeBadge;
+
+public class BadgeResponse {
     private Long id;
     private String nom;
     private String description;
+    private TypeBadge type;
     private String icone;
-    private int nombreParticipations; // optionnel, pour info
 
     // Constructeurs
-    public BadgeReponse() {}
+    public BadgeResponse() {}
 
-    public BadgeReponse(Long id, String nom, String description,  String icone, int nombreParticipations) {
+    public BadgeResponse(Long id, String nom, String description,  TypeBadge type, String icone) {
         this.id = id;
         this.nom = nom;
         this.description = description;
+        this.type = type;
         this.icone = icone;
-        this.nombreParticipations = nombreParticipations;
     }
 
     // Getters et Setters
@@ -51,11 +53,11 @@ public class BadgeReponse {
         this.icone = icone;
     }
 
-    public int getNombreParticipations() {
-        return nombreParticipations;
+    public TypeBadge getType() {
+        return type;
     }
 
-    public void setNombreParticipations(int nombreParticipations) {
-        this.nombreParticipations = nombreParticipations;
+    public void setType(TypeBadge type) {
+        this.type = type;
     }
 }

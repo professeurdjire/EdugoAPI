@@ -1,4 +1,4 @@
 package com.example.edugo.service;
 
-public class Objectif {
+public class ServiceObjectif {
 }
