@@ -1,6 +1,5 @@
 package com.example.edugo.entity.Principales;
 
-import com.example.edugo.entity.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -11,44 +10,46 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "id_eleve", nullable = false)
+    private Long idEleve;
+
     @Column(nullable = false)
     private String titre;
 
     @Column(length = 1000)
     private String message;
 
-    @Column(name = "date_notification")
-    private LocalDateTime dateNotification;
+    @Column(name = "date_explication")
+    private LocalDateTime dateExplication;
 
-    @Column(name = "lu")
-    private Boolean lu = false;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "est_vu")
+    private Boolean estVu = false;
 
     @PrePersist
     protected void onCreate() {
-        dateNotification = LocalDateTime.now();
+        dateExplication = LocalDateTime.now();
     }
 
     // Constructeurs
     public Notification() {}
 
-    public Notification(String titre, String message, User user) {
+    public Notification(String titre, String message, Long idEleve) {
         this.titre = titre;
         this.message = message;
-        this.user = user;
+        this.idEleve = idEleve;
     }
 
     // Méthodes utilitaires
-    public void marquerCommeLu() {
-        this.lu = true;
+    public void marquerCommeVu() {
+        this.estVu = true;
     }
 
     // Getters et Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public Long getIdEleve() { return idEleve; }
+    public void setIdEleve(Long idEleve) { this.idEleve = idEleve; }
 
     public String getTitre() { return titre; }
     public void setTitre(String titre) { this.titre = titre; }
@@ -56,12 +57,9 @@ public class Notification {
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
 
-    public LocalDateTime getDateNotification() { return dateNotification; }
-    public void setDateNotification(LocalDateTime dateNotification) { this.dateNotification = dateNotification; }
+    public LocalDateTime getDateExplication() { return dateExplication; }
+    public void setDateExplication(LocalDateTime dateExplication) { this.dateExplication = dateExplication; }
 
-    public Boolean getLu() { return lu; }
-    public void setLu(Boolean lu) { this.lu = lu; }
-
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public Boolean getEstVu() { return estVu; }
+    public void setEstVu(Boolean estVu) { this.estVu = estVu; }
 }

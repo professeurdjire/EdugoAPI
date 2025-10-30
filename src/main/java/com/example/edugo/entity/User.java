@@ -49,31 +49,39 @@ public abstract class User implements UserDetails {
     @Column(name = "photo_profil")
     private String photoProfil;
 
-    public User(String email, String password, String firstName, String lastName) {
-    }
+    public User() {}
 
-    // Méthodes de sécurité
+    // Méthodes de sécurité pour UserDetails
     public Collection<? extends org.springframework.security.core.GrantedAuthority> getAuthorities() {
         return Collections.singletonList(() -> "ROLE_" + role);
     }
-    public User(){}
 
+    @Override
     public String getUsername() {
         return email;
     }
 
+    @Override
+    public String getPassword() {
+        return motDePasse;
+    }
+
+    @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
+    @Override
     public boolean isAccountNonLocked() {
         return estActive;
     }
 
+    @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
+    @Override
     public boolean isEnabled() {
         return estActive;
     }

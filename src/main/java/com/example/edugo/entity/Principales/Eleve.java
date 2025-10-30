@@ -41,11 +41,13 @@ public class Eleve extends User {
     public Eleve() {}
 
     public Eleve(String email, String password, String firstName, String lastName, String dateNaissance, Classe classe, Integer pointAccumule) {
-        super(email, password, firstName, lastName);
+        this.setEmail(email);
+        this.setMotDePasse(password);
+        this.setNom(lastName);
+        this.setPrenom(firstName);
         this.dateNaissance = dateNaissance;
         this.classe = classe;
         this.pointAccumule = pointAccumule;
-
     }
 
     // Getters et Setters
@@ -78,9 +80,4 @@ public class Eleve extends User {
 
     public List<Suggestion> getSuggestions() {return suggestions;}
     public void setSuggestions(List<Suggestion> suggestions) {this.suggestions = suggestions;}
-
-    @Override
-    public String getPassword() {
-        return "";
-    }
 }

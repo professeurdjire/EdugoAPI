@@ -36,7 +36,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // Compter les utilisateurs par rôle
     @Query("SELECT COUNT(u) FROM User u WHERE u.role = :role")
-    Long countByRole(@Param("role") String role);
+    Long countByRole(@Param("role") com.example.edugo.entity.Role role);
 
     // Trouver les utilisateurs avec pagination
     @Query("SELECT u FROM User u ORDER BY u.dateCreation DESC")

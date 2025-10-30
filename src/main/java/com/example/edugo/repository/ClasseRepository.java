@@ -15,4 +15,11 @@ public interface ClasseRepository extends JpaRepository<Classe, Long> {
     // Trouver par nom
     Optional<Classe> findByNom(String nom);
 
+    // Added for domain services
+    @Query("SELECT c FROM Classe c WHERE c.niveau.id = :niveauId")
+    List<Classe> findByNiveauId(@Param("niveauId") Long niveauId);
+
+    @Query("SELECT c FROM Classe c WHERE LOWER(c.nom) LIKE LOWER(CONCAT('%', :nom, '%'))")
+    List<Classe> findByNomContainingIgnoreCase(@Param("nom") String nom);
+
 }

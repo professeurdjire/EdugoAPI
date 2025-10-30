@@ -14,6 +14,8 @@ public class EleveDefi {
     private String reponseUtilisateur;
 
     private LocalDateTime dateEnvoie;
+    private LocalDateTime dateParticipation;
+    private String statut;
 
     // Relation entre EleveDefi et  élève
     @ManyToOne
@@ -44,6 +46,12 @@ public class EleveDefi {
 
     public LocalDateTime getDateEnvoie() { return dateEnvoie; }
     public void setDateEnvoie(LocalDateTime dateEnvoie) { this.dateEnvoie = dateEnvoie; }
+
+    public LocalDateTime getDateParticipation() { return dateParticipation; }
+    public void setDateParticipation(LocalDateTime dateParticipation) { this.dateParticipation = dateParticipation; }
+
+    public String getStatut() { return statut; }
+    public void setStatut(String statut) { this.statut = statut; }
 
     public Eleve getEleve() { return eleve; }
     public void setEleve(Eleve eleve) { this.eleve = eleve; }

@@ -69,6 +69,9 @@ public class Progression {
     public LocalDateTime getDateDerniereLecture() { return dateDerniereLecture; }
     public void setDateDerniereLecture(LocalDateTime dateDerniereLecture) { this.dateDerniereLecture = dateDerniereLecture; }
 
+    // Alias attendu par certains services
+    public void setDateMiseAJour(LocalDateTime dateMiseAJour) { this.dateDerniereLecture = dateMiseAJour; }
+
     public Eleve getEleve() { return eleve; }
     public void setEleve(Eleve eleve) { this.eleve = eleve; }
 

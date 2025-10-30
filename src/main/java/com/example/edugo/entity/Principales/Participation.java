@@ -16,6 +16,8 @@ public class Participation {
     @Column(nullable = false)
     private Integer tempsPasse;
 
+    private String statut;
+
     @Column(name = "date_participation")
     private LocalDateTime dateParticipation;
 
@@ -71,6 +73,9 @@ public class Participation {
 
     public LocalDateTime getDateParticipation() { return dateParticipation; }
     public void setDateParticipation(LocalDateTime dateParticipation) { this.dateParticipation = dateParticipation; }
+
+    public String getStatut() { return statut; }
+    public void setStatut(String statut) { this.statut = statut; }
 
     public Eleve getEleve() { return eleve; }
     public void setEleve(Eleve eleve) { this.eleve = eleve; }

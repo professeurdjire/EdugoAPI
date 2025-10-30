@@ -47,6 +47,10 @@ public class Exercice {
     @JoinColumn(name = "id_niveau", nullable = false)
     private Niveau niveauScolaire;
 
+    @ManyToOne
+    @JoinColumn(name = "livre_id")
+    private Livre livre;
+
     @OneToMany(mappedBy = "exercice", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference(value = "exercice-questions")
     private List<Question> questionsExercice;
@@ -121,6 +125,9 @@ public class Exercice {
     public void setNiveauScolaire(Niveau niveauScolaire) {
         this.niveauScolaire = niveauScolaire;
     }
+
+    public Livre getLivre() { return livre; }
+    public void setLivre(Livre livre) { this.livre = livre; }
 
     public List<Question> getQuestionsExercice() {
         return questionsExercice;

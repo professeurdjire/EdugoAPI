@@ -16,11 +16,6 @@ public class Admin extends User {
         this.setRole(Role.ADMIN);
     }
 
-    @Override
-    public String getPassword() {
-        return "";
-    }
-
     // Méthodes spécifiques à l'admin
     // gererUtilisateur(), ajouterContenu(), etc.
 }

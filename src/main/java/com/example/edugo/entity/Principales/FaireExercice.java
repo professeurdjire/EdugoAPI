@@ -1,7 +1,7 @@
 package com.example.edugo.entity.Principales;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "faireExercice")
@@ -26,12 +26,19 @@ public class FaireExercice {
     @Enumerated(EnumType.STRING)
     private StatutExercice statut;
 
-    private LocalDate dateExercice;
+    private LocalDateTime dateExercice;
+
+    // Champs attendus par les services
+    private String reponse;
+    private LocalDateTime dateSoumission;
+    private Integer note;
+    private String commentaire;
+    private LocalDateTime dateCorrection;
 
     // --- Constructeurs ---
     public FaireExercice() {}
 
-    public FaireExercice(Eleve eleve, Exercice exercice, int pointExercice, StatutExercice statut, LocalDate dateExercice) {
+    public FaireExercice(Eleve eleve, Exercice exercice, int pointExercice, StatutExercice statut, LocalDateTime dateExercice) {
         this.eleve = eleve;
         this.exercice = exercice;
         this.pointExercice = pointExercice;
@@ -54,8 +61,24 @@ public class FaireExercice {
     public StatutExercice getStatut() { return statut; }
     public void setStatut(StatutExercice statut) { this.statut = statut; }
 
-    public LocalDate getDateExercice() { return dateExercice; }
-    public void setDateExercice(LocalDate dateExercice) { this.dateExercice = dateExercice; }
+    public LocalDateTime getDateExercice() { return dateExercice; }
+    public void setDateExercice(LocalDateTime dateExercice) { this.dateExercice = dateExercice; }
+
+    // Champs supplémentaires pour compatibilité avec les services
+    public String getReponse() { return reponse; }
+    public void setReponse(String reponse) { this.reponse = reponse; }
+
+    public LocalDateTime getDateSoumission() { return dateSoumission; }
+    public void setDateSoumission(LocalDateTime dateSoumission) { this.dateSoumission = dateSoumission; }
+
+    public Integer getNote() { return note; }
+    public void setNote(Integer note) { this.note = note; }
+
+    public String getCommentaire() { return commentaire; }
+    public void setCommentaire(String commentaire) { this.commentaire = commentaire; }
+
+    public LocalDateTime getDateCorrection() { return dateCorrection; }
+    public void setDateCorrection(LocalDateTime dateCorrection) { this.dateCorrection = dateCorrection; }
 
     public void setId(Long id) {
         this.id = id;

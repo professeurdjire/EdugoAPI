@@ -23,7 +23,7 @@ public class Defi {
 
     private String reponseDefi;
 
-    private int pointDefi;
+    private Integer pointDefi;
 
     private int nbreParticipations;
 
@@ -64,8 +64,8 @@ public class Defi {
     public String getReponseDefi() { return reponseDefi; }
     public void setReponseDefi(String reponseDefi) { this.reponseDefi = reponseDefi; }
 
-    public int getPointDefi() { return pointDefi; }
-    public void setPointDefi(int pointDefi) { this.pointDefi = pointDefi; }
+    public Integer getPointDefi() { return pointDefi; }
+    public void setPointDefi(Integer pointDefi) { this.pointDefi = pointDefi; }
 
     public int getNbreParticipations() { return nbreParticipations; }
     public void setNbreParticipations(int nbreParticipations) { this.nbreParticipations = nbreParticipations; }
