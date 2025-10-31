@@ -1,6 +1,7 @@
 package com.example.edugo.controller;
 
 import com.example.edugo.entity.Principales.*;
+import com.example.edugo.dto.*;
 import com.example.edugo.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -94,20 +95,20 @@ public class EleveController {
     
     @GetMapping("/livres/disponibles/{id}")
     @Operation(summary = "Récupérer les livres disponibles pour un élève", description = "Permet de récupérer les livres adaptés au niveau d'un élève")
-    public ResponseEntity<List<Livre>> getLivresDisponibles(@Parameter(description = "ID de l'élève") @PathVariable Long id) {
+    public ResponseEntity<List<LivreResponse>> getLivresDisponibles(@Parameter(description = "ID de l'élève") @PathVariable Long id) {
         return ResponseEntity.ok(serviceLivre.getLivresDisponibles(id));
     }
 
     @GetMapping("/livres/{id}")
     @Operation(summary = "Récupérer un livre par ID", description = "Permet de récupérer les détails d'un livre")
-    public ResponseEntity<Livre> getLivreById(@Parameter(description = "ID du livre") @PathVariable Long id) {
+    public ResponseEntity<LivreDetailResponse> getLivreById(@Parameter(description = "ID du livre") @PathVariable Long id) {
         return ResponseEntity.ok(serviceLivre.getLivreById(id));
     }
 
     @PostMapping("/progression/{eleveId}/{livreId}")
     @Operation(summary = "Mettre à jour la progression de lecture", description = "Permet de mettre à jour la page actuelle de lecture d'un élève")
     @PreAuthorize("hasRole('ELEVE')")
-    public ResponseEntity<Progression> updateProgressionLecture(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId,
+    public ResponseEntity<com.example.edugo.dto.ProgressionResponse> updateProgressionLecture(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId,
                                                               @Parameter(description = "ID du livre") @PathVariable Long livreId,
                                                               @RequestBody ProgressionUpdateRequest progressionData) {
         Integer pageActuelle = progressionData.getPageActuelle();
@@ -116,7 +117,7 @@ public class EleveController {
 
     @GetMapping("/progression/{id}")
     @Operation(summary = "Récupérer la progression de lecture d'un élève", description = "Permet de récupérer l'historique de lecture d'un élève")
-    public ResponseEntity<List<Progression>> getProgressionLecture(@Parameter(description = "ID de l'élève") @PathVariable Long id) {
+    public ResponseEntity<java.util.List<com.example.edugo.dto.ProgressionResponse>> getProgressionLecture(@Parameter(description = "ID de l'élève") @PathVariable Long id) {
         return ResponseEntity.ok(serviceLivre.getProgressionLecture(id));
     }
 
@@ -124,20 +125,20 @@ public class EleveController {
     
     @GetMapping("/exercices/disponibles/{id}")
     @Operation(summary = "Récupérer les exercices disponibles pour un élève", description = "Permet de récupérer les exercices actifs pour un élève")
-    public ResponseEntity<List<Exercice>> getExercicesDisponibles(@Parameter(description = "ID de l'élève") @PathVariable Long id) {
+    public ResponseEntity<List<ExerciceResponse>> getExercicesDisponibles(@Parameter(description = "ID de l'élève") @PathVariable Long id) {
         return ResponseEntity.ok(serviceExercice.getExercicesDisponibles(id));
     }
 
     @GetMapping("/exercices/{id}")
     @Operation(summary = "Récupérer un exercice par ID", description = "Permet de récupérer les détails d'un exercice")
-    public ResponseEntity<Exercice> getExerciceById(@Parameter(description = "ID de l'exercice") @PathVariable Long id) {
+    public ResponseEntity<ExerciceDetailResponse> getExerciceById(@Parameter(description = "ID de l'exercice") @PathVariable Long id) {
         return ResponseEntity.ok(serviceExercice.getExerciceById(id));
     }
 
     @PostMapping("/exercices/soumettre/{eleveId}/{exerciceId}")
     @Operation(summary = "Soumettre un exercice", description = "Permet à un élève de soumettre sa réponse à un exercice")
     @PreAuthorize("hasRole('ELEVE')")
-    public ResponseEntity<FaireExercice> soumettreExercice(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId,
+    public ResponseEntity<FaireExerciceResponse> soumettreExercice(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId,
                                                           @Parameter(description = "ID de l'exercice") @PathVariable Long exerciceId,
                                                           @RequestBody ExerciceSubmissionRequest reponseData) {
         String reponse = reponseData.getReponse();
@@ -146,7 +147,7 @@ public class EleveController {
 
     @GetMapping("/exercices/historique/{id}")
     @Operation(summary = "Récupérer l'historique des exercices d'un élève", description = "Permet de récupérer l'historique des exercices réalisés par un élève")
-    public ResponseEntity<List<FaireExercice>> getHistoriqueExercices(@Parameter(description = "ID de l'élève") @PathVariable Long id) {
+    public ResponseEntity<List<FaireExerciceResponse>> getHistoriqueExercices(@Parameter(description = "ID de l'élève") @PathVariable Long id) {
         return ResponseEntity.ok(serviceExercice.getHistoriqueExercices(id));
     }
 
@@ -154,27 +155,27 @@ public class EleveController {
     
     @GetMapping("/defis/disponibles/{id}")
     @Operation(summary = "Récupérer les défis disponibles pour un élève", description = "Permet de récupérer les défis disponibles pour un élève")
-    public ResponseEntity<List<Defi>> getDefisDisponibles(@Parameter(description = "ID de l'élève") @PathVariable Long id) {
+    public ResponseEntity<List<DefiResponse>> getDefisDisponibles(@Parameter(description = "ID de l'élève") @PathVariable Long id) {
         return ResponseEntity.ok(serviceDefi.getDefisDisponibles(id));
     }
 
     @GetMapping("/defis/{id}")
     @Operation(summary = "Récupérer un défi par ID", description = "Permet de récupérer les détails d'un défi")
-    public ResponseEntity<Defi> getDefiById(@Parameter(description = "ID du défi") @PathVariable Long id) {
+    public ResponseEntity<DefiDetailResponse> getDefiById(@Parameter(description = "ID du défi") @PathVariable Long id) {
         return ResponseEntity.ok(serviceDefi.getDefiById(id));
     }
 
     @PostMapping("/defis/participer/{eleveId}/{defiId}")
     @Operation(summary = "Participer à un défi", description = "Permet à un élève de participer à un défi")
     @PreAuthorize("hasRole('ELEVE')")
-    public ResponseEntity<EleveDefi> participerDefi(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId,
+    public ResponseEntity<EleveDefiResponse> participerDefi(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId,
                                                    @Parameter(description = "ID du défi") @PathVariable Long defiId) {
         return ResponseEntity.ok(serviceDefi.participerDefi(eleveId, defiId));
     }
 
     @GetMapping("/defis/participes/{id}")
     @Operation(summary = "Récupérer les défis participés par un élève", description = "Permet de récupérer l'historique des défis d'un élève")
-    public ResponseEntity<List<EleveDefi>> getDefisParticipes(@Parameter(description = "ID de l'élève") @PathVariable Long id) {
+    public ResponseEntity<List<EleveDefiResponse>> getDefisParticipes(@Parameter(description = "ID de l'élève") @PathVariable Long id) {
         return ResponseEntity.ok(serviceDefi.getDefisParticipes(id));
     }
 

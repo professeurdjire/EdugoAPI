@@ -1,5 +1,10 @@
 package com.example.edugo.service;
 
+import com.example.edugo.dto.ExerciceResponse;
+import com.example.edugo.dto.LivreResponse;
+import com.example.edugo.dto.MatiereDetailResponse;
+import com.example.edugo.dto.MatiereRequest;
+import com.example.edugo.dto.MatiereResponse;
 import com.example.edugo.entity.Principales.*;
 import com.example.edugo.exception.ResourceNotFoundException;
 import com.example.edugo.repository.*;
@@ -9,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,24 +26,24 @@ public class ServiceMatiere {
     private final EleveRepository eleveRepository;
 
     // ==================== CRUD MATIÈRES ====================
-    
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public Matiere createMatiere(Matiere matiere) {
-        if (matiereRepository.existsByNom(matiere.getNom())) {
+    public MatiereResponse createMatiere(MatiereRequest request) {
+        if (matiereRepository.existsByNom(request.getNom())) {
             throw new RuntimeException("Cette matière existe déjà");
         }
-        return matiereRepository.save(matiere);
+        Matiere matiere = new Matiere();
+        matiere.setNom(request.getNom());
+        return toResponse(matiereRepository.save(matiere));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public Matiere updateMatiere(Long id, Matiere matiereDetails) {
+    public MatiereResponse updateMatiere(Long id, MatiereRequest request) {
         Matiere matiere = matiereRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Matière", id));
-        
-        matiere.setNom(matiereDetails.getNom());
-        return matiereRepository.save(matiere);
+        matiere.setNom(request.getNom());
+        return toResponse(matiereRepository.save(matiere));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -45,91 +51,73 @@ public class ServiceMatiere {
     public void deleteMatiere(Long id) {
         Matiere matiere = matiereRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Matière", id));
-        
-        // Vérifier s'il y a des livres associés à cette matière
         List<Livre> livres = livreRepository.findByMatiereId(id);
         if (!livres.isEmpty()) {
             throw new RuntimeException("Impossible de supprimer une matière contenant des livres");
         }
-        
         matiereRepository.delete(matiere);
     }
 
-    public List<Matiere> getAllMatieres() {
-        return matiereRepository.findAll();
+    public List<MatiereResponse> getAllMatieres() {
+        return matiereRepository.findAll().stream().map(this::toResponse).collect(Collectors.toList());
     }
 
-    public Matiere getMatiereById(Long id) {
-        return matiereRepository.findById(id)
+    public MatiereDetailResponse getMatiereById(Long id) {
+        Matiere matiere = matiereRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Matière", id));
+        List<Exercice> exercices = exerciceRepository.findByMatiereId(id);
+        List<Livre> livres = livreRepository.findByMatiereId(id);
+        return toDetailResponse(matiere, livres.size(), exercices.size(), (int) exercices.stream().filter(e -> Boolean.TRUE.equals(e.getActive())).count());
     }
 
     // ==================== LIVRES PAR MATIÈRE ====================
-    
-    public List<Livre> getLivresByMatiere(Long matiereId) {
-        return livreRepository.findByMatiereId(matiereId);
+    public List<LivreResponse> getLivresByMatiere(Long matiereId) {
+        return livreRepository.findByMatiereId(matiereId).stream().map(this::toLivreResponse).collect(Collectors.toList());
     }
 
     @PreAuthorize("hasRole('ELEVE')")
-    public List<Livre> getLivresDisponiblesByMatiere(Long eleveId, Long matiereId) {
-        Eleve eleve = eleveRepository.findById(eleveId)
+    public List<LivreResponse> getLivresDisponiblesByMatiere(Long eleveId, Long matiereId) {
+        eleveRepository.findById(eleveId)
                 .orElseThrow(() -> new ResourceNotFoundException("Élève", eleveId));
-        
-        return livreRepository.findByMatiereId(matiereId);
+        return getLivresByMatiere(matiereId);
     }
 
     // ==================== EXERCICES PAR MATIÈRE ====================
-    
-    public List<Exercice> getExercicesByMatiere(Long matiereId) {
-        return exerciceRepository.findByMatiereId(matiereId);
+    public List<ExerciceResponse> getExercicesByMatiere(Long matiereId) {
+        return exerciceRepository.findByMatiereId(matiereId).stream().map(this::toExerciceResponse).collect(Collectors.toList());
     }
 
     @PreAuthorize("hasRole('ELEVE')")
-    public List<Exercice> getExercicesDisponiblesByMatiere(Long eleveId, Long matiereId) {
-        return exerciceRepository.findByMatiereIdAndActiveTrue(matiereId);
+    public List<ExerciceResponse> getExercicesDisponiblesByMatiere(Long eleveId, Long matiereId) {
+        return exerciceRepository.findByMatiereIdAndActiveTrue(matiereId).stream().map(this::toExerciceResponse).collect(Collectors.toList());
     }
 
     // ==================== STATISTIQUES MATIÈRES ====================
-    
     public Object getStatistiquesMatiere(Long matiereId) {
         Matiere matiere = matiereRepository.findById(matiereId)
                 .orElseThrow(() -> new ResourceNotFoundException("Matière", matiereId));
-        
         List<Livre> livres = livreRepository.findByMatiereId(matiereId);
         List<Exercice> exercices = exerciceRepository.findByMatiereId(matiereId);
-        
-    java.util.Map<String, Object> stats = new java.util.HashMap<>();
-    stats.put("matiereId", matiere.getId());
-    stats.put("nomMatiere", matiere.getNom());
-    stats.put("nombreLivres", livres.size());
-    stats.put("nombreExercices", exercices.size());
-    stats.put("nombreExercicesActifs", (int) exercices.stream()
-        .filter(e -> Boolean.TRUE.equals(e.getActive()))
-        .count());
-    return stats;
+        java.util.Map<String, Object> stats = new java.util.HashMap<>();
+        stats.put("matiereId", matiere.getId());
+        stats.put("nomMatiere", matiere.getNom());
+        stats.put("nombreLivres", livres.size());
+        stats.put("nombreExercices", exercices.size());
+        stats.put("nombreExercicesActifs", (int) exercices.stream().filter(e -> Boolean.TRUE.equals(e.getActive())).count());
+        return stats;
     }
 
     // ==================== PROGRESSION PAR MATIÈRE ====================
-    
     @PreAuthorize("hasRole('ELEVE')")
     public Object getProgressionMatiere(Long eleveId, Long matiereId) {
         Eleve eleve = eleveRepository.findById(eleveId)
                 .orElseThrow(() -> new ResourceNotFoundException("Élève", eleveId));
-        
         Matiere matiere = matiereRepository.findById(matiereId)
                 .orElseThrow(() -> new ResourceNotFoundException("Matière", matiereId));
-        
         List<Livre> livresMatiere = livreRepository.findByMatiereId(matiereId);
         List<Exercice> exercicesMatiere = exerciceRepository.findByMatiereId(matiereId);
-        
-        // Calculer la progression moyenne pour cette matière
         double progressionMoyenne = 0.0;
-        if (!livresMatiere.isEmpty()) {
-            // Logique de calcul de progression basée sur les livres lus
-            // Cette logique devrait être implémentée selon vos besoins spécifiques
-        }
-        
-        java.util.Map<String,Object> result = new java.util.HashMap<>();
+        java.util.Map<String, Object> result = new java.util.HashMap<>();
         result.put("eleveId", eleve.getId());
         result.put("nomEleve", eleve.getNom() + " " + eleve.getPrenom());
         result.put("matiereId", matiere.getId());
@@ -141,16 +129,13 @@ public class ServiceMatiere {
     }
 
     // ==================== RECHERCHE ET FILTRAGE ====================
-    
-    public List<Matiere> searchMatieresByName(String nom) {
-        return matiereRepository.findByNomContainingIgnoreCase(nom);
+    public List<MatiereResponse> searchMatieresByName(String nom) {
+        return matiereRepository.findByNomContainingIgnoreCase(nom).stream().map(this::toResponse).collect(Collectors.toList());
     }
 
     // ==================== MATIÈRES POPULAIRES ====================
-    
     public List<Object> getMatieresPopulaires() {
         List<Livre> livres = livreRepository.findAll();
-        
         return livres.stream()
                 .filter(livre -> livre.getMatiere() != null)
                 .collect(java.util.stream.Collectors.groupingBy(
@@ -171,46 +156,78 @@ public class ServiceMatiere {
     }
 
     // ==================== VALIDATION MATIÈRES ====================
-    
     @PreAuthorize("hasRole('ADMIN')")
     public boolean validerMatiere(Long matiereId) {
         Matiere matiere = matiereRepository.findById(matiereId)
                 .orElseThrow(() -> new ResourceNotFoundException("Matière", matiereId));
-        
-        // Vérifier si la matière a au moins un livre ou un exercice
         List<Livre> livres = livreRepository.findByMatiereId(matiereId);
         List<Exercice> exercices = exerciceRepository.findByMatiereId(matiereId);
-        
         return !livres.isEmpty() || !exercices.isEmpty();
     }
 
     // ==================== FUSION DE MATIÈRES ====================
-    
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void fusionnerMatieres(Long matiereIdSource, Long matiereIdDestination) {
         Matiere matiereDestination = matiereRepository.findById(matiereIdDestination)
                 .orElseThrow(() -> new ResourceNotFoundException("Matière", matiereIdDestination));
-        
         Matiere matiereSource = matiereRepository.findById(matiereIdSource)
                 .orElseThrow(() -> new ResourceNotFoundException("Matière", matiereIdSource));
-        
-        // Migrer tous les livres de la matière source vers la destination
         List<Livre> livresSource = livreRepository.findByMatiereId(matiereIdSource);
         for (Livre livre : livresSource) {
             livre.setMatiere(matiereDestination);
             livreRepository.save(livre);
         }
-        
-        // Migrer tous les exercices de la matière source vers la destination
         List<Exercice> exercicesSource = exerciceRepository.findByMatiereId(matiereIdSource);
         for (Exercice exercice : exercicesSource) {
             exercice.setMatiere(matiereDestination);
             exerciceRepository.save(exercice);
         }
-        
-        // Supprimer la matière source
         matiereRepository.delete(matiereSource);
+    }
+
+    // ==================== Mapping Helpers ====================
+    private MatiereResponse toResponse(Matiere m) {
+        MatiereResponse dto = new MatiereResponse();
+        dto.setId(m.getId());
+        dto.setNom(m.getNom());
+        return dto;
+    }
+
+    private MatiereDetailResponse toDetailResponse(Matiere m, int nombreLivres, int nombreExercices, int nombreExercicesActifs) {
+        MatiereDetailResponse dto = new MatiereDetailResponse();
+        dto.setId(m.getId());
+        dto.setNom(m.getNom());
+        dto.setNombreLivres(nombreLivres);
+        dto.setNombreExercices(nombreExercices);
+        dto.setNombreExercicesActifs(nombreExercicesActifs);
+        dto.setStatistiques(getStatistiquesMatiere(m.getId()));
+        return dto;
+    }
+
+    private LivreResponse toLivreResponse(Livre l) {
+        LivreResponse dto = new LivreResponse();
+        dto.setId(l.getId());
+        dto.setTitre(l.getTitre());
+        dto.setIsbn(l.getIsbn());
+        dto.setAuteur(l.getAuteur());
+        dto.setImageCouverture(l.getImageCouverture());
+        dto.setTotalPages(l.getTotalPages());
+        return dto;
+    }
+
+    private ExerciceResponse toExerciceResponse(Exercice e) {
+        ExerciceResponse dto = new ExerciceResponse();
+        dto.setId(e.getId());
+        dto.setTitre(e.getTitre());
+        dto.setActive(e.getActive());
+        dto.setNiveauDifficulte(e.getNiveauDifficulte());
+        dto.setTempsAlloue(e.getTempsAlloue());
+        if (e.getMatiere() != null) {
+            dto.setMatiereId(e.getMatiere().getId());
+            dto.setMatiereNom(e.getMatiere().getNom());
+        }
+        return dto;
     }
 }
 

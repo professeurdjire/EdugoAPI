@@ -1,6 +1,10 @@
 package com.example.edugo.controller;
 
-import com.example.edugo.entity.Principales.*;
+import com.example.edugo.dto.ExerciceResponse;
+import com.example.edugo.dto.LivreResponse;
+import com.example.edugo.dto.MatiereDetailResponse;
+import com.example.edugo.dto.MatiereRequest;
+import com.example.edugo.dto.MatiereResponse;
 import com.example.edugo.service.ServiceMatiere;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,28 +30,28 @@ public class MatiereController {
     
     @GetMapping
     @Operation(summary = "Récupérer toutes les matières")
-    public ResponseEntity<List<Matiere>> getAllMatieres() {
+    public ResponseEntity<List<MatiereResponse>> getAllMatieres() {
         return ResponseEntity.ok(serviceMatiere.getAllMatieres());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Récupérer une matière par ID")
-    public ResponseEntity<Matiere> getMatiereById(@Parameter(description = "ID de la matière") @PathVariable Long id) {
+    public ResponseEntity<MatiereDetailResponse> getMatiereById(@Parameter(description = "ID de la matière") @PathVariable Long id) {
         return ResponseEntity.ok(serviceMatiere.getMatiereById(id));
     }
 
     @PostMapping
     @Operation(summary = "Créer une matière")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Matiere> createMatiere(@RequestBody Matiere matiere) {
+    public ResponseEntity<MatiereResponse> createMatiere(@RequestBody MatiereRequest matiere) {
         return ResponseEntity.ok(serviceMatiere.createMatiere(matiere));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Mettre à jour une matière")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Matiere> updateMatiere(@Parameter(description = "ID de la matière") @PathVariable Long id,
-                                                 @RequestBody Matiere matiere) {
+    public ResponseEntity<MatiereResponse> updateMatiere(@Parameter(description = "ID de la matière") @PathVariable Long id,
+                                                 @RequestBody MatiereRequest matiere) {
         return ResponseEntity.ok(serviceMatiere.updateMatiere(id, matiere));
     }
 
@@ -63,13 +67,13 @@ public class MatiereController {
     
     @GetMapping("/{id}/livres")
     @Operation(summary = "Livres par matière")
-    public ResponseEntity<List<Livre>> getLivresByMatiere(@Parameter(description = "ID de la matière") @PathVariable Long id) {
+    public ResponseEntity<List<LivreResponse>> getLivresByMatiere(@Parameter(description = "ID de la matière") @PathVariable Long id) {
         return ResponseEntity.ok(serviceMatiere.getLivresByMatiere(id));
     }
 
     @GetMapping("/{id}/exercices")
     @Operation(summary = "Exercices par matière")
-    public ResponseEntity<List<Exercice>> getExercicesByMatiere(@Parameter(description = "ID de la matière") @PathVariable Long id) {
+    public ResponseEntity<List<ExerciceResponse>> getExercicesByMatiere(@Parameter(description = "ID de la matière") @PathVariable Long id) {
         return ResponseEntity.ok(serviceMatiere.getExercicesByMatiere(id));
     }
 }

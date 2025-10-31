@@ -1,5 +1,6 @@
 package com.example.edugo.entity.Principales;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +16,11 @@ public class Matiere {
     private String nom;
 
     @OneToMany(mappedBy = "matiere", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Livre> livres = new ArrayList<>();
     @OneToMany(mappedBy = "matiere", cascade = CascadeType.ALL)
+
+    @JsonIgnore
     private List<Exercice> Exercice = new ArrayList<>();
 
     // Constructeurs

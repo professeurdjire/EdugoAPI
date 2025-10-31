@@ -7,6 +7,8 @@ import lombok.Data;
 @AllArgsConstructor
 public class ApiMessage {
     private String message;
+
+
 }
 
 

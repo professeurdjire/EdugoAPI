@@ -1,6 +1,10 @@
 package com.example.edugo.controller;
 
-import com.example.edugo.entity.Principales.*;
+import com.example.edugo.dto.LivreRequest;
+import com.example.edugo.dto.LivreResponse;
+import com.example.edugo.dto.LivreDetailResponse;
+import com.example.edugo.entity.Principales.Livre;
+import com.example.edugo.entity.Principales.Progression;
 import com.example.edugo.service.ServiceLivre;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,28 +34,28 @@ public class LivreController {
     
     @GetMapping
     @Operation(summary = "Récupérer tous les livres", description = "Permet de récupérer la liste de tous les livres")
-    public ResponseEntity<List<Livre>> getAllLivres() {
+    public ResponseEntity<List<LivreResponse>> getAllLivres() {
         return ResponseEntity.ok(serviceLivre.getAllLivres());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Récupérer un livre par ID", description = "Permet de récupérer les détails d'un livre")
-    public ResponseEntity<Livre> getLivreById(@Parameter(description = "ID du livre") @PathVariable Long id) {
+    public ResponseEntity<LivreDetailResponse> getLivreById(@Parameter(description = "ID du livre") @PathVariable Long id) {
         return ResponseEntity.ok(serviceLivre.getLivreById(id));
     }
 
     @PostMapping
     @Operation(summary = "Créer un nouveau livre", description = "Permet à un administrateur de créer un nouveau livre")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Livre> createLivre(@RequestBody Livre livre) {
+    public ResponseEntity<LivreResponse> createLivre(@RequestBody LivreRequest livre) {
         return ResponseEntity.ok(serviceLivre.createLivre(livre));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Mettre à jour un livre", description = "Permet à un administrateur de modifier un livre")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Livre> updateLivre(@Parameter(description = "ID du livre") @PathVariable Long id, 
-                                           @RequestBody Livre livreDetails) {
+    public ResponseEntity<LivreResponse> updateLivre(@Parameter(description = "ID du livre") @PathVariable Long id, 
+                                           @RequestBody LivreRequest livreDetails) {
         return ResponseEntity.ok(serviceLivre.updateLivre(id, livreDetails));
     }
 
@@ -68,28 +72,28 @@ public class LivreController {
     @GetMapping("/disponibles/{eleveId}")
     @Operation(summary = "Récupérer les livres disponibles pour un élève", description = "Permet de récupérer les livres adaptés au niveau d'un élève")
     @PreAuthorize("hasRole('ELEVE')")
-    public ResponseEntity<List<Livre>> getLivresDisponibles(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId) {
+    public ResponseEntity<List<LivreResponse>> getLivresDisponibles(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId) {
         return ResponseEntity.ok(serviceLivre.getLivresDisponibles(eleveId));
     }
 
     @GetMapping("/matiere/{matiereId}")
     @Operation(summary = "Récupérer les livres par matière", description = "Permet de récupérer les livres d'une matière spécifique")
     @PreAuthorize("hasRole('ELEVE')")
-    public ResponseEntity<List<Livre>> getLivresByMatiere(@Parameter(description = "ID de la matière") @PathVariable Long matiereId) {
+    public ResponseEntity<List<LivreResponse>> getLivresByMatiere(@Parameter(description = "ID de la matière") @PathVariable Long matiereId) {
         return ResponseEntity.ok(serviceLivre.getLivresByMatiere(matiereId));
     }
 
     @GetMapping("/niveau/{niveauId}")
     @Operation(summary = "Récupérer les livres par niveau", description = "Permet de récupérer les livres d'un niveau spécifique")
     @PreAuthorize("hasRole('ELEVE')")
-    public ResponseEntity<List<Livre>> getLivresByNiveau(@Parameter(description = "ID du niveau") @PathVariable Long niveauId) {
+    public ResponseEntity<List<LivreResponse>> getLivresByNiveau(@Parameter(description = "ID du niveau") @PathVariable Long niveauId) {
         return ResponseEntity.ok(serviceLivre.getLivresByNiveau(niveauId));
     }
 
     @GetMapping("/classe/{classeId}")
     @Operation(summary = "Récupérer les livres par classe", description = "Permet de récupérer les livres d'une classe spécifique")
     @PreAuthorize("hasRole('ELEVE')")
-    public ResponseEntity<List<Livre>> getLivresByClasse(@Parameter(description = "ID de la classe") @PathVariable Long classeId) {
+    public ResponseEntity<List<LivreResponse>> getLivresByClasse(@Parameter(description = "ID de la classe") @PathVariable Long classeId) {
         return ResponseEntity.ok(serviceLivre.getLivresByClasse(classeId));
     }
 
@@ -98,7 +102,7 @@ public class LivreController {
     @PostMapping("/progression/{eleveId}/{livreId}")
     @Operation(summary = "Mettre à jour la progression de lecture", description = "Permet de mettre à jour la page actuelle de lecture d'un élève")
     @PreAuthorize("hasRole('ELEVE')")
-    public ResponseEntity<Progression> updateProgressionLecture(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId,
+    public ResponseEntity<com.example.edugo.dto.ProgressionResponse> updateProgressionLecture(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId,
                                                                @Parameter(description = "ID du livre") @PathVariable Long livreId,
                                                                @RequestBody ProgressionUpdateRequest progressionData) {
         Integer pageActuelle = progressionData.getPageActuelle();
@@ -108,16 +112,16 @@ public class LivreController {
     @GetMapping("/progression/{eleveId}")
     @Operation(summary = "Récupérer la progression de lecture d'un élève", description = "Permet de récupérer l'historique de lecture d'un élève")
     @PreAuthorize("hasRole('ELEVE')")
-    public ResponseEntity<List<Progression>> getProgressionLecture(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId) {
+    public ResponseEntity<List<com.example.edugo.dto.ProgressionResponse>> getProgressionLecture(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId) {
         return ResponseEntity.ok(serviceLivre.getProgressionLecture(eleveId));
     }
 
     @GetMapping("/progression/{eleveId}/{livreId}")
     @Operation(summary = "Récupérer la progression d'un livre spécifique", description = "Permet de récupérer la progression d'un élève pour un livre donné")
     @PreAuthorize("hasRole('ELEVE')")
-    public ResponseEntity<Progression> getProgressionLivre(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId,
+    public ResponseEntity<com.example.edugo.dto.ProgressionResponse> getProgressionLivre(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId,
                                                           @Parameter(description = "ID du livre") @PathVariable Long livreId) {
-        Progression progression = serviceLivre.getProgressionLivre(eleveId, livreId);
+        com.example.edugo.dto.ProgressionResponse progression = serviceLivre.getProgressionLivre(eleveId, livreId);
         return ResponseEntity.ok(progression);
     }
 
@@ -138,7 +142,7 @@ public class LivreController {
     @GetMapping("/recommandes/{eleveId}")
     @Operation(summary = "Récupérer les livres recommandés", description = "Permet de récupérer les livres recommandés pour un élève")
     @PreAuthorize("hasRole('ELEVE')")
-    public ResponseEntity<List<Livre>> getLivresRecommandes(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId) {
+    public ResponseEntity<List<LivreResponse>> getLivresRecommandes(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId) {
         return ResponseEntity.ok(serviceLivre.getLivresRecommandes(eleveId));
     }
 
@@ -146,19 +150,19 @@ public class LivreController {
     
     @GetMapping("/recherche/titre")
     @Operation(summary = "Rechercher des livres par titre", description = "Permet de rechercher des livres par titre")
-    public ResponseEntity<List<Livre>> searchLivresByTitre(@Parameter(description = "Titre à rechercher") @RequestParam String titre) {
+    public ResponseEntity<List<LivreResponse>> searchLivresByTitre(@Parameter(description = "Titre à rechercher") @RequestParam String titre) {
         return ResponseEntity.ok(serviceLivre.searchLivresByTitre(titre));
     }
 
     @GetMapping("/recherche/auteur")
     @Operation(summary = "Rechercher des livres par auteur", description = "Permet de rechercher des livres par auteur")
-    public ResponseEntity<List<Livre>> searchLivresByAuteur(@Parameter(description = "Auteur à rechercher") @RequestParam String auteur) {
+    public ResponseEntity<List<LivreResponse>> searchLivresByAuteur(@Parameter(description = "Auteur à rechercher") @RequestParam String auteur) {
         return ResponseEntity.ok(serviceLivre.searchLivresByAuteur(auteur));
     }
 
     @GetMapping("/recents")
     @Operation(summary = "Récupérer les livres récents", description = "Permet de récupérer les livres les plus récemment ajoutés")
-    public ResponseEntity<List<Livre>> getLivresRecents() {
+    public ResponseEntity<List<LivreResponse>> getLivresRecents() {
         return ResponseEntity.ok(serviceLivre.getLivresRecents());
     }
 }

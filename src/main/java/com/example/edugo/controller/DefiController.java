@@ -1,6 +1,9 @@
 package com.example.edugo.controller;
 
-import com.example.edugo.entity.Principales.*;
+import com.example.edugo.dto.DefiRequest;
+import com.example.edugo.dto.DefiResponse;
+import com.example.edugo.dto.DefiDetailResponse;
+import com.example.edugo.dto.EleveDefiResponse;
 import com.example.edugo.service.ServiceDefi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -23,32 +26,31 @@ public class DefiController {
     private final ServiceDefi serviceDefi;
 
     // ==================== CRUD DEFIS (ADMIN) ====================
-    
     @GetMapping
     @Operation(summary = "Récupérer tous les défis")
-    public ResponseEntity<List<Defi>> getAllDefis() {
+    public ResponseEntity<List<DefiResponse>> getAllDefis() {
         return ResponseEntity.ok(serviceDefi.getAllDefis());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Récupérer un défi par ID")
-    public ResponseEntity<Defi> getDefiById(@Parameter(description = "ID du défi") @PathVariable Long id) {
+    public ResponseEntity<DefiDetailResponse> getDefiById(@Parameter(description = "ID du défi") @PathVariable Long id) {
         return ResponseEntity.ok(serviceDefi.getDefiById(id));
     }
 
     @PostMapping
     @Operation(summary = "Créer un défi")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Defi> createDefi(@RequestBody Defi defi) {
-        return ResponseEntity.ok(serviceDefi.createDefi(defi));
+    public ResponseEntity<DefiResponse> createDefi(@RequestBody DefiRequest dto) {
+        return ResponseEntity.ok(serviceDefi.createDefi(dto));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Mettre à jour un défi")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Defi> updateDefi(@Parameter(description = "ID du défi") @PathVariable Long id,
-                                           @RequestBody Defi defi) {
-        return ResponseEntity.ok(serviceDefi.updateDefi(id, defi));
+    public ResponseEntity<DefiResponse> updateDefi(@Parameter(description = "ID du défi") @PathVariable Long id,
+                                       @RequestBody DefiRequest dto) {
+        return ResponseEntity.ok(serviceDefi.updateDefi(id, dto));
     }
 
     @DeleteMapping("/{id}")
@@ -60,26 +62,25 @@ public class DefiController {
     }
 
     // ==================== PARTICIPATION (ELEVE) ====================
-    
     @GetMapping("/disponibles/{eleveId}")
     @Operation(summary = "Défis disponibles pour un élève")
     @PreAuthorize("hasRole('ELEVE')")
-    public ResponseEntity<List<Defi>> getDefisDisponibles(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId) {
+    public ResponseEntity<List<DefiResponse>> getDefisDisponibles(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId) {
         return ResponseEntity.ok(serviceDefi.getDefisDisponibles(eleveId));
     }
 
     @PostMapping("/participer/{eleveId}/{defiId}")
     @Operation(summary = "Participer à un défi")
     @PreAuthorize("hasRole('ELEVE')")
-    public ResponseEntity<EleveDefi> participerDefi(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId,
-                                                    @Parameter(description = "ID du défi") @PathVariable Long defiId) {
+    public ResponseEntity<EleveDefiResponse> participerDefi(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId,
+                                                           @Parameter(description = "ID du défi") @PathVariable Long defiId) {
         return ResponseEntity.ok(serviceDefi.participerDefi(eleveId, defiId));
     }
 
     @GetMapping("/participes/{eleveId}")
     @Operation(summary = "Défis participés par un élève")
     @PreAuthorize("hasRole('ELEVE')")
-    public ResponseEntity<List<EleveDefi>> getDefisParticipes(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId) {
+    public ResponseEntity<List<EleveDefiResponse>> getDefisParticipes(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId) {
         return ResponseEntity.ok(serviceDefi.getDefisParticipes(eleveId));
     }
 }
