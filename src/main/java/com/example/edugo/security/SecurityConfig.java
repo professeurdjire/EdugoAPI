@@ -1,6 +1,6 @@
 package com.example.edugo.security;
 
-
+import com.example.edugo.config.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +16,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import com.example.edugo.config.JwtAuthenticationFilter;
 
 import java.util.Arrays;
 
@@ -34,18 +33,19 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
+                        // --- Routes publiques ---
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
-                        // Admin only endpoints
+                        // --- Routes réservées à l'ADMIN ---
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // User endpoints
-                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
+                        // --- Routes accessibles à l'ÉLÈVE et à l'ADMIN ---
+                        .requestMatchers("/api/eleves/**").hasAnyRole("ELEVE", "ADMIN")
+                        .requestMatchers("/api/user/**").hasAnyRole("ELEVE", "ADMIN")
 
-                        // All other requests need authentication
+                        // --- Toute autre route nécessite une authentification ---
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

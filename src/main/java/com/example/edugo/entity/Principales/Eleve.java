@@ -36,18 +36,14 @@ public class Eleve extends User {
 
     @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ConversionEleve> conversions = new ArrayList<>();
-
     @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Suggestion> suggestions = new ArrayList<>();
-
-    @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<NotificationsEleve> notificationsRecues = new ArrayList<>();
 
     // Constructeurs
     public Eleve() {}
 
-    public Eleve(String email, String motPasse, String prenom, String nom, String dateNaissance, Classe classe, Integer pointAccumule, String avatarUrl) {
-        super(email, motPasse, prenom, nom);
+    public Eleve(String email, String password, String firstName, String lastName, String dateNaissance, Classe classe, Integer pointAccumule) {
+        super(email, password, firstName, lastName);
         this.dateNaissance = dateNaissance;
         this.classe = classe;
         this.pointAccumule = pointAccumule;

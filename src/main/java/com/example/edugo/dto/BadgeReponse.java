@@ -1,33 +1,21 @@
 package com.example.edugo.dto;
 
-import com.example.edugo.entity.Principales.TypeBadge;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-
-public class BadgeRequest {
+public class BadgeReponse {
     private Long id;
-
-    @NotBlank(message = "Le nom du badge est obligatoire")
     private String nom;
-
-    @NotBlank(message = "La description est obligatoire")
     private String description;
-
-    @NotNull(message = "Le type du badge est obligatoire")
-    private TypeBadge type;
-
-    @NotBlank(message = "L'icône est obligatoire")
     private String icone;
+    private int nombreParticipations; // optionnel, pour info
 
     // Constructeurs
-    public BadgeRequest() {}
+    public BadgeReponse() {}
 
-    public BadgeRequest(Long id, String nom, String description, TypeBadge type, String icone, String appliqueA) {
+    public BadgeReponse(Long id, String nom, String description,  String icone, int nombreParticipations) {
         this.id = id;
         this.nom = nom;
         this.description = description;
-        this.type = type;
         this.icone = icone;
+        this.nombreParticipations = nombreParticipations;
     }
 
     // Getters et Setters
@@ -55,14 +43,6 @@ public class BadgeRequest {
         this.description = description;
     }
 
-    public TypeBadge getType() {
-        return type;
-    }
-
-    public void setType(TypeBadge type) {
-        this.type = type;
-    }
-
     public String getIcone() {
         return icone;
     }
@@ -71,4 +51,11 @@ public class BadgeRequest {
         this.icone = icone;
     }
 
+    public int getNombreParticipations() {
+        return nombreParticipations;
+    }
+
+    public void setNombreParticipations(int nombreParticipations) {
+        this.nombreParticipations = nombreParticipations;
+    }
 }

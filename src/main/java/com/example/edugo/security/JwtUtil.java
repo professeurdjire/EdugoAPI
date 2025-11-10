@@ -3,14 +3,14 @@ package com.example.edugo.security;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtUtil {
@@ -25,6 +25,7 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
+    // --- Extraction claims ---
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -50,8 +51,13 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
+    // --- Génération JWT avec rôles ---
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", userDetails.getAuthorities()
+                .stream()
+                .map(auth -> auth.getAuthority().replace("ROLE_", ""))
+                .collect(Collectors.toList()));
         return createToken(claims, userDetails.getUsername());
     }
 
@@ -68,5 +74,10 @@ public class JwtUtil {
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    public List<String> extractRoles(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("roles", List.class);
     }
 }

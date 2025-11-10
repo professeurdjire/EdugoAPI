@@ -1,6 +1,7 @@
 package com.example.edugo.entity.Principales;
 
 import com.example.edugo.entity.FichierLivre;
+import com.example.edugo.entity.Tag;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -68,6 +69,13 @@ public class Livre {
     @OneToMany(mappedBy = "livre", cascade = CascadeType.ALL)
     private List<Progression> progressions = new ArrayList<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "livre_tags",
+            joinColumns = @JoinColumn(name = "livre_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private List<Tag> tags = new ArrayList<>();
 
     // Constructeurs
     public Livre() {}
@@ -142,6 +150,9 @@ public class Livre {
 
     public List<Progression> getProgressions() { return progressions; }
     public void setProgressions(List<Progression> progressions) { this.progressions = progressions; }
+
+    public List<Tag> getTags() { return tags; }
+    public void setTags(List<Tag> tags) { this.tags = tags; }
 
     public Quiz getQuiz() {
         return quiz;

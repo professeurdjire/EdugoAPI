@@ -27,7 +27,7 @@ public class Badge {
     // Constructeurs
     public Badge() {}
 
-    public Badge(String nom, String description, TypeBadge type, String icone) {
+    public Badge(String nom, String description, TypeBadge type) {
         this.nom = nom;
         this.description = description;
         this.type = type;

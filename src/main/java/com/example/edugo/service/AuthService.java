@@ -1,6 +1,5 @@
 package com.example.edugo.service;
 
-
 import com.example.edugo.dto.LoginRequest;
 import com.example.edugo.dto.RegisterRequest;
 import com.example.edugo.entity.Principales.Eleve;
@@ -21,21 +20,27 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
+    /**
+     * Enregistrement d'un nouvel élève
+     */
     public User register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email déjà utilisé");
         }
 
-        Eleve user = new Eleve();
-        user.setNom(request.getNom());
-        user.setPrenom(request.getPrenom());
-        user.setEmail(request.getEmail());
-        user.setMotDePasse(passwordEncoder.encode(request.getMotDePasse()));
-        user.setRole(Role.ELEVE); // Par défaut
+        Eleve eleve = new Eleve();
+        eleve.setNom(request.getNom());
+        eleve.setPrenom(request.getPrenom());
+        eleve.setEmail(request.getEmail());
+        eleve.setMotDePasse(passwordEncoder.encode(request.getMotDePasse()));
+        eleve.setRole(Role.ELEVE); // 👈 par défaut
 
-        return userRepository.save(user);
+        return userRepository.save(eleve);
     }
 
+    /**
+     * Authentification (admin ou élève)
+     */
     public User authenticate(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -45,6 +50,6 @@ public class AuthService {
         );
 
         return userRepository.findByEmail(request.getEmail())
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
     }
 }
