@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/matieres")
+@RequestMapping("/matieres")
 @RequiredArgsConstructor
 @Tag(name = "Matières", description = "Gestion des matières, livres et exercices par matière")
 @SecurityRequirement(name = "bearerAuth")

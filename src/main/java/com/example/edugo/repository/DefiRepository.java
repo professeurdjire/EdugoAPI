@@ -28,5 +28,16 @@ public interface DefiRepository extends JpaRepository<Defi, Long> {
            "LOWER(d.titre) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
            "LOWER(d.ennonce) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
     List<Defi> searchByTitreOrEnonce(@Param("searchTerm") String searchTerm);
+    
+    // Méthodes pour les statistiques
+    // Assuming Defi has an 'active' field, if not, these methods should be removed
+    // @Query("SELECT d FROM Defi d WHERE d.active = true")
+    // List<Defi> findByActiveTrue();
+    // 
+    // @Query("SELECT d FROM Defi d WHERE d.active = false")
+    // List<Defi> findByActiveFalse();
+    // 
+    // Long countByActiveTrue();
+    // Long countByActiveFalse();
 }
 

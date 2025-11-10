@@ -8,7 +8,13 @@ import com.example.edugo.repository.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,7 +45,7 @@ public class ServiceLivre {
     // ============ CRUD LIVRES ============
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public LivreResponse createLivre(LivreRequest req) {
+    public LivreResponse createLivre(LivreRequest req, MultipartFile image) {
         Livre livre = new Livre();
         livre.setTitre(req.getTitre());
         livre.setIsbn(req.getIsbn());
@@ -48,7 +54,18 @@ public class ServiceLivre {
         livre.setEditeur(req.getEditeur());
         livre.setAuteur(req.getAuteur());
         livre.setTotalPages(req.getTotalPages());
-        livre.setImageCouverture(req.getImageCouverture());
+        // Handle image upload: prefer provided MultipartFile, otherwise use value from request
+        if (image != null && !image.isEmpty()) {
+            try {
+                String stored = saveCoverImage(image);
+                livre.setImageCouverture(stored);
+            } catch (IOException e) {
+                // If saving fails, fall back to provided string or null
+                livre.setImageCouverture(req.getImageCouverture());
+            }
+        } else {
+            livre.setImageCouverture(req.getImageCouverture());
+        }
         livre.setLectureAuto(req.getLectureAuto());
         livre.setInteractif(req.getInteractif());
         if (req.getNiveauId() != null)
@@ -62,7 +79,7 @@ public class ServiceLivre {
 
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public LivreResponse updateLivre(Long id, LivreRequest req) {
+    public LivreResponse updateLivre(Long id, LivreRequest req, MultipartFile image) {
         Livre livre = livreRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Livre", id));
         livre.setTitre(req.getTitre());
@@ -72,7 +89,18 @@ public class ServiceLivre {
         livre.setEditeur(req.getEditeur());
         livre.setAuteur(req.getAuteur());
         livre.setTotalPages(req.getTotalPages());
-        livre.setImageCouverture(req.getImageCouverture());
+        if (image != null && !image.isEmpty()) {
+            try {
+                String stored = saveCoverImage(image);
+                livre.setImageCouverture(stored);
+            } catch (IOException e) {
+                // keep existing or provided
+                livre.setImageCouverture(req.getImageCouverture());
+            }
+        } else {
+            // if no new file provided, use supplied string (may be null) or keep existing
+            if (req.getImageCouverture() != null) livre.setImageCouverture(req.getImageCouverture());
+        }
         livre.setLectureAuto(req.getLectureAuto());
         livre.setInteractif(req.getInteractif());
         if (req.getNiveauId() != null)
@@ -82,6 +110,25 @@ public class ServiceLivre {
         if (req.getMatiereId() != null)
             livre.setMatiere(matiereRepository.findById(req.getMatiereId()).orElse(null));
         return toResponse(livreRepository.save(livre));
+    }
+
+    // Save uploaded cover image to local filesystem under uploads/covers and return stored relative path
+    private String saveCoverImage(MultipartFile image) throws IOException {
+        String uploadsDir = System.getProperty("user.dir") + "" + java.io.File.separator + "uploads" + java.io.File.separator + "covers";
+        Path uploadsPath = Paths.get(uploadsDir);
+        if (!Files.exists(uploadsPath)) {
+            Files.createDirectories(uploadsPath);
+        }
+        String original = image.getOriginalFilename();
+        String ext = "";
+        if (original != null && original.contains(".")) {
+            ext = original.substring(original.lastIndexOf('.'));
+        }
+        String filename = UUID.randomUUID().toString() + ext;
+        Path target = uploadsPath.resolve(filename);
+        image.transferTo(target.toFile());
+        // Return a relative path that can be served by static resource handlers if configured
+        return "/uploads/covers/" + filename;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -198,44 +245,47 @@ public class ServiceLivre {
         .orElse(null);
     }
 
-    public Object getStatistiquesLivre(Long livreId) {
-        Livre livre = livreRepository.findById(livreId)
-                .orElseThrow(() -> new ResourceNotFoundException("Livre", livreId));
-        List<Progression> progressions = progressionRepository.findByLivreId(livreId);
-        return new Object() {
-            public final Long livreId = livre.getId();
-            public final String titre = livre.getTitre();
-            public final String auteur = livre.getAuteur();
-            public final Integer totalPages = livre.getTotalPages();
-            public final Integer nombreLecteurs = progressions.size();
-            public final Integer nombreLecteursComplets = (int) progressions.stream()
-                    .filter(p -> p.getPourcentageCompletion() >= 100)
-                    .count();
-            public final Double progressionMoyenne = progressions.isEmpty() ? 0.0 :
-                    progressions.stream()
-                            .mapToInt(Progression::getPourcentageCompletion)
-                            .average()
-                            .orElse(0.0);
-        };
+    public com.example.edugo.dto.StatistiquesLivreResponse getStatistiquesLivre(Long livreId) {
+    Livre livre = livreRepository.findById(livreId)
+        .orElseThrow(() -> new ResourceNotFoundException("Livre", livreId));
+    List<Progression> progressions = progressionRepository.findByLivreId(livreId);
+    Integer nombreLecteurs = progressions.size();
+    Integer nombreLecteursComplets = (int) progressions.stream()
+        .filter(p -> p.getPourcentageCompletion() >= 100)
+        .count();
+    Double progressionMoyenne = progressions.isEmpty() ? 0.0 :
+        progressions.stream()
+            .mapToInt(Progression::getPourcentageCompletion)
+            .average()
+            .orElse(0.0);
+    return new com.example.edugo.dto.StatistiquesLivreResponse(
+        livre.getId(),
+        livre.getTitre(),
+        livre.getAuteur(),
+        livre.getTotalPages(),
+        nombreLecteurs,
+        nombreLecteursComplets,
+        progressionMoyenne
+    );
     }
 
-    public List<Object> getLivresPopulaires() {
-        List<Progression> progressions = progressionRepository.findAll();
-        return progressions.stream()
-                .collect(java.util.stream.Collectors.groupingBy(
-                        Progression::getLivre,
-                        java.util.stream.Collectors.counting()
-                ))
-                .entrySet().stream()
-                .sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
-                .limit(10)
-                .map(entry -> new Object() {
-                    public final Long livreId = entry.getKey().getId();
-                    public final String titre = entry.getKey().getTitre();
-                    public final String auteur = entry.getKey().getAuteur();
-                    public final Long nombreLecteurs = entry.getValue();
-                })
-                .collect(java.util.stream.Collectors.toList());
+    public java.util.List<com.example.edugo.dto.LivrePopulaireResponse> getLivresPopulaires() {
+    List<Progression> progressions = progressionRepository.findAll();
+    return progressions.stream()
+        .collect(java.util.stream.Collectors.groupingBy(
+            Progression::getLivre,
+            java.util.stream.Collectors.counting()
+        ))
+        .entrySet().stream()
+        .sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
+        .limit(10)
+        .map(entry -> new com.example.edugo.dto.LivrePopulaireResponse(
+            entry.getKey().getId(),
+            entry.getKey().getTitre(),
+            entry.getKey().getAuteur(),
+            entry.getValue()
+        ))
+        .collect(java.util.stream.Collectors.toList());
     }
 
     @PreAuthorize("hasRole('ELEVE')")

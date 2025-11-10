@@ -41,4 +41,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Trouver les utilisateurs avec pagination
     @Query("SELECT u FROM User u ORDER BY u.dateCreation DESC")
     List<User> findAllOrderByDateCreationDesc();
+    
+    // Compter les utilisateurs actifs/inactifs
+    Long countByEstActiveTrue();
+    Long countByEstActiveFalse();
+    
+    // Trouver par rôle (String)
+    @Query("SELECT u FROM User u WHERE u.role = :role")
+    List<User> findByRole(@Param("role") String role);
 }

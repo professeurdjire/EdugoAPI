@@ -26,6 +26,7 @@ public interface FaireExerciceRepository extends JpaRepository<FaireExercice, Lo
 
     @Query("SELECT COUNT(f) FROM FaireExercice f WHERE f.eleve.id = :eleveId")
     Long countByEleveId(@Param("eleveId") Long eleveId);
+    
+    // Méthodes pour les statistiques
+    Long countByNoteNotNull();
 }
-
-

@@ -34,5 +34,9 @@ public interface EleveRepository extends JpaRepository<Eleve, Long> {
 
     @Query("SELECT e FROM Eleve e WHERE e.classe.niveau.id = :niveauId")
     List<Eleve> findByClasseNiveauId(@Param("niveauId") Long niveauId);
+    
+    // Méthodes pour les statistiques
+    @Query("SELECT SUM(e.pointAccumule) FROM Eleve e")
+    Long sumAllPoints();
 }
 

@@ -51,4 +51,15 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
 
     @Query("SELECT c FROM Challenge c WHERE c.rewardMode = :rewardMode")
     List<Challenge> findByRewardMode(@Param("rewardMode") String rewardMode);
+    
+    // Méthodes pour les statistiques
+    // Assuming Challenge has an 'active' field, if not, these methods should be removed
+    // @Query("SELECT c FROM Challenge c WHERE c.active = true")
+    // List<Challenge> findByActiveTrue();
+    // 
+    // @Query("SELECT c FROM Challenge c WHERE c.active = false")
+    // List<Challenge> findByActiveFalse();
+    // 
+    // Long countByActiveTrue();
+    // Long countByActiveFalse();
 }

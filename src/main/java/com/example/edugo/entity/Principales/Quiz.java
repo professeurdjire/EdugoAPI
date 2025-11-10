@@ -2,6 +2,7 @@ package com.example.edugo.entity.Principales;
 
 import com.example.edugo.entity.StatutQuiz;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ public class Quiz {
     private Livre livre;
 
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Question> questionsQuiz = new ArrayList<>();
 
     @PrePersist

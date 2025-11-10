@@ -1,5 +1,6 @@
 package com.example.edugo.entity.Principales;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ public class Defi {
 
     // Relation entre défi et  élève
     @OneToMany(mappedBy = "defi", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<EleveDefi> eleveDefis = new ArrayList<>();
 
     // --- Constructeurs ---

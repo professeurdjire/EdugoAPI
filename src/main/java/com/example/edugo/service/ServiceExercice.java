@@ -96,23 +96,26 @@ public class ServiceExercice {
     }
 
     // ========== Compat: endpoints utilisés par controllers existants ==========
-    public Object getStatistiquesExercice(Long exerciceId) {
-        Exercice exercice = exerciceRepository.findById(exerciceId)
-                .orElseThrow(() -> new ResourceNotFoundException("Exercice", exerciceId));
-        List<FaireExercice> realisations = faireExerciceRepository.findByExerciceId(exerciceId);
-        return new Object() {
-            public final Long exerciceId = exercice.getId();
-            public final String titre = exercice.getTitre();
-            public final Integer nombreTentatives = realisations.size();
-            public final Integer nombreReussites = (int) realisations.stream()
-                    .filter(r -> r.getNote() != null && r.getNote() >= 10)
-                    .count();
-            public final Double noteMoyenne = realisations.stream()
-                    .filter(r -> r.getNote() != null)
-                    .mapToInt(FaireExercice::getNote)
-                    .average()
-                    .orElse(0.0);
-        };
+    public com.example.edugo.dto.StatistiquesExerciceResponse getStatistiquesExercice(Long exerciceId) {
+    Exercice exercice = exerciceRepository.findById(exerciceId)
+        .orElseThrow(() -> new ResourceNotFoundException("Exercice", exerciceId));
+    List<FaireExercice> realisations = faireExerciceRepository.findByExerciceId(exerciceId);
+    Integer nombreTentatives = realisations.size();
+    Integer nombreReussites = (int) realisations.stream()
+        .filter(r -> r.getNote() != null && r.getNote() >= 10)
+        .count();
+    Double noteMoyenne = realisations.stream()
+        .filter(r -> r.getNote() != null)
+        .mapToInt(FaireExercice::getNote)
+        .average()
+        .orElse(0.0);
+    return new com.example.edugo.dto.StatistiquesExerciceResponse(
+        exercice.getId(),
+        exercice.getTitre(),
+        nombreTentatives,
+        nombreReussites,
+        noteMoyenne
+    );
     }
 
     public List<ExerciceResponse> searchExercicesByTitre(String titre) {

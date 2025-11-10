@@ -8,7 +8,8 @@ public class SwaggerRedirectController {
 
     @GetMapping({"/", "", "/docs", "/swagger"})
     public String redirectToSwagger() {
-        return "redirect:/api/swagger-ui/index.html";
+        // Avec context-path=/api, le chemin réel est /swagger-ui/index.html
+        return "redirect:/swagger-ui/index.html";
     }
 }
 

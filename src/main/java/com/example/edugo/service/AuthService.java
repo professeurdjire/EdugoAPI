@@ -26,6 +26,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final EmailService emailService;
 
     public LoginResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -51,6 +52,14 @@ public class AuthService {
         
         eleve.setPointAccumule(0);
         eleve = (Eleve) userRepository.save(eleve);
+        
+        // Envoyer un email de bienvenue
+        try {
+            emailService.sendWelcomeEmail(eleve.getEmail(), eleve.getNom(), eleve.getPrenom());
+        } catch (Exception e) {
+            // Log l'erreur mais ne bloque pas l'inscription
+            System.err.println("Erreur lors de l'envoi de l'email de bienvenue: " + e.getMessage());
+        }
         
         String token = jwtUtil.generateToken(eleve);
         String refreshToken = jwtUtil.generateRefreshToken(eleve);

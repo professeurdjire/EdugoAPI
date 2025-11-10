@@ -2,6 +2,10 @@ package com.example.edugo.entity.Principales;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +18,14 @@ public class Matiere {
 
     @Column(nullable = false, unique = true)
     private String nom;
+
+    @CreationTimestamp
+    @Column(name = "date_creation")
+    private LocalDateTime dateCreation;
+
+    @UpdateTimestamp
+    @Column(name = "date_modification")
+    private LocalDateTime dateModification;
 
     @OneToMany(mappedBy = "matiere", cascade = CascadeType.ALL)
     @JsonIgnore
@@ -36,6 +48,12 @@ public class Matiere {
 
     public String getNom() { return nom; }
     public void setNom(String nom) { this.nom = nom; }
+
+    public LocalDateTime getDateCreation() { return dateCreation; }
+    public void setDateCreation(LocalDateTime dateCreation) { this.dateCreation = dateCreation; }
+
+    public LocalDateTime getDateModification() { return dateModification; }
+    public void setDateModification(LocalDateTime dateModification) { this.dateModification = dateModification; }
 
     public List<Livre> getLivres() { return livres; }
     public void setLivres(List<Livre> livres) { this.livres = livres; }

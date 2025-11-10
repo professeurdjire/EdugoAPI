@@ -1,6 +1,7 @@
 package com.example.edugo.entity.Principales;
 
 import com.example.edugo.entity.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,23 +19,30 @@ public class Eleve extends User {
     private Integer pointAccumule;
 
     @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Participation> participations = new ArrayList<>();
 
     @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Progression> progressions = new ArrayList<>();
 
     // Relation avec EleveDefi
     @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<EleveDefi> eleveDefis = new ArrayList<>();
 
     @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<FaireExercice> faireExercices;
     @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<ReponseEleve> reponsesUtilisateurs = new ArrayList<>();
 
     @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<ConversionEleve> conversions = new ArrayList<>();
     @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Suggestion> suggestions = new ArrayList<>();
 
     // Constructeurs

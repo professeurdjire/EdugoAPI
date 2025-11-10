@@ -240,20 +240,23 @@ public class ServiceEleve {
     // ==================== STATISTIQUES ÉLÈVE ====================
     
     @PreAuthorize("hasRole('ELEVE')")
-    public Object getStatistiques(Long eleveId) {
+    public com.example.edugo.dto.StatistiquesEleveResponse getStatistiques(Long eleveId) {
         Eleve eleve = eleveRepository.findById(eleveId)
                 .orElseThrow(() -> new ResourceNotFoundException("Élève", eleveId));
-        
-        // Créer un objet avec les statistiques
-        return new Object() {
-            public final Long eleveId = eleve.getId();
-            public final String nom = eleve.getNom();
-            public final String prenom = eleve.getPrenom();
-            public final Integer points = eleve.getPointAccumule();
-            public final Long exercicesRealises = faireExerciceRepository.countByEleveId(eleveId);
-            public final Long defisParticipes = eleveDefiRepository.countByEleveId(eleveId);
-            public final Long challengesParticipes = participationRepository.countByEleveId(eleveId);
-        };
+
+        Long exercicesRealises = faireExerciceRepository.countByEleveId(eleveId);
+        Long defisParticipes = eleveDefiRepository.countByEleveId(eleveId);
+        Long challengesParticipes = participationRepository.countByEleveId(eleveId);
+
+        return new com.example.edugo.dto.StatistiquesEleveResponse(
+                eleve.getId(),
+                eleve.getNom(),
+                eleve.getPrenom(),
+                eleve.getPointAccumule(),
+                exercicesRealises,
+                defisParticipes,
+                challengesParticipes
+        );
     }
 
     // ==================== GESTION CLASSE ====================

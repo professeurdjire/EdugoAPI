@@ -41,5 +41,9 @@ public interface ExerciceRepository extends JpaRepository<Exercice, Long> {
 
     @Query("SELECT e FROM Exercice e WHERE e.livre.id = :livreId AND e.active = true")
     List<Exercice> findByLivreIdAndActiveTrue(@Param("livreId") Long livreId);
+    
+    // Méthodes pour les statistiques
+    Long countByActiveTrue();
+    Long countByActiveFalse();
 }
 

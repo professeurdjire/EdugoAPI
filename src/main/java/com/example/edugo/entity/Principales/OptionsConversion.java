@@ -1,5 +1,6 @@
 package com.example.edugo.entity.Principales;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class OptionsConversion {
     private LocalDateTime dateAjout;
 
     @OneToMany(mappedBy = "option", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List <ConversionEleve> conversions = new ArrayList<>();
 
     // --- Constructeurs ---

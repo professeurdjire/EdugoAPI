@@ -40,5 +40,8 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
 
     @Query("SELECT p FROM Participation p WHERE p.challenge.id = :challengeId AND p.statut = :statut")
     List<Participation> findByChallengeIdAndStatut(@Param("challengeId") Long challengeId, @Param("statut") String statut);
+    
+    // Méthodes pour les statistiques
+    Long countByStatut(String statut);
 }
 
