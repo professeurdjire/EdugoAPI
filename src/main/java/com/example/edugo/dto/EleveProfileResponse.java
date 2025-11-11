@@ -15,9 +15,12 @@ public class EleveProfileResponse {
     private String prenom;
     private String email;
     private String photoProfil;
-    private String dateNaissance;
+    private String ville;
     private Long classeId;
     private String classeNom;
+    private Long niveauId;
+    private String niveauNom;
+    private String photoUrl;
     private Integer points;
 }
 

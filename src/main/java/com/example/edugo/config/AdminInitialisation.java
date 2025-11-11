@@ -18,33 +18,30 @@ public class AdminInitialisation implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AdminRepository adminRepository;
 
     private static final Logger log = LoggerFactory.getLogger(AdminInitialisation.class);
 
     @Override
     public void run(String... args) {
-        // Vérifie si un admin existe déjà dans AdminRepository ou UserRepository
         try {
-            boolean exists = adminRepository.findByEmail("admin@edugo.com").isPresent()
-                    || userRepository.findByEmail("admin@edugo.com").isPresent();
+            // Vérifie si un admin existe déjà
+            boolean exists = userRepository.findByEmail("admin@edugo.com").isPresent();
 
             if (!exists) {
-                User admin = new com.example.edugo.entity.Admin();
+                Admin admin = new Admin();
                 admin.setNom("Admin");
                 admin.setPrenom("Principal");
                 admin.setEmail("admin@edugo.com");
-                admin.setMotDePasse(passwordEncoder.encode("admin123")); // mot de passe par défaut
+                admin.setMotDePasse(passwordEncoder.encode("admin123"));
                 admin.setRole(Role.ADMIN);
 
                 userRepository.save(admin);
-                log.info("Administrateur par défaut créé : admin@edugo.com / admin123");
+                log.info(" Administrateur par défaut créé : admin@edugo.com / admin123");
             } else {
-                log.info("Administrateur déjà présent, aucune création nécessaire.");
+                log.info(" Administrateur déjà présent, aucune création nécessaire.");
             }
         } catch (Exception e) {
-            // Ne pas faire planter le démarrage pour une erreur d'init
-            log.error("Erreur lors de l'initialisation de l'administrateur par défaut", e);
+            log.error(" Erreur lors de l'initialisation de l'administrateur par défaut", e);
         }
     }
 }

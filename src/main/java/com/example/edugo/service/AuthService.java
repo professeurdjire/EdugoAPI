@@ -6,9 +6,11 @@ import com.example.edugo.dto.LoginResponse;
 import com.example.edugo.dto.RegisterRequest;
 import com.example.edugo.entity.Principales.Classe;
 import com.example.edugo.entity.Principales.Eleve;
+import com.example.edugo.entity.Principales.Niveau;
 import com.example.edugo.entity.Role;
 import com.example.edugo.entity.User;
 import com.example.edugo.repository.ClasseRepository;
+import com.example.edugo.repository.NiveauRepository;
 import com.example.edugo.repository.UserRepository;
 import com.example.edugo.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final ClasseRepository classeRepository;
+    private final NiveauRepository niveauRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
@@ -36,17 +39,22 @@ public class AuthService {
         eleve.setNom(request.getNom());
         eleve.setPrenom(request.getPrenom());
         eleve.setEmail(request.getEmail());
+        eleve.setVille(request.getVille());
+        eleve.setTelephone(request.getTelephone());
+        eleve.setPhotoProfil(request.getPhotoProfil());
         eleve.setMotDePasse(passwordEncoder.encode(request.getMotDePasse()));
         eleve.setRole(Role.ELEVE);
-        
-        if (request.getDateNaissance() != null) {
-            eleve.setDateNaissance(request.getDateNaissance());
-        }
         
         if (request.getClasseId() != null) {
             Classe classe = classeRepository.findById(request.getClasseId())
                     .orElseThrow(() -> new RuntimeException("Classe non trouvée"));
             eleve.setClasse(classe);
+        }
+
+        if (request.getNiveauId() != null) {
+           Niveau niveau = niveauRepository.findById(request.getNiveauId())
+                    .orElseThrow(() -> new RuntimeException("niveau non trouvée"));
+            eleve.setNiveau(niveau);
         }
         
         eleve.setPointAccumule(0);

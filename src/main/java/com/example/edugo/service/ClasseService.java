@@ -1,5 +1,7 @@
 package com.example.edugo.service;
 
+import com.example.edugo.dto.ClasseRequest;
+import com.example.edugo.dto.ClasseResponse;
 import com.example.edugo.entity.Principales.Classe;
 import com.example.edugo.entity.Principales.Eleve;
 import com.example.edugo.entity.Principales.Niveau;
@@ -23,33 +25,37 @@ public class ClasseService {
     private final NiveauRepository niveauRepository;
 
     // ==================== CRUD CLASSES ====================
-    
+
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public Classe createClasse(Classe classe) {
-        if (classe.getNiveau() != null) {
-            Niveau niveau = niveauRepository.findById(classe.getNiveau().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Niveau", classe.getNiveau().getId()));
-            classe.setNiveau(niveau);
-        }
-        return classeRepository.save(classe);
+    public ClasseResponse createClasse(ClasseRequest request) {
+        Niveau niveau = niveauRepository.findById(request.getNiveauId())
+                .orElseThrow(() -> new ResourceNotFoundException("Niveau", request.getNiveauId()));
+
+        Classe classe = new Classe();
+        classe.setNom(request.getNom());
+        classe.setNiveau(niveau);
+
+        Classe saved = classeRepository.save(classe);
+        return mapToResponse(saved);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public Classe updateClasse(Long id, Classe classeDetails) {
+    public ClasseResponse updateClasse(Long id, ClasseRequest request) {
         Classe classe = classeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Classe", id));
-        
-        classe.setNom(classeDetails.getNom());
-        
-        if (classeDetails.getNiveau() != null) {
-            Niveau niveau = niveauRepository.findById(classeDetails.getNiveau().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Niveau", classeDetails.getNiveau().getId()));
+
+        classe.setNom(request.getNom());
+
+        if (request.getNiveauId() != null) {
+            Niveau niveau = niveauRepository.findById(request.getNiveauId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Niveau", request.getNiveauId()));
             classe.setNiveau(niveau);
         }
-        
-        return classeRepository.save(classe);
+
+        Classe updated = classeRepository.save(classe);
+        return mapToResponse(updated);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -57,27 +63,30 @@ public class ClasseService {
     public void deleteClasse(Long id) {
         Classe classe = classeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Classe", id));
-        
-        // Vérifier s'il y a des élèves dans cette classe
+
         List<Eleve> eleves = eleveRepository.findByClasseId(id);
         if (!eleves.isEmpty()) {
             throw new RuntimeException("Impossible de supprimer une classe contenant des élèves");
         }
-        
+
         classeRepository.delete(classe);
     }
 
-    public List<Classe> getAllClasses() {
-        return classeRepository.findAll();
+    public List<ClasseResponse> getAllClasses() {
+        return classeRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
-    public Classe getClasseById(Long id) {
-        return classeRepository.findById(id)
+    public ClasseResponse getClasseById(Long id) {
+        Classe classe = classeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Classe", id));
+        return mapToResponse(classe);
     }
 
     // ==================== GESTION ÉLÈVES DANS LES CLASSES ====================
-    
+
     @PreAuthorize("hasRole('ADMIN')")
     public List<Eleve> getElevesByClasse(Long classeId) {
         return eleveRepository.findByClasseId(classeId);
@@ -88,10 +97,10 @@ public class ClasseService {
     public Eleve assignerEleveAClasse(Long eleveId, Long classeId) {
         Eleve eleve = eleveRepository.findById(eleveId)
                 .orElseThrow(() -> new ResourceNotFoundException("Élève", eleveId));
-        
+
         Classe classe = classeRepository.findById(classeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Classe", classeId));
-        
+
         eleve.setClasse(classe);
         return eleveRepository.save(eleve);
     }
@@ -101,36 +110,57 @@ public class ClasseService {
     public void retirerEleveDeClasse(Long eleveId) {
         Eleve eleve = eleveRepository.findById(eleveId)
                 .orElseThrow(() -> new ResourceNotFoundException("Élève", eleveId));
-        
+
         eleve.setClasse(null);
         eleveRepository.save(eleve);
     }
 
     // ==================== STATISTIQUES CLASSE ====================
-    
+
     public Object getStatistiquesClasse(Long classeId) {
         Classe classe = classeRepository.findById(classeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Classe", classeId));
-        
+
         List<Eleve> eleves = eleveRepository.findByClasseId(classeId);
-        
+
         return new Object() {
-            public final Long classeId = classe.getId();
+            public final Long classeIdField = classe.getId();
             public final String nomClasse = classe.getNom();
             public final String niveau = classe.getNiveau() != null ? classe.getNiveau().getNom() : "Non défini";
             public final Integer nombreEleves = eleves.size();
-            public final Integer pointsMoyens = eleves.isEmpty() ? 0 : 
-                eleves.stream().mapToInt(Eleve::getPointAccumule).sum() / eleves.size();
+            public final Integer pointsMoyens = eleves.isEmpty() ? 0 :
+                    eleves.stream().mapToInt(Eleve::getPointAccumule).sum() / eleves.size();
         };
     }
 
     // ==================== RECHERCHE ET FILTRAGE ====================
-    
-    public List<Classe> getClassesByNiveau(Long niveauId) {
-        return classeRepository.findByNiveauId(niveauId);
+
+    public List<ClasseResponse> getClassesByNiveau(Long niveauId) {
+        return classeRepository.findByNiveauId(niveauId)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
-    public List<Classe> searchClassesByName(String nom) {
-        return classeRepository.findByNomContainingIgnoreCase(nom);
+    public List<ClasseResponse> searchClassesByName(String nom) {
+        return classeRepository.findByNomContainingIgnoreCase(nom)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    // ==================== MÉTHODE UTILITAIRE ====================
+
+    private ClasseResponse mapToResponse(Classe classe) {
+        ClasseResponse response = new ClasseResponse();
+        response.setId(classe.getId());
+        response.setNom(classe.getNom());
+
+        if (classe.getNiveau() != null) {
+            response.setNiveauId(classe.getNiveau().getId());
+            response.setNiveauNom(classe.getNiveau().getNom());
+        }
+
+        return response;
     }
 }

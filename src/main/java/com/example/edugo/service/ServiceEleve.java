@@ -21,6 +21,7 @@ public class ServiceEleve {
 
     private final EleveRepository eleveRepository;
     private final ClasseRepository classeRepository;
+    private final NiveauRepository niveauRepository;
     private final ExerciceRepository exerciceRepository;
     private final DefiRepository defiRepository;
     private final ChallengeRepository challengeRepository;
@@ -49,14 +50,20 @@ public class ServiceEleve {
         eleve.setPrenom(eleveDetails.getPrenom());
         eleve.setEmail(eleveDetails.getEmail());
         eleve.setPhotoProfil(eleveDetails.getPhotoProfil());
-        eleve.setDateNaissance(eleveDetails.getDateNaissance());
+        eleve.setVille(eleveDetails.getVille());
         
         if (eleveDetails.getClasse() != null) {
             Classe classe = classeRepository.findById(eleveDetails.getClasse().getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Classe", eleveDetails.getClasse().getId()));
             eleve.setClasse(classe);
         }
-        
+
+        if (eleveDetails.getNiveau() != null) {
+            Niveau niveau = niveauRepository.findById(eleveDetails.getClasse().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Niveau", eleveDetails.getNiveau().getId()));
+            eleve.setNiveau(niveau);
+        }
+
         return eleveRepository.save(eleve);
     }
 
