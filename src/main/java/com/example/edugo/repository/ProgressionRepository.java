@@ -29,5 +29,9 @@ public interface ProgressionRepository extends JpaRepository<Progression, Long> 
 
     @Query("SELECT COUNT(p) FROM Progression p WHERE p.eleve.id = :eleveId")
     Long countByEleveId(@Param("eleveId") Long eleveId);
+    
+    // Méthodes pour les statistiques
+    @Query("SELECT AVG(p.pourcentageCompletion) FROM Progression p")
+    Double calculateAverageCompletionRate();
 }
 

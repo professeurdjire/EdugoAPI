@@ -2,6 +2,8 @@ package com.example.edugo.entity.Principales;
 
 import com.example.edugo.entity.FichierLivre;
 import com.example.edugo.entity.Tag;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -59,14 +61,17 @@ public class Livre {
     private Langue langue;
 
     @OneToMany(mappedBy = "livre", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<FichierLivre> fichiers = new ArrayList<>();
 
     // --- Relation OneToOne avec Quiz ---
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "quiz_id", referencedColumnName = "id")
+    @JsonManagedReference(value = "livre-quiz")
     private Quiz quiz;
 
     @OneToMany(mappedBy = "livre", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Progression> progressions = new ArrayList<>();
 
     @ManyToMany
@@ -75,6 +80,7 @@ public class Livre {
             joinColumns = @JoinColumn(name = "livre_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
+    @JsonIgnore
     private List<Tag> tags = new ArrayList<>();
 
     // Constructeurs

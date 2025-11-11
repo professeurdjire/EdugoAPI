@@ -1,5 +1,6 @@
 package com.example.edugo.entity.Principales;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,6 +24,9 @@ public class Challenge {
     @Column(name = "date_fin")
     private LocalDateTime dateFin;
 
+    @Column(name = "points")
+    private Integer points = 0;
+
     @Column(name = "reward_mode")
     private String rewardMode;
 
@@ -45,12 +49,15 @@ public class Challenge {
             joinColumns = @JoinColumn(name = "challenge_id"),
             inverseJoinColumns = @JoinColumn(name = "badge_id")
     )
+    @JsonIgnore
     private List<Badge> rewards = new ArrayList<>();
 
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Question> questionsChallenge = new ArrayList<>();
 
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Participation> participations = new ArrayList<>();
 
     // Constructeurs
@@ -85,6 +92,9 @@ public class Challenge {
 
     public LocalDateTime getDateFin() { return dateFin; }
     public void setDateFin(LocalDateTime dateFin) { this.dateFin = dateFin; }
+
+    public Integer getPoints() { return points; }
+    public void setPoints(Integer points) { this.points = points; }
 
     public TypeChallenge getTypeChallenge() {return typeChallenge;}
     public void setTypeChallenge(TypeChallenge typeChallenge) {this.typeChallenge = typeChallenge;}

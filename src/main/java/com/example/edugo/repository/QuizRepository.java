@@ -27,5 +27,17 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
     // Trouver un quiz avec ses questions
     @Query("SELECT q FROM Quiz q LEFT JOIN FETCH q.questionsQuiz WHERE q.id = :quizId")
     Optional<Quiz> findByIdWithQuestions(@Param("quizId") Long quizId);
-
+    
+    // Méthodes pour les statistiques
+    @Query("SELECT q FROM Quiz q WHERE q.statut = 'ACTIF'")
+    List<Quiz> findByStatutActif();
+    
+    @Query("SELECT q FROM Quiz q WHERE q.statut != 'ACTIF'")
+    List<Quiz> findByStatutInactif();
+    
+    @Query("SELECT COUNT(q) FROM Quiz q WHERE q.statut = 'ACTIF'")
+    Long countByStatutActif();
+    
+    @Query("SELECT COUNT(q) FROM Quiz q WHERE q.statut != 'ACTIF'")
+    Long countByStatutInactif();
 }

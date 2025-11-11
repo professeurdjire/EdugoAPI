@@ -151,42 +151,45 @@ public class ServiceChallenge {
 
     // ==================== STATISTIQUES CHALLENGES ====================
     
-    public Object getStatistiquesChallenge(Long challengeId) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Challenge", challengeId));
-        
-        List<Participation> participations = participationRepository.findByChallengeId(challengeId);
-        
-        return new Object() {
-            public final Long challengeId = challenge.getId();
-            public final String titre = challenge.getTitre();
-            public final Integer nombreParticipations = participations.size();
-            public final Integer nombreValidations = (int) participations.stream()
-                    .filter(p -> "VALIDE".equals(p.getStatut()))
-                    .count();
-            public final Integer nombreDisqualifications = (int) participations.stream()
-                    .filter(p -> "DISQUALIFIE".equals(p.getStatut()))
-                    .count();
-            public final Double tauxParticipation = participations.isEmpty() ? 0.0 :
-                    (double) participations.size() / eleveRepository.count() * 100;
-        };
+    public com.example.edugo.dto.StatistiquesChallengeResponse getStatistiquesChallenge(Long challengeId) {
+    Challenge challenge = challengeRepository.findById(challengeId)
+        .orElseThrow(() -> new ResourceNotFoundException("Challenge", challengeId));
+
+    List<Participation> participations = participationRepository.findByChallengeId(challengeId);
+    Integer nombreParticipations = participations.size();
+    Integer nombreValidations = (int) participations.stream()
+        .filter(p -> "VALIDE".equals(p.getStatut()))
+        .count();
+    Integer nombreDisqualifications = (int) participations.stream()
+        .filter(p -> "DISQUALIFIE".equals(p.getStatut()))
+        .count();
+    Double tauxParticipation = participations.isEmpty() ? 0.0 :
+        (double) participations.size() / eleveRepository.count() * 100;
+    return new com.example.edugo.dto.StatistiquesChallengeResponse(
+        challenge.getId(),
+        challenge.getTitre(),
+        nombreParticipations,
+        nombreValidations,
+        nombreDisqualifications,
+        tauxParticipation
+    );
     }
 
     // ==================== CLASSEMENT CHALLENGES ====================
     
-    public List<Object> getLeaderboardChallenge(Long challengeId) {
+    public List<com.example.edugo.dto.ChallengeLeaderboardEntryResponse> getLeaderboardChallenge(Long challengeId) {
         List<Participation> participationsValidees = participationRepository.findByChallengeId(challengeId);
-        
+
         return participationsValidees.stream()
                 .sorted((p1, p2) -> p1.getDateParticipation().compareTo(p2.getDateParticipation()))
                 .limit(10)
-                .map(participation -> new Object() {
-                    public final Long eleveId = participation.getEleve().getId();
-                    public final String nom = participation.getEleve().getNom();
-                    public final String prenom = participation.getEleve().getPrenom();
-                    public final LocalDateTime dateParticipation = participation.getDateParticipation();
-                    public final Integer points = participation.getEleve().getPointAccumule();
-                })
+                .map(participation -> new com.example.edugo.dto.ChallengeLeaderboardEntryResponse(
+                        participation.getEleve().getId(),
+                        participation.getEleve().getNom(),
+                        participation.getEleve().getPrenom(),
+                        participation.getDateParticipation(),
+                        participation.getEleve().getPointAccumule()
+                ))
                 .collect(java.util.stream.Collectors.toList());
     }
 

@@ -19,7 +19,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import com.example.edugo.dto.LivrePopulaireResponse;
+import com.example.edugo.dto.StatistiquesLivreResponse;
 import com.example.edugo.dto.ProgressionUpdateRequest;
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestPart;
 
 @RestController
 @RequestMapping("/api/livres")
@@ -44,19 +49,21 @@ public class LivreController {
         return ResponseEntity.ok(serviceLivre.getLivreById(id));
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Créer un nouveau livre", description = "Permet à un administrateur de créer un nouveau livre")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<LivreResponse> createLivre(@RequestBody LivreRequest livre) {
-        return ResponseEntity.ok(serviceLivre.createLivre(livre));
+    public ResponseEntity<LivreResponse> createLivre(@RequestPart("livre") com.example.edugo.dto.LivreRequest livre,
+                                                     @RequestPart(value = "image", required = false) MultipartFile image) {
+        return ResponseEntity.ok(serviceLivre.createLivre(livre, image));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Mettre à jour un livre", description = "Permet à un administrateur de modifier un livre")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<LivreResponse> updateLivre(@Parameter(description = "ID du livre") @PathVariable Long id, 
-                                           @RequestBody LivreRequest livreDetails) {
-        return ResponseEntity.ok(serviceLivre.updateLivre(id, livreDetails));
+    public ResponseEntity<LivreResponse> updateLivre(@Parameter(description = "ID du livre") @PathVariable Long id,
+                                                     @RequestPart("livre") com.example.edugo.dto.LivreRequest livreDetails,
+                                                     @RequestPart(value = "image", required = false) MultipartFile image) {
+        return ResponseEntity.ok(serviceLivre.updateLivre(id, livreDetails, image));
     }
 
     @DeleteMapping("/{id}")
@@ -129,13 +136,13 @@ public class LivreController {
     
     @GetMapping("/statistiques/{livreId}")
     @Operation(summary = "Récupérer les statistiques d'un livre", description = "Permet de récupérer les statistiques de lecture d'un livre")
-    public ResponseEntity<Object> getStatistiquesLivre(@Parameter(description = "ID du livre") @PathVariable Long livreId) {
+    public ResponseEntity<StatistiquesLivreResponse> getStatistiquesLivre(@Parameter(description = "ID du livre") @PathVariable Long livreId) {
         return ResponseEntity.ok(serviceLivre.getStatistiquesLivre(livreId));
     }
 
     @GetMapping("/populaires")
     @Operation(summary = "Récupérer les livres populaires", description = "Permet de récupérer les livres les plus lus")
-    public ResponseEntity<List<Object>> getLivresPopulaires() {
+    public ResponseEntity<List<LivrePopulaireResponse>> getLivresPopulaires() {
         return ResponseEntity.ok(serviceLivre.getLivresPopulaires());
     }
 

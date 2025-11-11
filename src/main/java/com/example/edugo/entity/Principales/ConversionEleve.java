@@ -1,5 +1,6 @@
 package com.example.edugo.entity.Principales;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -12,10 +13,12 @@ public class ConversionEleve {
 
     @ManyToOne
     @JoinColumn(name = "id_option", nullable = false)
+    @JsonIgnore
     private OptionsConversion option;
 
     @ManyToOne
     @JoinColumn(name = "id_eleve", nullable = false)
+    @JsonIgnore
     private Eleve eleve;
 
     private LocalDateTime dateConversion;

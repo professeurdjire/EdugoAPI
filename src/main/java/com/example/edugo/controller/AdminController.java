@@ -1,5 +1,6 @@
 package com.example.edugo.controller;
 
+import com.example.edugo.dto.*;
 import com.example.edugo.entity.Principales.*;
 import com.example.edugo.entity.User;
 import com.example.edugo.service.AdminService;
@@ -81,23 +82,23 @@ public class AdminController {
     // ==================== NIVEAUX ====================
     
     @GetMapping("/niveaux")
-    public ResponseEntity<List<Niveau>> getAllNiveaux() {
-        return ResponseEntity.ok(adminService.getAllNiveaux());
+    public ResponseEntity<List<NiveauResponse>> getAllNiveaux() {
+        return ResponseEntity.ok(adminService.getAllNiveauxDto());
     }
 
     @GetMapping("/niveaux/{id}")
-    public ResponseEntity<Niveau> getNiveauById(@PathVariable Long id) {
-        return ResponseEntity.ok(adminService.getNiveauById(id));
+    public ResponseEntity<NiveauResponse> getNiveauById(@PathVariable Long id) {
+        return ResponseEntity.ok(adminService.getNiveauByIdDto(id));
     }
 
     @PostMapping("/niveaux")
-    public ResponseEntity<Niveau> createNiveau(@RequestBody Niveau niveau) {
-        return ResponseEntity.ok(adminService.createNiveau(niveau));
+    public ResponseEntity<NiveauResponse> createNiveau(@RequestBody NiveauRequest niveauRequest) {
+        return ResponseEntity.ok(adminService.createNiveauDto(niveauRequest));
     }
 
     @PutMapping("/niveaux/{id}")
-    public ResponseEntity<Niveau> updateNiveau(@PathVariable Long id, @RequestBody Niveau niveau) {
-        return ResponseEntity.ok(adminService.updateNiveau(id, niveau));
+    public ResponseEntity<NiveauResponse> updateNiveau(@PathVariable Long id, @RequestBody NiveauRequest niveauRequest) {
+        return ResponseEntity.ok(adminService.updateNiveauDto(id, niveauRequest));
     }
 
     @DeleteMapping("/niveaux/{id}")
@@ -109,23 +110,23 @@ public class AdminController {
     // ==================== CLASSES ====================
     
     @GetMapping("/classes")
-    public ResponseEntity<List<Classe>> getAllClasses() {
-        return ResponseEntity.ok(adminService.getAllClasses());
+    public ResponseEntity<List<ClasseResponse>> getAllClasses() {
+        return ResponseEntity.ok(adminService.getAllClassesDto());
     }
 
     @GetMapping("/classes/{id}")
-    public ResponseEntity<Classe> getClasseById(@PathVariable Long id) {
-        return ResponseEntity.ok(adminService.getClasseById(id));
+    public ResponseEntity<ClasseResponse> getClasseById(@PathVariable Long id) {
+        return ResponseEntity.ok(adminService.getClasseByIdDto(id));
     }
 
     @PostMapping("/classes")
-    public ResponseEntity<Classe> createClasse(@RequestBody Classe classe) {
-        return ResponseEntity.ok(adminService.createClasse(classe));
+    public ResponseEntity<ClasseResponse> createClasse(@RequestBody ClasseRequest classeRequest) {
+        return ResponseEntity.ok(adminService.createClasseDto(classeRequest));
     }
 
     @PutMapping("/classes/{id}")
-    public ResponseEntity<Classe> updateClasse(@PathVariable Long id, @RequestBody Classe classe) {
-        return ResponseEntity.ok(adminService.updateClasse(id, classe));
+    public ResponseEntity<ClasseResponse> updateClasse(@PathVariable Long id, @RequestBody ClasseRequest classeRequest) {
+        return ResponseEntity.ok(adminService.updateClasseDto(id, classeRequest));
     }
 
     @DeleteMapping("/classes/{id}")
@@ -137,23 +138,23 @@ public class AdminController {
     // ==================== MATIERES ====================
     
     @GetMapping("/matieres")
-    public ResponseEntity<List<Matiere>> getAllMatieres() {
-        return ResponseEntity.ok(adminService.getAllMatieres());
+    public ResponseEntity<List<MatiereResponse>> getAllMatieres() {
+        return ResponseEntity.ok(adminService.getAllMatieresDto());
     }
 
     @GetMapping("/matieres/{id}")
-    public ResponseEntity<Matiere> getMatiereById(@PathVariable Long id) {
-        return ResponseEntity.ok(adminService.getMatiereById(id));
+    public ResponseEntity<MatiereResponse> getMatiereById(@PathVariable Long id) {
+        return ResponseEntity.ok(adminService.getMatiereByIdDto(id));
     }
 
     @PostMapping("/matieres")
-    public ResponseEntity<Matiere> createMatiere(@RequestBody Matiere matiere) {
-        return ResponseEntity.ok(adminService.createMatiere(matiere));
+    public ResponseEntity<MatiereResponse> createMatiere(@RequestBody MatiereRequest matiereRequest) {
+        return ResponseEntity.ok(adminService.createMatiereDto(matiereRequest));
     }
 
     @PutMapping("/matieres/{id}")
-    public ResponseEntity<Matiere> updateMatiere(@PathVariable Long id, @RequestBody Matiere matiere) {
-        return ResponseEntity.ok(adminService.updateMatiere(id, matiere));
+    public ResponseEntity<MatiereResponse> updateMatiere(@PathVariable Long id, @RequestBody MatiereRequest matiereRequest) {
+        return ResponseEntity.ok(adminService.updateMatiereDto(id, matiereRequest));
     }
 
     @DeleteMapping("/matieres/{id}")
@@ -165,13 +166,13 @@ public class AdminController {
     // ==================== LIVRES ====================
     
     @GetMapping("/livres")
-    public ResponseEntity<List<Livre>> getAllLivres() {
-        return ResponseEntity.ok(adminService.getAllLivres());
+    public ResponseEntity<List<LivreResponse>> getAllLivres() {
+        return ResponseEntity.ok(adminService.getAllLivresDto());
     }
 
     @GetMapping("/livres/{id}")
-    public ResponseEntity<Livre> getLivreById(@PathVariable Long id) {
-        return ResponseEntity.ok(adminService.getLivreById(id));
+    public ResponseEntity<LivreResponse> getLivreById(@PathVariable Long id) {
+        return ResponseEntity.ok(adminService.getLivreByIdDto(id));
     }
 
     @PostMapping("/livres")
@@ -193,13 +194,13 @@ public class AdminController {
     // ==================== EXERCICES ====================
     
     @GetMapping("/exercices")
-    public ResponseEntity<List<Exercice>> getAllExercices() {
-        return ResponseEntity.ok(adminService.getAllExercices());
+    public ResponseEntity<List<ExerciceResponse>> getAllExercices() {
+        return ResponseEntity.ok(adminService.getAllExercicesDto());
     }
 
     @GetMapping("/exercices/{id}")
-    public ResponseEntity<Exercice> getExerciceById(@PathVariable Long id) {
-        return ResponseEntity.ok(adminService.getExerciceById(id));
+    public ResponseEntity<ExerciceResponse> getExerciceById(@PathVariable Long id) {
+        return ResponseEntity.ok(adminService.getExerciceByIdDto(id));
     }
 
     @PostMapping("/exercices")
@@ -221,13 +222,13 @@ public class AdminController {
     // ==================== DEFIS ====================
     
     @GetMapping("/defis")
-    public ResponseEntity<List<Defi>> getAllDefis() {
-        return ResponseEntity.ok(adminService.getAllDefis());
+    public ResponseEntity<List<DefiResponse>> getAllDefis() {
+        return ResponseEntity.ok(adminService.getAllDefisDto());
     }
 
     @GetMapping("/defis/{id}")
-    public ResponseEntity<Defi> getDefiById(@PathVariable Long id) {
-        return ResponseEntity.ok(adminService.getDefiById(id));
+    public ResponseEntity<DefiResponse> getDefiById(@PathVariable Long id) {
+        return ResponseEntity.ok(adminService.getDefiByIdDto(id));
     }
 
     @PostMapping("/defis")
@@ -249,13 +250,13 @@ public class AdminController {
     // ==================== CHALLENGES ====================
     
     @GetMapping("/challenges")
-    public ResponseEntity<List<Challenge>> getAllChallenges() {
-        return ResponseEntity.ok(adminService.getAllChallenges());
+    public ResponseEntity<List<ChallengeResponse>> getAllChallenges() {
+        return ResponseEntity.ok(adminService.getAllChallengesDto());
     }
 
     @GetMapping("/challenges/{id}")
-    public ResponseEntity<Challenge> getChallengeById(@PathVariable Long id) {
-        return ResponseEntity.ok(adminService.getChallengeById(id));
+    public ResponseEntity<ChallengeResponse> getChallengeById(@PathVariable Long id) {
+        return ResponseEntity.ok(adminService.getChallengeByIdDto(id));
     }
 
     @PostMapping("/challenges")
@@ -277,13 +278,13 @@ public class AdminController {
     // ==================== BADGES ====================
     
     @GetMapping("/badges")
-    public ResponseEntity<List<Badge>> getAllBadges() {
-        return ResponseEntity.ok(adminService.getAllBadges());
+    public ResponseEntity<List<BadgeResponse>> getAllBadges() {
+        return ResponseEntity.ok(adminService.getAllBadgesDto());
     }
 
     @GetMapping("/badges/{id}")
-    public ResponseEntity<Badge> getBadgeById(@PathVariable Long id) {
-        return ResponseEntity.ok(adminService.getBadgeById(id));
+    public ResponseEntity<BadgeResponse> getBadgeById(@PathVariable Long id) {
+        return ResponseEntity.ok(adminService.getBadgeByIdDto(id));
     }
 
     @PostMapping("/badges")
@@ -300,6 +301,69 @@ public class AdminController {
     public ResponseEntity<Void> deleteBadge(@PathVariable Long id) {
         adminService.deleteBadge(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // ==================== QUIZZES ====================
+    
+    @GetMapping("/quizzes")
+    public ResponseEntity<List<com.example.edugo.entity.Principales.Quiz>> getAllQuizzes() {
+        return ResponseEntity.ok(adminService.getAllQuizzes());
+    }
+
+    @GetMapping("/quizzes/{id}")
+    public ResponseEntity<com.example.edugo.entity.Principales.Quiz> getQuizById(@PathVariable Long id) {
+        return ResponseEntity.ok(adminService.getQuizById(id));
+    }
+
+    @PostMapping("/quizzes")
+    public ResponseEntity<com.example.edugo.entity.Principales.Quiz> createQuiz(@RequestBody com.example.edugo.entity.Principales.Quiz quiz) {
+        return ResponseEntity.ok(adminService.createQuiz(quiz));
+    }
+
+    @PutMapping("/quizzes/{id}")
+    public ResponseEntity<com.example.edugo.entity.Principales.Quiz> updateQuiz(@PathVariable Long id, @RequestBody com.example.edugo.entity.Principales.Quiz quiz) {
+        return ResponseEntity.ok(adminService.updateQuiz(id, quiz));
+    }
+
+    @DeleteMapping("/quizzes/{id}")
+    public ResponseEntity<Void> deleteQuiz(@PathVariable Long id) {
+        adminService.deleteQuiz(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ==================== PARTENAIRES ====================
+    
+    @GetMapping("/partenaires")
+    public ResponseEntity<List<PartenaireResponse>> getAllPartenaires() {
+        return ResponseEntity.ok(adminService.getAllPartenairesDto());
+    }
+
+    @GetMapping("/partenaires/{id}")
+    public ResponseEntity<PartenaireResponse> getPartenaireById(@PathVariable Long id) {
+        return ResponseEntity.ok(adminService.getPartenaireByIdDto(id));
+    }
+
+    @PostMapping("/partenaires")
+    public ResponseEntity<PartenaireResponse> createPartenaire(@RequestBody PartenaireRequest partenaireRequest) {
+        return ResponseEntity.ok(adminService.createPartenaireDto(partenaireRequest));
+    }
+
+    @PutMapping("/partenaires/{id}")
+    public ResponseEntity<PartenaireResponse> updatePartenaire(@PathVariable Long id, @RequestBody PartenaireRequest partenaireRequest) {
+        return ResponseEntity.ok(adminService.updatePartenaireDto(id, partenaireRequest));
+    }
+
+    @DeleteMapping("/partenaires/{id}")
+    public ResponseEntity<Void> deletePartenaire(@PathVariable Long id) {
+        adminService.deletePartenaire(id);
+        return ResponseEntity.noContent().build();
+    }
+    
+    // ==================== STATISTIQUES ====================
+    
+    @GetMapping("/statistiques/plateforme")
+    public ResponseEntity<StatistiquesPlateformeResponse> getStatistiquesPlateforme() {
+        return ResponseEntity.ok(adminService.getStatistiquesPlateforme());
     }
 }
 

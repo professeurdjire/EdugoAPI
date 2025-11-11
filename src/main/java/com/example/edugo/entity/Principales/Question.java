@@ -1,8 +1,7 @@
 package com.example.edugo.entity.Principales;
 
-
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -62,6 +61,7 @@ public class Question {
     private List<ReponsePossible> reponsesPossibles;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<ReponseEleve> reponsesEleves = new ArrayList<>();
 
 

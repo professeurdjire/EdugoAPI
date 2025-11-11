@@ -1,5 +1,6 @@
 package com.example.edugo.entity.Principales;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,12 +20,15 @@ public class Classe {
     private Niveau niveau;
 
     @OneToMany(mappedBy = "classe", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Eleve> eleves = new ArrayList<>();
 
     @OneToMany(mappedBy = "classe", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Livre> livres = new ArrayList<>();
 
     @OneToMany(mappedBy = "classe")
+    @JsonIgnore
     private List<Challenge> challenges = new ArrayList<>();
 
 
