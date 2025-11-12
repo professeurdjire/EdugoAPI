@@ -10,18 +10,23 @@ import java.util.List;
 @Table(name = "eleves")
 public class Eleve extends User {
     @Column(name = "ville")
+    @JsonIgnore
     private String ville;
 
     @ManyToOne
     @JoinColumn(name = "classe_id")
+    @JsonIgnore
     private Classe classe;
 
     @ManyToOne
     @JoinColumn(name = "niveau_id")
+    @JsonIgnore
     private Niveau niveau;
 
+    @JsonIgnore
     private Integer pointAccumule;
 
+    @JsonIgnore
     private Integer telephone;
 
 
@@ -69,7 +74,7 @@ public class Eleve extends User {
 
     // Getters et Setters
     public String getVille() { return ville; }
-    public void setVille(String dateNaissance) { this.ville = ville; }
+    public void setVille(String ville) { this.ville = ville; }
 
     public Classe getClasse() { return classe; }
     public void setClasse(Classe classe) { this.classe = classe; }

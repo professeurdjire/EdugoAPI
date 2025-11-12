@@ -1,6 +1,7 @@
 package com.example.edugo.service;
 
 
+import com.example.edugo.dto.EleveProfileResponse;
 import com.example.edugo.dto.LoginRequest;
 import com.example.edugo.dto.LoginResponse;
 import com.example.edugo.dto.RegisterRequest;
@@ -129,5 +130,33 @@ public class AuthService {
                 .role(user.getRole().name())
                 .id(user.getId())
                 .build();
+    }
+
+    public EleveProfileResponse getCurrentEleve(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        // Si l'utilisateur est un Eleve, cast explicite
+        if (user instanceof Eleve) {
+            Eleve eleve = (Eleve) user;
+            return EleveProfileResponse.builder()
+                    .id(eleve.getId())
+                    .email(eleve.getEmail())
+                    .nom(eleve.getNom())
+                    .prenom(eleve.getPrenom())
+                    .role(eleve.getRole().name())
+                    .telephone(eleve.getTelephone())
+                    .ville(eleve.getVille())
+                    .photoProfil(eleve.getPhotoProfil())
+                    .pointAccumule(eleve.getPointAccumule())
+                    // Champs spécifiques avec les bons noms d'attributs
+                    .classeId(eleve.getClasse() != null ? eleve.getClasse().getId() : null)
+                    .classeNom(eleve.getClasse() != null ? eleve.getClasse().getNom() : null)
+                    .niveauId(eleve.getNiveau() != null ? eleve.getNiveau().getId() : null)
+                    .niveauNom(eleve.getNiveau() != null ? eleve.getNiveau().getNom() : null)
+                    .build();
+        } else {
+            throw new RuntimeException("L'utilisateur n'est pas un élève");
+        }
     }
 }

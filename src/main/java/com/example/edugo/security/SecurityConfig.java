@@ -92,6 +92,7 @@ public class SecurityConfig {
                         
                         // Eleve endpoints - require ELEVE or ADMIN role
                         .requestMatchers("/eleve/**", "/api/eleve/**").hasAnyRole("ELEVE", "ADMIN")
+                        .requestMatchers("/objectifs/**", "/api/objectifs/**").hasAnyRole("ELEVE", "ADMIN")
                         
                         // Conversion endpoints - accessible to authenticated users
                         .requestMatchers(HttpMethod.GET, "/conversions/**", "/api/conversions/**").authenticated()
@@ -104,7 +105,7 @@ public class SecurityConfig {
                                         "/badges/**", "/quizzes/**",
                                          "/api/matieres/**", "/api/users/**",
                                         "/api/livres/**", "/api/exercices/**", "/api/defis/**", "/api/challenges/**", 
-                                        "/api/badges/**", "/api/quizzes/**").authenticated()
+                                        "/api/badges/**", "/api/quizzes/**", "/api/auth/me").authenticated()
                         
                         // General data endpoints - POST/PUT/DELETE require ADMIN role
                         .requestMatchers(HttpMethod.POST, "/classes/**", "/matieres/**", "/niveaux/**", "/users/**",
