@@ -22,6 +22,7 @@ public class LivreDetailResponse {
     private String matiereNom;
     private Long langueId;
     private String langueNom;
-    private Double progression; // Pourcentage de lecture
+    private Double progression;
     private Object statistiques;
+    // À compléter suivant besoins métier plus précis
 }

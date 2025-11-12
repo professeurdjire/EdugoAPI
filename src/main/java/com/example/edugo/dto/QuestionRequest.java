@@ -5,8 +5,16 @@ import java.util.List;
 
 @Data
 public class QuestionRequest {
-    private String intitule;
+    // Exactly one of these should be provided
+    private Long quizId;
+    private Long exerciceId;
+    private Long challengeId;
+    private Long defiId;
+
+    private String enonce;
+    private Integer points;
+    // QCU | QCM | VRAI_FAUX
     private String type;
-    private List<ReponsePossibleRequest> reponsesPossibles;
-    private Integer numeroOrdre;
+    // For QCU/QCM/VRAI_FAUX
+    private List<ReponsePossibleRequest> reponses;
 }

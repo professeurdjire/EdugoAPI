@@ -4,6 +4,7 @@ import com.example.edugo.dto.*;
 import com.example.edugo.entity.Principales.*;
 import com.example.edugo.entity.User;
 import com.example.edugo.service.AdminService;
+import com.example.edugo.service.ServiceLangue;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +31,9 @@ import java.util.Map;
 public class AdminController {
 
     private final AdminService adminService;
+    private final ServiceLangue serviceLangue;
+
+
 
     // ==================== UTILISATEURS ====================
     
@@ -79,6 +84,60 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
+
+    // Récupérer toutes les langues
+    @GetMapping("/langues")
+    public ResponseEntity<List<Langue>> getAllLangues() {
+        try {
+            List<Langue> langues = serviceLangue.getAllLangues();
+            return ResponseEntity.ok(langues);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // Récupérer une langue par ID
+    @GetMapping("/langues/{id}")
+    public ResponseEntity<Langue> getLangueById(@PathVariable Long id) {
+        return serviceLangue.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Créer une nouvelle langue
+    @PostMapping("/langues")
+    public ResponseEntity<Langue> createLangue(@RequestBody Langue langue) {
+        try {
+            Langue saved = serviceLangue.save(langue);
+            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // Mettre à jour une langue existante
+    @PutMapping("/langues/{id}")
+    public ResponseEntity<Langue> updateLangue(@PathVariable Long id, @RequestBody Langue langue) {
+        return serviceLangue.findById(id)
+                .map(existing -> {
+                    existing.setNom(langue.getNom()); // par exemple, si Langue a un champ 'nom'
+                    // Ajouter ici d'autres champs si nécessaire
+                    Langue updated = serviceLangue.save(existing);
+                    return ResponseEntity.ok(updated);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Supprimer une langue
+    @DeleteMapping("/langues/{id}")
+    public ResponseEntity<Void> deleteLangue(@PathVariable Long id) {
+        java.util.Optional<Langue> existing = serviceLangue.findById(id);
+        if (existing.isPresent()) {
+            serviceLangue.delete(existing.get().getId());
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
     // ==================== NIVEAUX ====================
     
     @GetMapping("/niveaux")

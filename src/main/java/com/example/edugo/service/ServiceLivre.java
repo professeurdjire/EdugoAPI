@@ -26,6 +26,7 @@ public class ServiceLivre {
     private final NiveauRepository niveauRepository;
     private final ClasseRepository classeRepository;
     private final MatiereRepository matiereRepository;
+    private final ServiceLangue serviceLangue;
 
     // Explicit constructor to ensure IDEs that don't run Lombok annotation processing still see a valid constructor
     public ServiceLivre(LivreRepository livreRepository,
@@ -33,13 +34,15 @@ public class ServiceLivre {
                         EleveRepository eleveRepository,
                         NiveauRepository niveauRepository,
                         ClasseRepository classeRepository,
-                        MatiereRepository matiereRepository) {
+                        MatiereRepository matiereRepository,
+                        ServiceLangue serviceLangue) {
         this.livreRepository = livreRepository;
         this.progressionRepository = progressionRepository;
         this.eleveRepository = eleveRepository;
         this.niveauRepository = niveauRepository;
         this.classeRepository = classeRepository;
         this.matiereRepository = matiereRepository;
+        this.serviceLangue = serviceLangue;
     }
 
     // ============ CRUD LIVRES ============
@@ -69,11 +72,17 @@ public class ServiceLivre {
         livre.setLectureAuto(req.getLectureAuto());
         livre.setInteractif(req.getInteractif());
         if (req.getNiveauId() != null)
-            livre.setNiveau(niveauRepository.findById(req.getNiveauId()).orElse(null));
+            livre.setNiveau(niveauRepository.findById(req.getNiveauId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Niveau", req.getNiveauId())));
         if (req.getClasseId() != null)
-            livre.setClasse(classeRepository.findById(req.getClasseId()).orElse(null));
+            livre.setClasse(classeRepository.findById(req.getClasseId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Classe", req.getClasseId())));
         if (req.getMatiereId() != null)
-            livre.setMatiere(matiereRepository.findById(req.getMatiereId()).orElse(null));
+            livre.setMatiere(matiereRepository.findById(req.getMatiereId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Matière", req.getMatiereId())));
+        if (req.getLangueId() != null)
+            livre.setLangue(serviceLangue.findById(req.getLangueId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Langue", req.getLangueId())));
         return toResponse(livreRepository.save(livre));
     }
 
@@ -104,11 +113,17 @@ public class ServiceLivre {
         livre.setLectureAuto(req.getLectureAuto());
         livre.setInteractif(req.getInteractif());
         if (req.getNiveauId() != null)
-            livre.setNiveau(niveauRepository.findById(req.getNiveauId()).orElse(null));
+            livre.setNiveau(niveauRepository.findById(req.getNiveauId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Niveau", req.getNiveauId())));
         if (req.getClasseId() != null)
-            livre.setClasse(classeRepository.findById(req.getClasseId()).orElse(null));
+            livre.setClasse(classeRepository.findById(req.getClasseId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Classe", req.getClasseId())));
         if (req.getMatiereId() != null)
-            livre.setMatiere(matiereRepository.findById(req.getMatiereId()).orElse(null));
+            livre.setMatiere(matiereRepository.findById(req.getMatiereId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Matière", req.getMatiereId())));
+        if (req.getLangueId() != null)
+            livre.setLangue(serviceLangue.findById(req.getLangueId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Langue", req.getLangueId())));
         return toResponse(livreRepository.save(livre));
     }
 

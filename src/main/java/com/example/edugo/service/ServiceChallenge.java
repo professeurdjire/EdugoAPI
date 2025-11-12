@@ -3,6 +3,8 @@ package com.example.edugo.service;
 import com.example.edugo.entity.Principales.*;
 import com.example.edugo.exception.ResourceNotFoundException;
 import com.example.edugo.repository.*;
+import com.example.edugo.dto.ChallengeRequest;
+import com.example.edugo.dto.ChallengeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,21 @@ public class ServiceChallenge {
     @Transactional
     public Challenge createChallenge(Challenge challenge) {
         return challengeRepository.save(challenge);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public ChallengeResponse createChallenge(ChallengeRequest dto) {
+        Challenge challenge = new Challenge();
+        challenge.setTitre(dto.getTitre());
+        challenge.setDescription(dto.getDescription());
+        challenge.setDateDebut(dto.getDateDebut());
+        challenge.setDateFin(dto.getDateFin());
+        challenge.setPoints(dto.getPoints());
+        // dto.theme not directly mapped in entity; using rewardMode
+        challenge.setRewardMode(dto.getTheme());
+        Challenge saved = challengeRepository.save(challenge);
+        return toResponse(saved);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -59,6 +76,18 @@ public class ServiceChallenge {
     public Challenge getChallengeById(Long id) {
         return challengeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Challenge", id));
+    }
+
+    private ChallengeResponse toResponse(Challenge challenge) {
+        ChallengeResponse res = new ChallengeResponse();
+        res.setId(challenge.getId());
+        res.setTitre(challenge.getTitre());
+        res.setDescription(challenge.getDescription());
+        res.setPoints(challenge.getPoints());
+        res.setTheme(challenge.getRewardMode());
+        res.setDateDebut(challenge.getDateDebut());
+        res.setDateFin(challenge.getDateFin());
+        return res;
     }
 
     // ==================== CHALLENGES POUR ÉLÈVES ====================

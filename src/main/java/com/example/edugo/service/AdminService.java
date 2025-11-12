@@ -29,6 +29,7 @@ public class AdminService {
     private final BadgeRepository badgeRepository;
     private final PartenaireRepository partenaireRepository;
     private final QuizRepository quizRepository;
+    private final LangueRepository langueRepository;
     private final StatistiqueService statistiqueService;
     private final PasswordEncoder passwordEncoder;
 
@@ -412,6 +413,31 @@ public class AdminService {
     
     @Transactional
     public Livre createLivre(Livre livre) {
+        // Résoudre les entités liées pour éviter les instances transientes
+        if (livre.getNiveau() != null) {
+            Long id = livre.getNiveau().getId();
+            livre.setNiveau(id != null ?
+                    niveauRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Niveau", id)) : null);
+        }
+        if (livre.getClasse() != null) {
+            Long id = livre.getClasse().getId();
+            livre.setClasse(id != null ?
+                    classeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Classe", id)) : null);
+        }
+        if (livre.getMatiere() != null) {
+            Long id = livre.getMatiere().getId();
+            livre.setMatiere(id != null ?
+                    matiereRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Matière", id)) : null);
+        }
+        if (livre.getLangue() != null) {
+            Long id = livre.getLangue().getId();
+            livre.setLangue(id != null ?
+                    langueRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Langue", id)) : null);
+        }
+        // Éviter de tenter de persister un Quiz non sauvegardé si envoyé dans la requête
+        if (livre.getQuiz() != null && livre.getQuiz().getId() == null) {
+            livre.setQuiz(null);
+        }
         return livreRepository.save(livre);
     }
 
@@ -419,13 +445,43 @@ public class AdminService {
         Livre livre = livreRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Livre", id));
         
+        // Champs simples
         livre.setTitre(livreDetails.getTitre());
+        livre.setIsbn(livreDetails.getIsbn());
         livre.setAuteur(livreDetails.getAuteur());
         livre.setDescription(livreDetails.getDescription());
+        livre.setAnneePublication(livreDetails.getAnneePublication());
+        livre.setEditeur(livreDetails.getEditeur());
+        livre.setImageCouverture(livreDetails.getImageCouverture());
+        livre.setLectureAuto(livreDetails.getLectureAuto());
+        livre.setInteractif(livreDetails.getInteractif());
         livre.setTotalPages(livreDetails.getTotalPages());
-        livre.setNiveau(livreDetails.getNiveau());
-        livre.setClasse(livreDetails.getClasse());
-        livre.setMatiere(livreDetails.getMatiere());
+
+        // Relations: recharger par ID pour éviter transients
+        if (livreDetails.getNiveau() != null) {
+            Long nivId = livreDetails.getNiveau().getId();
+            livre.setNiveau(nivId != null ?
+                    niveauRepository.findById(nivId).orElseThrow(() -> new ResourceNotFoundException("Niveau", nivId)) : null);
+        } else { livre.setNiveau(null); }
+
+        if (livreDetails.getClasse() != null) {
+            Long clsId = livreDetails.getClasse().getId();
+            livre.setClasse(clsId != null ?
+                    classeRepository.findById(clsId).orElseThrow(() -> new ResourceNotFoundException("Classe", clsId)) : null);
+        } else { livre.setClasse(null); }
+
+        if (livreDetails.getMatiere() != null) {
+            Long matId = livreDetails.getMatiere().getId();
+            livre.setMatiere(matId != null ?
+                    matiereRepository.findById(matId).orElseThrow(() -> new ResourceNotFoundException("Matière", matId)) : null);
+        } else { livre.setMatiere(null); }
+
+        if (livreDetails.getLangue() != null) {
+            Long lanId = livreDetails.getLangue().getId();
+            livre.setLangue(lanId != null ?
+                    langueRepository.findById(lanId).orElseThrow(() -> new ResourceNotFoundException("Langue", lanId)) : null);
+        } else { livre.setLangue(null); }
+        // Quiz: on ne modifie pas ici pour éviter cascade involontaire
         
         return livreRepository.save(livre);
     }
