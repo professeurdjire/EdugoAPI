@@ -19,7 +19,6 @@ import java.util.List;
 @RequestMapping("/api/classes")
 @RequiredArgsConstructor
 @Tag(name = "Classes", description = "Gestion des classes et affectations d'élèves")
-@SecurityRequirement(name = "bearerAuth")
 public class ClasseController {
 
     private final ClasseService classeService;
@@ -95,7 +94,6 @@ public class ClasseController {
 
     @GetMapping("/niveau/{niveauId}")
     @Operation(summary = "Récupérer les classes par niveau")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ClasseResponse>> getClassesByNiveau(
             @Parameter(description = "ID du niveau") @PathVariable Long niveauId) {
         return ResponseEntity.ok(classeService.getClassesByNiveau(niveauId));

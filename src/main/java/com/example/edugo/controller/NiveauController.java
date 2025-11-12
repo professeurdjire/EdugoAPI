@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/niveaux")
 @RequiredArgsConstructor
 @Tag(name = "Niveaux", description = "Gestion des niveaux et classes associées")
-@SecurityRequirement(name = "bearerAuth")
 public class NiveauController {
 
     private final ServiceNiveau serviceNiveau;
@@ -30,6 +29,7 @@ public class NiveauController {
     @GetMapping
     @Operation(summary = "Récupérer tous les niveaux")
     public ResponseEntity<List<NiveauResponse>> getAllNiveaux() {
+        System.out.println("DEBUG: Endpoint /api/niveaux appelé !");
         List<NiveauResponse> responses = serviceNiveau.getAllNiveaux()
                 .stream()
                 .map(this::convertToResponse)

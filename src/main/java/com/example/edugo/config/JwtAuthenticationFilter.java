@@ -22,6 +22,15 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    //  Liste des endpoints publics qui ne nécessitent pas de JWT
+    private static final String[] PUBLIC_ENDPOINTS = {
+            "/auth/",
+            "/public/",
+            "/api/niveaux/",
+            "/api/classes/",
+            "/swagger-ui/",
+            "/v3/api-docs/"
+    };
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     
