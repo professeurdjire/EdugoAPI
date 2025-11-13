@@ -1,13 +1,16 @@
 package com.example.edugo.dto;
 
-// Créez cette classe dans le package approprié
 public class EleveSimpleResponse {
     private Long id;
     private String nom;
     private String prenom;
     private String email;
 
-    // Constructeur avec 4 paramètres
+    // CONSTRUCTEUR SANS ARGUMENT OBLIGATOIRE
+    public EleveSimpleResponse() {
+    }
+
+    // Votre constructeur existant
     public EleveSimpleResponse(Long id, String nom, String prenom, String email) {
         this.id = id;
         this.nom = nom;
@@ -15,7 +18,7 @@ public class EleveSimpleResponse {
         this.email = email;
     }
 
-    // Getters et setters
+    // GETTERS ET SETTERS POUR TOUS LES CHAMPS
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

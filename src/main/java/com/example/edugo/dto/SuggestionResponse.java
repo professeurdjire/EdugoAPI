@@ -1,4 +1,5 @@
 package com.example.edugo.dto;
+
 import java.time.LocalDateTime;
 
 public class SuggestionResponse {
@@ -7,7 +8,11 @@ public class SuggestionResponse {
     private LocalDateTime dateEnvoie;
     private EleveSimpleResponse eleve;
 
-    // CONSTRUCTEUR avec 4 paramètres dans le bon ordre
+    // CONSTRUCTEUR SANS ARGUMENT OBLIGATOIRE
+    public SuggestionResponse() {
+    }
+
+    // Votre constructeur existant
     public SuggestionResponse(Long id, String contenu, LocalDateTime dateEnvoie, EleveSimpleResponse eleve) {
         this.id = id;
         this.contenu = contenu;
@@ -15,8 +20,16 @@ public class SuggestionResponse {
         this.eleve = eleve;
     }
 
-    // Getters et setters...
+    // GETTERS ET SETTERS POUR TOUS LES CHAMPS
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getContenu() { return contenu; }
+    public void setContenu(String contenu) { this.contenu = contenu; }
+
+    public LocalDateTime getDateEnvoie() { return dateEnvoie; }
+    public void setDateEnvoie(LocalDateTime dateEnvoie) { this.dateEnvoie = dateEnvoie; }
+
+    public EleveSimpleResponse getEleve() { return eleve; }
+    public void setEleve(EleveSimpleResponse eleve) { this.eleve = eleve; }
 }
-
-
-
