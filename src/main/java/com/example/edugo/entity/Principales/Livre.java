@@ -44,37 +44,41 @@ public class Livre {
     @Column(name = "interactif")
     private Boolean interactif = false;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "niveau_id")
+    @JsonIgnore
     private Niveau niveau;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "classe_id")
+    @JsonIgnore
     private Classe classe;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "matiere_id")
+    @JsonIgnore
     private Matiere matiere;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "langue_id")
+    @JsonIgnore
     private Langue langue;
 
-    @OneToMany(mappedBy = "livre", cascade = CascadeType.ALL)
-    @JsonIgnore
+    @OneToMany(mappedBy = "livre", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference(value = "livre-fichiers")
     private List<FichierLivre> fichiers = new ArrayList<>();
 
     // --- Relation OneToOne avec Quiz ---
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id", referencedColumnName = "id")
     @JsonManagedReference(value = "livre-quiz")
     private Quiz quiz;
 
-    @OneToMany(mappedBy = "livre", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "livre", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Progression> progressions = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "livre_tags",
             joinColumns = @JoinColumn(name = "livre_id"),

@@ -4,6 +4,7 @@ import com.example.edugo.dto.*;
 import com.example.edugo.entity.Principales.*;
 import com.example.edugo.entity.User;
 import com.example.edugo.service.AdminService;
+import com.example.edugo.service.ServiceLivre;
 import com.example.edugo.service.ServiceQuiz;
 import com.example.edugo.service.ServiceLangue;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,6 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -32,6 +35,8 @@ import java.util.Map;
 public class AdminController {
 
     private final AdminService adminService;
+    private final com.example.edugo.service.ServiceFichierLivre fichierLivreService;
+    private final ServiceLivre serviceLivre;
     private final ServiceLangue serviceLangue;
     private final ServiceQuiz serviceQuiz;
 
@@ -236,17 +241,35 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getLivreByIdDto(id));
     }
 
-    @PostMapping("/livres")
-    public ResponseEntity<LivreResponse> createLivre(@RequestBody Livre livre) {
-        Livre saved = adminService.createLivre(livre);
-        return ResponseEntity.ok(adminService.getLivreByIdDto(saved.getId()));
+    @PostMapping(value = "/livres", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<LivreResponse> createLivre(@RequestPart("livre") com.example.edugo.dto.LivreRequest livre,
+                                                     @RequestPart("document") MultipartFile document,
+                                                     @RequestPart(value = "image", required = false) MultipartFile image) throws Exception {
+        if (document == null || document.isEmpty()) {
+            throw new IllegalArgumentException("Un document (PDF/EPUB/...) est requis pour créer un livre");
+        }
+        LivreResponse resp = serviceLivre.createLivre(livre, image);
+        // upload du document
+        fichierLivreService.upload(resp.getId(), document);
+        return ResponseEntity.ok(resp);
     }
 
-    @PutMapping("/livres/{id}")
-    public ResponseEntity<LivreResponse> updateLivre(@PathVariable Long id, @RequestBody Livre livre) {
-        adminService.updateLivre(id, livre);
-        return ResponseEntity.ok(adminService.getLivreByIdDto(id));
+    @PutMapping(value = "/livres/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+public ResponseEntity<LivreResponse> updateLivre(
+        @PathVariable Long id,
+        @RequestPart("livre") com.example.edugo.dto.LivreRequest livre,
+        @RequestPart(value = "document", required = false) MultipartFile document,
+        @RequestPart(value = "image", required = false) MultipartFile image) throws Exception {
+
+    LivreResponse resp = serviceLivre.updateLivre(id, livre, image);
+
+    if (document != null && !document.isEmpty()) {
+        fichierLivreService.upload(resp.getId(), document);
     }
+
+    return ResponseEntity.ok(resp);
+}
+
 
     @DeleteMapping("/livres/{id}")
     public ResponseEntity<Void> deleteLivre(@PathVariable Long id) {

@@ -1,5 +1,6 @@
 package com.example.edugo.entity.Principales;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ public class Langue {
     private String codeIso;
 
     @OneToMany(mappedBy = "langue", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Livre> livres = new ArrayList<>();
 
     // Constructeurs

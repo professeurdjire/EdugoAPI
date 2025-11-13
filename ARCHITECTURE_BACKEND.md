@@ -1,3 +1,138 @@
+# Architecture Backend - EDUGO
+
+## 1. Technologies
+
+### Framework et Langage
+- **Framework** : Spring Boot 3.5.7
+- **Langage** : Java 21
+- **Build Tool** : Apache Maven
+
+### Base de Données
+- **SGBD** : MySQL 8.0
+- **ORM** : JPA/Hibernate
+- **Pool de Connexion** : HikariCP
+
+### Sécurité
+- **Authentification** : JWT (JSON Web Token)
+- **Autorisation** : Spring Security (RBAC)
+- **Cryptographie** : BCrypt, JJWT
+
+### Documentation API
+- **Swagger/OpenAPI** : SpringDoc OpenAPI
+
+### Tests
+- **Framework** : JUnit 5, Mockito
+- **Coverage** : Jacoco
+
+### Monitoring
+- **Actuators** : Spring Boot Actuator
+
+## 2. Structure du Projet
+
+```
+src/main/java/com/example/edugo/
+├── config/               # Configuration de sécurité, Swagger, initialisation
+├── controller/          # Contrôleurs REST par module
+├── dto/                 # Objets de transfert de données
+├── entity/              # Entités JPA
+├── exception/           # Gestion d'exceptions personnalisées
+├── repository/          # Interfaces de persistance Spring Data JPA
+├── security/            # Filtres JWT, utilitaires d'authentification
+└── service/             # Logique métier
+
+src/main/resources/
+├── application.properties        # Configuration principale
+├── application-dev.properties   # Configuration développement
+└── static/                      # Ressources statiques
+```
+
+## 3. Architecture Logique
+
+### Modèle MVC
+- **Modèle** : Entités JPA + DTOs
+- **Vue** : API REST (JSON)
+- **Contrôleur** : @RestController
+
+### Couches d'Architecture
+1. **Présentation** : REST Controllers
+2. **Application** : Services
+3. **Domaine** : Entités, Logique métier
+4. **Persistance** : Repositories, JPA
+
+## 4. Modules Fonctionnels
+
+### Utilisateurs
+- Gestion Admins, Élèves
+- Authentification JWT
+- Rôles et Permissions
+
+### Ressources Pédagogiques
+- Livres numériques
+- Exercices interactifs
+- Quiz et Évaluations
+
+### Gamification
+- Défis et Challenges
+- Badges et Récompenses
+- Classements
+
+### Analytics
+- Statistiques d'utilisation
+- Suivi de progression
+- Rapports
+
+## 5. Configuration Serveur
+
+### Accès API
+- **Port** : Dynamique (par défaut 8080)
+- **Context Path** : `/api`
+- **URL complète** : `http://localhost:<port>/api/...`
+
+### Points d'Entrée Principaux
+- **Authentification** : `/api/auth/**`
+- **Administration** : `/api/admin/**`
+- **Élève** : `/api/eleve/**`
+- **Public** : `/api/public/**`
+
+### Documentation
+- **Swagger UI** : `/api/swagger-ui.html`
+- **OpenAPI Docs** : `/api/v3/api-docs`
+
+## 6. Sécurité
+
+### Schéma d'Authentification
+1. **Inscription** : `/api/auth/register`
+2. **Connexion** : `/api/auth/login` → JWT + Refresh Token
+3. **Accès Protégé** : Header `Authorization: Bearer <token>`
+
+### Rôles
+- **ADMIN** : Gestion complète
+- **ELEVE** : Accès aux ressources pédagogiques
+
+## 7. Gestion des Fichiers
+
+### Types Supportés
+- **Livres** : PDF, EPUB
+- **Images** : JPG, PNG
+- **Audio/Video** : MP3, MP4
+
+### Stockage
+- **Répertoire** : `./uploads/`
+- **Organisation** : Sous-dossiers par type
+
+## 8. Performance
+
+### Configuration
+- **Batch Processing** : JDBC batch
+- **Caching** : Spring Cache (Simple)
+- **Connection Pool** : HikariCP
+
+### Optimisations
+- **Lazy Loading** : Fetch strategies
+- **Pagination** : Pageable queries
+- **Indexing** : Database indexes
+
+---
 # 📚 Architecture du Backend EDUGO - Guide Complet
 
 ## 🎯 Vue d'Ensemble
@@ -210,9 +345,9 @@ Les DTOs ne contiennent que les données nécessaires, sans relations circulaire
 ## 🔧 Configuration Importante
 
 ### Port et Context Path
-- **Port** : 8089
+- **Port** : Dynamique (par défaut 8080)
 - **Context Path** : `/api`
-- **URL complète** : `http://localhost:8089/api/...`
+- **URL complète** : `http://localhost:<port>/api/...`
 
 ### Base de Données
 - **MySQL** : `edugodatabase`

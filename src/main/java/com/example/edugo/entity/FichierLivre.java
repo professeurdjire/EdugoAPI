@@ -1,6 +1,7 @@
 package com.example.edugo.entity;
 
 import com.example.edugo.entity.Principales.Livre;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -26,6 +27,7 @@ public class FichierLivre {
 
     @ManyToOne
     @JoinColumn(name = "livre_id", nullable = false)
+    @JsonBackReference(value = "livre-fichiers")
     private Livre livre;
 
     // Enum pour le type de fichier
