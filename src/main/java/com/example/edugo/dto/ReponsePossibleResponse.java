@@ -2,16 +2,16 @@ package com.example.edugo.dto;
 
 public class ReponsePossibleResponse {
     private Long id;
-    private String texte;
-    private Boolean correcte;
+    private String libelle;
+    private Boolean estCorrecte;
 
     public ReponsePossibleResponse() {
     }
 
-    public ReponsePossibleResponse(Long id, String texte, Boolean correcte) {
+    public ReponsePossibleResponse(Long id, String libelle, Boolean estCorrecte) {
         this.id = id;
-        this.texte = texte;
-        this.correcte = correcte;
+        this.libelle = libelle;
+        this.estCorrecte = estCorrecte;
     }
 
     public Long getId() {
@@ -22,28 +22,28 @@ public class ReponsePossibleResponse {
         this.id = id;
     }
 
-    public String getTexte() {
-        return texte;
+    public String getLibelle() {
+        return libelle;
     }
 
-    public void setTexte(String texte) {
-        this.texte = texte;
+    public void setLibelle(String libelle) {
+        this.libelle = libelle;
     }
 
-    public Boolean getCorrecte() {
-        return correcte;
+    public Boolean getEstCorrecte() {
+        return estCorrecte;
     }
 
-    public void setCorrecte(Boolean correcte) {
-        this.correcte = correcte;
+    public void setEstCorrecte(Boolean estCorrecte) {
+        this.estCorrecte = estCorrecte;
     }
 
     @Override
     public String toString() {
         return "ReponsePossibleResponse{" +
                 "id=" + id +
-                ", texte='" + texte + '\'' +
-                ", correcte=" + correcte +
+                ", libelle='" + libelle + '\'' +
+                ", estCorrecte=" + estCorrecte +
                 '}';
     }
 }

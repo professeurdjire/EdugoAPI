@@ -32,7 +32,7 @@ public class Exercice {
     @Column(nullable = false)
     private Boolean active;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDateTime dateCreation;
 
     @Column(nullable = false)

@@ -1,5 +1,7 @@
 package com.example.edugo.controller;
 
+import com.example.edugo.dto.ChallengeRequest;
+import com.example.edugo.dto.ChallengeResponse;
 import com.example.edugo.entity.Principales.*;
 import com.example.edugo.service.ServiceChallenge;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,29 +28,50 @@ public class ChallengeController {
     
     @GetMapping
     @Operation(summary = "Récupérer tous les challenges")
-    public ResponseEntity<List<Challenge>> getAllChallenges() {
-        return ResponseEntity.ok(serviceChallenge.getAllChallenges());
+    public ResponseEntity<List<ChallengeResponse>> getAllChallenges() {
+        // map entities to DTOs using service mapping
+        return ResponseEntity.ok(serviceChallenge.getAllChallenges().stream().map(ch -> {
+            // reuse service private mapper via exposed DTO create/update; fallback manual minimal mapping
+            ChallengeResponse dto = new ChallengeResponse();
+            dto.setId(ch.getId());
+            dto.setTitre(ch.getTitre());
+            dto.setDescription(ch.getDescription());
+            dto.setPoints(ch.getPoints());
+            dto.setTheme(ch.getRewardMode());
+            dto.setDateDebut(ch.getDateDebut());
+            dto.setDateFin(ch.getDateFin());
+            return dto;
+        }).toList());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Récupérer un challenge par ID")
-    public ResponseEntity<Challenge> getChallengeById(@Parameter(description = "ID du challenge") @PathVariable Long id) {
-        return ResponseEntity.ok(serviceChallenge.getChallengeById(id));
+    public ResponseEntity<ChallengeResponse> getChallengeById(@Parameter(description = "ID du challenge") @PathVariable Long id) {
+        Challenge ch = serviceChallenge.getChallengeById(id);
+        ChallengeResponse dto = new ChallengeResponse();
+        dto.setId(ch.getId());
+        dto.setTitre(ch.getTitre());
+        dto.setDescription(ch.getDescription());
+        dto.setPoints(ch.getPoints());
+        dto.setTheme(ch.getRewardMode());
+        dto.setDateDebut(ch.getDateDebut());
+        dto.setDateFin(ch.getDateFin());
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping
     @Operation(summary = "Créer un challenge")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Challenge> createChallenge(@RequestBody Challenge challenge) {
-        return ResponseEntity.ok(serviceChallenge.createChallenge(challenge));
+    public ResponseEntity<ChallengeResponse> createChallenge(@RequestBody ChallengeRequest dto) {
+        return ResponseEntity.ok(serviceChallenge.createChallenge(dto));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Mettre à jour un challenge")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Challenge> updateChallenge(@Parameter(description = "ID du challenge") @PathVariable Long id,
-                                                     @RequestBody Challenge challenge) {
-        return ResponseEntity.ok(serviceChallenge.updateChallenge(id, challenge));
+    public ResponseEntity<ChallengeResponse> updateChallenge(@Parameter(description = "ID du challenge") @PathVariable Long id,
+                                                     @RequestBody ChallengeRequest dto) {
+        return ResponseEntity.ok(serviceChallenge.updateChallenge(id, dto));
     }
 
     @DeleteMapping("/{id}")

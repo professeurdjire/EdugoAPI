@@ -19,6 +19,9 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     // Trouver les questions d'un quiz
     List<Question> findByQuizId(Long quizId);
 
+    // Trouver les questions d'un défi
+    List<Question> findByDefiId(Long defiId);
+
     // Trouver toutes les questions d’un type spécifique
     List<Question> findByType_Id(Long id);
 

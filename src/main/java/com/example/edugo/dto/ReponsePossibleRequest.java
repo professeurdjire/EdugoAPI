@@ -1,38 +1,38 @@
 package com.example.edugo.dto;
 
 public class ReponsePossibleRequest {
-    private String texte;
-    private Boolean correcte;
+    private String libelle;
+    private Boolean estCorrecte;
 
     public ReponsePossibleRequest() {
     }
 
-    public ReponsePossibleRequest(String texte, Boolean correcte) {
-        this.texte = texte;
-        this.correcte = correcte;
+    public ReponsePossibleRequest(String libelle, Boolean estCorrecte) {
+        this.libelle = libelle;
+        this.estCorrecte = estCorrecte;
     }
 
-    public String getTexte() {
-        return texte;
+    public String getLibelle() {
+        return libelle;
     }
 
-    public void setTexte(String texte) {
-        this.texte = texte;
+    public void setLibelle(String libelle) {
+        this.libelle = libelle;
     }
 
-    public Boolean getCorrecte() {
-        return correcte;
+    public Boolean getEstCorrecte() {
+        return estCorrecte;
     }
 
-    public void setCorrecte(Boolean correcte) {
-        this.correcte = correcte;
+    public void setEstCorrecte(Boolean estCorrecte) {
+        this.estCorrecte = estCorrecte;
     }
 
     @Override
     public String toString() {
         return "ReponsePossibleRequest{" +
-                "texte='" + texte + '\'' +
-                ", correcte=" + correcte +
+                "libelle='" + libelle + '\'' +
+                ", estCorrecte=" + estCorrecte +
                 '}';
     }
 }

@@ -39,10 +39,10 @@ public class QuizController {
     }
 
     @PostMapping
-    @Operation(summary = "Créer un quiz")
+    @Operation(summary = "Créer un quiz (format minimal: livreId)")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<QuizResponse> createQuiz(@RequestBody Quiz quiz) {
-        return ResponseEntity.ok(serviceQuiz.createQuiz(quiz));
+    public ResponseEntity<QuizResponse> createQuiz(@RequestBody com.example.edugo.dto.QuizCreateRequest dto) {
+        return ResponseEntity.ok(serviceQuiz.createQuiz(dto));
     }
 
     @PutMapping("/{id}")

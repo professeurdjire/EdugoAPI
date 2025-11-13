@@ -1,9 +1,11 @@
 package com.example.edugo.service;
 
 import com.example.edugo.dto.QuizResponse;
+import com.example.edugo.entity.Principales.Livre;
 import com.example.edugo.entity.Principales.Quiz;
 import com.example.edugo.entity.StatutQuiz;
 import com.example.edugo.exception.ResourceNotFoundException;
+import com.example.edugo.repository.LivreRepository;
 import com.example.edugo.repository.QuizRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 public class ServiceQuiz {
 
     private final QuizRepository quizRepository;
+    private final LivreRepository livreRepository;
 
     // ====== MAPPING ENTITE <-> DTO ======
     private QuizResponse toResponse(Quiz quiz) {
@@ -61,7 +64,10 @@ public class ServiceQuiz {
 
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public QuizResponse createQuiz(Quiz quiz) {
+    public QuizResponse createQuiz(com.example.edugo.dto.QuizCreateRequest dto) {
+        Livre livre = livreRepository.findById(dto.getLivreId())
+                .orElseThrow(() -> new ResourceNotFoundException("Livre", dto.getLivreId()));
+        Quiz quiz = new Quiz(livre);
         Quiz saved = quizRepository.save(quiz);
         return toResponse(saved);
     }
