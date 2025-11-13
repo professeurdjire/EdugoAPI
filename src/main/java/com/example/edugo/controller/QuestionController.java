@@ -6,6 +6,7 @@ import com.example.edugo.service.ServiceQuestion;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,5 +26,33 @@ public class QuestionController {
     @Operation(summary = "Créer une question (QCU/QCM/VRAI_FAUX) pour un Quiz/Exercice/Challenge")
     public ResponseEntity<QuestionResponse> create(@RequestBody QuestionRequest request) {
         return ResponseEntity.ok(serviceQuestion.create(request));
+    }
+
+    @GetMapping("/by-quiz/{quizId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Lister les questions d'un quiz")
+    public ResponseEntity<List<QuestionResponse>> listByQuiz(@PathVariable Long quizId) {
+        return ResponseEntity.ok(serviceQuestion.listByQuiz(quizId));
+    }
+
+    @GetMapping("/by-exercices/{exerciceId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Lister les questions d'un exercice")
+    public ResponseEntity<List<QuestionResponse>> listByExercice(@PathVariable Long exerciceId) {
+        return ResponseEntity.ok(serviceQuestion.listByExercice(exerciceId));
+    }
+
+    @GetMapping("/by-challenges/{challengeId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Lister les questions d'un challenge")
+    public ResponseEntity<List<QuestionResponse>> listByChallenge(@PathVariable Long challengeId) {
+        return ResponseEntity.ok(serviceQuestion.listByChallenge(challengeId));
+    }
+
+    @GetMapping("/by-defis/{defiId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Lister les questions d'un défi")
+    public ResponseEntity<List<QuestionResponse>> listByDefi(@PathVariable Long defiId) {
+        return ResponseEntity.ok(serviceQuestion.listByDefi(defiId));
     }
 }

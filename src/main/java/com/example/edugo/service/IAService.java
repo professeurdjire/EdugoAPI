@@ -6,11 +6,18 @@ import com.example.edugo.entity.ChatSession;
 import com.example.edugo.entity.RessourceIA;
 import com.example.edugo.exception.ResourceNotFoundException;
 import com.example.edugo.repository.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,19 +29,22 @@ public class IAService {
     private final EleveRepository eleveRepository;
     private final LivreRepository livreRepository;
     private final MatiereRepository matiereRepository;
+    private final String geminiApiKey;
 
     public IAService(ChatSessionRepository chatSessionRepository,
                      ChatMessageRepository chatMessageRepository,
                      RessourceIARepository ressourceIARepository,
                      EleveRepository eleveRepository,
                      LivreRepository livreRepository,
-                     MatiereRepository matiereRepository) {
+                     MatiereRepository matiereRepository,
+                     @Value("${gemini.apiKey:}") String geminiApiKey) {
         this.chatSessionRepository = chatSessionRepository;
         this.chatMessageRepository = chatMessageRepository;
         this.ressourceIARepository = ressourceIARepository;
         this.eleveRepository = eleveRepository;
         this.livreRepository = livreRepository;
         this.matiereRepository = matiereRepository;
+        this.geminiApiKey = geminiApiKey;
     }
 
     @Transactional
@@ -61,12 +71,55 @@ public class IAService {
         userMsg.setContent(req.getMessage());
         chatMessageRepository.save(userMsg);
 
-        // stub LLM response
-        ChatMessage assistant = new ChatMessage();
-        assistant.setSession(session);
-        assistant.setRole(ChatMessage.Role.ASSISTANT);
-        assistant.setContent("[IA] Réponse générée (stub) à: " + req.getMessage());
-        chatMessageRepository.save(assistant);
+        // // stub LLM response
+        // ChatMessage assistant = new ChatMessage();
+        // assistant.setSession(session);
+        // assistant.setRole(ChatMessage.Role.ASSISTANT);
+        // assistant.setContent("[IA] Réponse générée (stub) à: " + req.getMessage());
+        // chatMessageRepository.save(assistant);
+
+        // --- Intégration réelle Gemini ---
+RestTemplate restTemplate = new RestTemplate();
+
+String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + geminiApiKey;
+
+// Prépare le corps de la requête
+Map<String, Object> body = Map.of(
+    "contents", List.of(
+        Map.of("parts", List.of(
+            Map.of("text", req.getMessage())
+        ))
+    )
+);
+
+HttpHeaders headers = new HttpHeaders();
+headers.setContentType(MediaType.APPLICATION_JSON);
+HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
+try {
+    ResponseEntity<Map> response = restTemplate.postForEntity(GEMINI_API_URL, request, Map.class);
+
+    // Extraire le texte de la réponse Gemini
+    List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.getBody().get("candidates");
+    Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
+    List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
+    String reponseIA = parts.get(0).get("text").toString();
+
+    // --- Sauvegarde du message IA ---
+    ChatMessage assistant = new ChatMessage();
+    assistant.setSession(session);
+    assistant.setRole(ChatMessage.Role.ASSISTANT);
+    assistant.setContent(reponseIA);
+    chatMessageRepository.save(assistant);
+
+} catch (Exception e) {
+    ChatMessage assistant = new ChatMessage();
+    assistant.setSession(session);
+    assistant.setRole(ChatMessage.Role.ASSISTANT);
+    assistant.setContent("[Erreur IA] Impossible de contacter Gemini : " + e.getMessage());
+    chatMessageRepository.save(assistant);
+}
+
 
         session.setUpdatedAt(LocalDateTime.now());
         chatSessionRepository.save(session);

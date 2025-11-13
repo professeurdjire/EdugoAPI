@@ -4,6 +4,7 @@ import com.example.edugo.dto.*;
 import com.example.edugo.entity.Principales.*;
 import com.example.edugo.entity.User;
 import com.example.edugo.exception.ResourceNotFoundException;
+import com.example.edugo.exception.ResourceAlreadyExistsException;
 import com.example.edugo.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -438,6 +439,11 @@ public class AdminService {
         if (livre.getQuiz() != null && livre.getQuiz().getId() == null) {
             livre.setQuiz(null);
         }
+        // Vérifier l'unicité de l'ISBN pour éviter une violation de contrainte SQL
+        String isbn = livre.getIsbn();
+        if (isbn != null && !isbn.isBlank() && livreRepository.existsByIsbn(isbn)) {
+            throw new ResourceAlreadyExistsException("ISBN", isbn);
+        }
         return livreRepository.save(livre);
     }
 
@@ -481,7 +487,13 @@ public class AdminService {
             livre.setLangue(lanId != null ?
                     langueRepository.findById(lanId).orElseThrow(() -> new ResourceNotFoundException("Langue", lanId)) : null);
         } else { livre.setLangue(null); }
-        // Quiz: on ne modifie pas ici pour éviter cascade involontaire
+        // Quiz: on ne modifie pas ici
+
+        // Vérifier l'unicité de l'ISBN sur mise à jour
+        String newIsbn = livre.getIsbn();
+        if (newIsbn != null && !newIsbn.isBlank() && livreRepository.existsByIsbnAndIdNot(newIsbn, livre.getId())) {
+            throw new ResourceAlreadyExistsException("ISBN", newIsbn);
+        }
         
         return livreRepository.save(livre);
     }

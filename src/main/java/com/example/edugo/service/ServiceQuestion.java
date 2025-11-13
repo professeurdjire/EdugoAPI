@@ -70,8 +70,9 @@ public class ServiceQuestion {
                     .orElseThrow(() -> new ResourceNotFoundException("Challenge", req.getChallengeId()));
             q.setChallenge(ch);
         } else if (req.getDefiId() != null) {
-            // Model does not currently link Question to Defi
-            throw new IllegalArgumentException("Défi n'est pas encore supporté comme owner de question");
+            Defi df = defiRepository.findById(req.getDefiId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Défi", req.getDefiId()));
+            q.setDefi(df);
         }
 
         // Map responses for MCQ types
@@ -116,6 +117,9 @@ public class ServiceQuestion {
             if (reps == null || reps.size() != 2) throw new IllegalArgumentException("VRAI_FAUX requires exactly 2 options");
             long correct = reps.stream().filter(r -> Boolean.TRUE.equals(r.getEstCorrecte())).count();
             if (correct != 1) throw new IllegalArgumentException("VRAI_FAUX requires exactly one correct option");
+        } else if ("APPARIEMENT".equals(t)) {
+            // Appariement: pas de schéma strict pour l'instant, exiger au moins 2 options
+            if (reps == null || reps.size() < 2) throw new IllegalArgumentException("APPARIEMENT requires at least 2 options");
         } else {
             throw new IllegalArgumentException("Unsupported type: " + t);
         }
@@ -130,6 +134,26 @@ public class ServiceQuestion {
                 .map(r -> new ReponsePossibleResponse(r.getId(), r.getLibelleReponse(), r.isEstCorrecte()))
                 .collect(Collectors.toList()));
         return dto;
+    }
+
+    @Transactional(readOnly = true)
+    public List<QuestionResponse> listByQuiz(Long quizId) {
+        return questionRepository.findByQuizId(quizId).stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<QuestionResponse> listByExercice(Long exerciceId) {
+        return questionRepository.findByExerciceId(exerciceId).stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<QuestionResponse> listByChallenge(Long challengeId) {
+        return questionRepository.findByChallengeId(challengeId).stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<QuestionResponse> listByDefi(Long defiId) {
+        return questionRepository.findByDefiId(defiId).stream().map(this::toResponse).collect(Collectors.toList());
     }
 }
 

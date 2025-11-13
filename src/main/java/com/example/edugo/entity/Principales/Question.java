@@ -31,6 +31,12 @@ public class Question {
     @Column(nullable = false)
     private LocalDateTime dateModification;
 
+    // Relation entre une question et un défi
+    @ManyToOne
+    @JoinColumn(name = "defi_id")
+    @JsonBackReference(value = "defi-questions")
+    private Defi defi;
+
     // Relation entre une question et un challenge
     @ManyToOne
     @JoinColumn(name = "challenge_id")
@@ -129,6 +135,9 @@ public class Question {
     public void setExercice(Exercice exercice) {
         this.exercice = exercice;
     }
+
+    public Defi getDefi() { return defi; }
+    public void setDefi(Defi defi) { this.defi = defi; }
 
     public TypeQuestion getType() {
         return type;

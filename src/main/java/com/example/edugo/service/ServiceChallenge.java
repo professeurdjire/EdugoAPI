@@ -32,6 +32,21 @@ public class ServiceChallenge {
 
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
+    public ChallengeResponse updateChallenge(Long id, ChallengeRequest dto) {
+        Challenge challenge = challengeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Challenge", id));
+        challenge.setTitre(dto.getTitre());
+        challenge.setDescription(dto.getDescription());
+        challenge.setDateDebut(dto.getDateDebut());
+        challenge.setDateFin(dto.getDateFin());
+        challenge.setPoints(dto.getPoints());
+        challenge.setRewardMode(dto.getTheme());
+        Challenge saved = challengeRepository.save(challenge);
+        return toResponse(saved);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ChallengeResponse createChallenge(ChallengeRequest dto) {
         Challenge challenge = new Challenge();
         challenge.setTitre(dto.getTitre());
