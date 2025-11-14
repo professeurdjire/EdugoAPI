@@ -27,6 +27,7 @@ public class ServiceLivre {
     private final ClasseRepository classeRepository;
     private final MatiereRepository matiereRepository;
     private final ServiceLangue serviceLangue;
+    private final FileUploadService fileUploadService;
 
     // Explicit constructor to ensure IDEs that don't run Lombok annotation processing still see a valid constructor
     public ServiceLivre(LivreRepository livreRepository,
@@ -35,7 +36,8 @@ public class ServiceLivre {
                         NiveauRepository niveauRepository,
                         ClasseRepository classeRepository,
                         MatiereRepository matiereRepository,
-                        ServiceLangue serviceLangue) {
+                        ServiceLangue serviceLangue,
+                        FileUploadService fileUploadService) {
         this.livreRepository = livreRepository;
         this.progressionRepository = progressionRepository;
         this.eleveRepository = eleveRepository;
@@ -43,6 +45,7 @@ public class ServiceLivre {
         this.classeRepository = classeRepository;
         this.matiereRepository = matiereRepository;
         this.serviceLangue = serviceLangue;
+        this.fileUploadService = fileUploadService;
     }
 
     // ============ CRUD LIVRES ============
@@ -60,7 +63,7 @@ public class ServiceLivre {
         // Handle image upload: prefer provided MultipartFile, otherwise use value from request
         if (image != null && !image.isEmpty()) {
             try {
-                String stored = saveCoverImage(image);
+                String stored = fileUploadService.uploadImage(image);
                 livre.setImageCouverture(stored);
             } catch (IOException e) {
                 // If saving fails, fall back to provided string or null
@@ -100,7 +103,7 @@ public class ServiceLivre {
         livre.setTotalPages(req.getTotalPages());
         if (image != null && !image.isEmpty()) {
             try {
-                String stored = saveCoverImage(image);
+                String stored = fileUploadService.uploadImage(image);
                 livre.setImageCouverture(stored);
             } catch (IOException e) {
                 // keep existing or provided
@@ -125,25 +128,6 @@ public class ServiceLivre {
             livre.setLangue(serviceLangue.findById(req.getLangueId())
                     .orElseThrow(() -> new ResourceNotFoundException("Langue", req.getLangueId())));
         return toResponse(livreRepository.save(livre));
-    }
-
-    // Save uploaded cover image to local filesystem under uploads/covers and return stored relative path
-    private String saveCoverImage(MultipartFile image) throws IOException {
-        String uploadsDir = System.getProperty("user.dir") + "" + java.io.File.separator + "uploads" + java.io.File.separator + "covers";
-        Path uploadsPath = Paths.get(uploadsDir);
-        if (!Files.exists(uploadsPath)) {
-            Files.createDirectories(uploadsPath);
-        }
-        String original = image.getOriginalFilename();
-        String ext = "";
-        if (original != null && original.contains(".")) {
-            ext = original.substring(original.lastIndexOf('.'));
-        }
-        String filename = UUID.randomUUID().toString() + ext;
-        Path target = uploadsPath.resolve(filename);
-        image.transferTo(target.toFile());
-        // Return a relative path that can be served by static resource handlers if configured
-        return "/uploads/covers/" + filename;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
