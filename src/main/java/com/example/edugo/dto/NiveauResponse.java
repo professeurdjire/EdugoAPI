@@ -1,15 +1,20 @@
 package com.example.edugo.dto;
 
+import java.util.List;
+
 public class NiveauResponse {
+
     private Long id;
     private String nom;
 
     public NiveauResponse() {}
+
     public NiveauResponse(Long id, String nom) {
         this.id = id;
         this.nom = nom;
     }
 
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

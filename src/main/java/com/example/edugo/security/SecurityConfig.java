@@ -80,12 +80,20 @@ public class SecurityConfig {
                         // Endpoints d'authentification publics
                         .requestMatchers("/auth/**", "/api/auth/**").permitAll()
                         .requestMatchers("/public/**", "/api/public/**").permitAll()
-                        
+                        // PUBLIC ENDPOINTS
+                        .requestMatchers(HttpMethod.GET, "/niveaux/**", "/api/niveaux/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/classes/**", "/api/classes/**").permitAll()
+
+
+
+
                         // Admin endpoints - require ADMIN role
                         .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
                         
                         // Eleve endpoints - require ELEVE or ADMIN role
                         .requestMatchers("/eleve/**", "/api/eleve/**").hasAnyRole("ELEVE", "ADMIN")
+                        .requestMatchers("/objectifs/**", "/api/objectifs/**").hasAnyRole("ELEVE", "ADMIN")
+                        .requestMatchers("/suggestions/**", "/api/suggestions/**").hasAnyRole("ELEVE", "ADMIN")
                         
                         // Conversion endpoints - accessible to authenticated users
                         .requestMatchers(HttpMethod.GET, "/conversions/**", "/api/conversions/**").authenticated()
@@ -93,12 +101,12 @@ public class SecurityConfig {
                         
                         // General data endpoints - accessible to authenticated users (GET operations)
                         // Support both /matieres/** (si frontend appelle /api/matieres) et /api/matieres/** (si frontend appelle /api/api/matieres)
-                        .requestMatchers(HttpMethod.GET, "/classes/**", "/matieres/**", "/niveaux/**", "/users/**", 
+                        .requestMatchers(HttpMethod.GET, "/matieres/**",  "/users/**",
                                         "/livres/**", "/exercices/**", "/defis/**", "/challenges/**", 
                                         "/badges/**", "/quizzes/**",
-                                        "/api/classes/**", "/api/matieres/**", "/api/niveaux/**", "/api/users/**", 
+                                         "/api/matieres/**", "/api/users/**",
                                         "/api/livres/**", "/api/exercices/**", "/api/defis/**", "/api/challenges/**", 
-                                        "/api/badges/**", "/api/quizzes/**").authenticated()
+                                        "/api/badges/**", "/api/quizzes/**", "/api/auth/me").authenticated()
                         
                         // General data endpoints - POST/PUT/DELETE require ADMIN role
                         .requestMatchers(HttpMethod.POST, "/classes/**", "/matieres/**", "/niveaux/**", "/users/**",

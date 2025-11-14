@@ -9,14 +9,26 @@ import java.util.List;
 @Entity
 @Table(name = "eleves")
 public class Eleve extends User {
-    @Column(name = "date_naissance")
-    private String dateNaissance;
+    @Column(name = "ville")
+    @JsonIgnore
+    private String ville;
 
     @ManyToOne
     @JoinColumn(name = "classe_id")
+    @JsonIgnore
     private Classe classe;
 
+    @ManyToOne
+    @JoinColumn(name = "niveau_id")
+    @JsonIgnore
+    private Niveau niveau;
+
+    @JsonIgnore
     private Integer pointAccumule;
+
+    @JsonIgnore
+    private Integer telephone;
+
 
     @OneToMany(mappedBy = "eleve", cascade = CascadeType.ALL)
     @JsonIgnore
@@ -48,19 +60,21 @@ public class Eleve extends User {
     // Constructeurs
     public Eleve() {}
 
-    public Eleve(String email, String password, String firstName, String lastName, String dateNaissance, Classe classe, Integer pointAccumule) {
+    public Eleve(String email, String password, String firstName, String lastName, String photoProfil, String ville, Classe classe, Integer pointAccumule, Integer telephone) {
         this.setEmail(email);
         this.setMotDePasse(password);
         this.setNom(lastName);
         this.setPrenom(firstName);
-        this.dateNaissance = dateNaissance;
+        this.setPhotoProfil(photoProfil);
+        this.ville = ville;
+        this.telephone = telephone;
         this.classe = classe;
         this.pointAccumule = pointAccumule;
     }
 
     // Getters et Setters
-    public String getDateNaissance() { return dateNaissance; }
-    public void setDateNaissance(String dateNaissance) { this.dateNaissance = dateNaissance; }
+    public String getVille() { return ville; }
+    public void setVille(String ville) { this.ville = ville; }
 
     public Classe getClasse() { return classe; }
     public void setClasse(Classe classe) { this.classe = classe; }
@@ -88,4 +102,15 @@ public class Eleve extends User {
 
     public List<Suggestion> getSuggestions() {return suggestions;}
     public void setSuggestions(List<Suggestion> suggestions) {this.suggestions = suggestions;}
+
+    public Niveau getNiveau() {return niveau;}
+    public void setNiveau(Niveau niveau) {this.niveau = niveau;}
+
+    public Integer getTelephone() {
+        return telephone;
+    }
+
+    public void setTelephone(Integer telephone) {
+        this.telephone = telephone;
+    }
 }

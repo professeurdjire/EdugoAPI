@@ -1,10 +1,7 @@
 package com.example.edugo.controller;
 
 
-import com.example.edugo.dto.LoginRequest;
-import com.example.edugo.dto.LoginResponse;
-import com.example.edugo.dto.RefreshTokenRequest;
-import com.example.edugo.dto.RegisterRequest;
+import com.example.edugo.dto.*;
 import com.example.edugo.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,8 +12,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -40,23 +37,8 @@ public class AuthController {
     })
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
-        LoginResponse resp = authService.register(request);
-        ResponseCookie accessCookie = ResponseCookie.from("access_token", resp.getToken())
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
-                .path("/")
-                .build();
-        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", resp.getRefreshToken())
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
-                .path("/")
-                .build();
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                .body(resp);
+        System.out.println("Ville reçue: " + request.getVille());
+        return ResponseEntity.ok(authService.register(request));
     }
 
     @Operation(
@@ -137,4 +119,27 @@ public class AuthController {
         // Pour JWT stateless, le logout est géré côté client
         return ResponseEntity.ok("Déconnexion réussie");
     }
+
+    //Recuperer l'elève courrent connecter
+
+    @Operation(
+            summary = "Récupérer l'élève connecté",
+            description = "Retourne les informations de l'élève actuellement authentifié",
+            tags = {"Authentification"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Élève récupéré avec succès"),
+            @ApiResponse(responseCode = "401", description = "Non authentifié"),
+            @ApiResponse(responseCode = "403", description = "L'utilisateur n'est pas un élève")
+    })
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentEleve() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        EleveProfileResponse eleve = authService.getCurrentEleve(email);
+        return ResponseEntity.ok(eleve);
+    }
+
+
 }

@@ -1,6 +1,9 @@
 package com.example.edugo.dto;
 
+import java.util.List;
+
 public class NiveauRequest {
+
     private String nom;
 
     public NiveauRequest() {}

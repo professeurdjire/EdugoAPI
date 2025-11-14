@@ -8,8 +8,9 @@ public class EleveProfileUpdateRequest {
     private String prenom;
     private String email;
     private String photoProfil;
-    private String dateNaissance;
+    private String ville;
     private Long classeId;
+    private Long niveauId;
 }
 
 

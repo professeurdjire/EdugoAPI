@@ -1,15 +1,29 @@
 package com.example.edugo.dto;
 
-import lombok.Data;
-import java.time.LocalDateTime;
+import com.example.edugo.entity.Principales.TypeObjectif;
+import java.time.LocalDate;
 
-@Data
 public class ObjectifRequest {
-    private String nom;
-    private String description;
-    private String cible;
-    private String typeObjectif;
-    private Integer valeur;
-    private LocalDateTime dateDebut;
-    private LocalDateTime dateFin;
+    private TypeObjectif typeObjectif;
+    private int nbreLivre;
+    private LocalDate dateEnvoie;
+
+    // Constructeurs
+    public ObjectifRequest() {}
+
+    public ObjectifRequest(TypeObjectif typeObjectif, int nbreLivre, LocalDate dateEnvoie) {
+        this.typeObjectif = typeObjectif;
+        this.nbreLivre = nbreLivre;
+        this.dateEnvoie = dateEnvoie;
+    }
+
+    // Getters & Setters
+    public TypeObjectif getTypeObjectif() { return typeObjectif; }
+    public void setTypeObjectif(TypeObjectif typeObjectif) { this.typeObjectif = typeObjectif; }
+
+    public int getNbreLivre() { return nbreLivre; }
+    public void setNbreLivre(int nbreLivre) { this.nbreLivre = nbreLivre; }
+
+    public LocalDate getDateEnvoie() { return dateEnvoie; }
+    public void setDateEnvoie(LocalDate dateEnvoie) { this.dateEnvoie = dateEnvoie; }
 }

@@ -20,6 +20,9 @@ public class Niveau {
     private List<Classe> classes = new ArrayList<>();
 
     @OneToMany(mappedBy = "niveau", cascade = CascadeType.ALL)
+    private List<Eleve> eleves = new ArrayList<>();
+
+    @OneToMany(mappedBy = "niveau", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Livre> livres = new ArrayList<>();
 
@@ -50,4 +53,6 @@ public class Niveau {
     public List<Challenge> getChallenges() { return challenges; }
     public void setChallenges(List<Challenge> challenges) { this.challenges = challenges; }
 
+    public List<Eleve> getEleves() {return eleves;}
+    public void setEleves(List<Eleve> eleves) {this.eleves = eleves;}
 }

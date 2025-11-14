@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,5 +34,13 @@ public interface ProgressionRepository extends JpaRepository<Progression, Long> 
     // Méthodes pour les statistiques
     @Query("SELECT AVG(p.pourcentageCompletion) FROM Progression p")
     Double calculateAverageCompletionRate();
+
+// Methode concernant mon objectif
+    @Query("SELECT p FROM Progression p WHERE p.eleve = :eleve AND p.pourcentageCompletion = :pourcentageCompletion AND p.dateDerniereLecture BETWEEN :startDate AND :endDate")
+    List<Progression> findByEleveAndPourcentageCompletionAndDateDerniereLectureBetween(
+            @Param("eleve") Eleve eleve,
+            @Param("pourcentageCompletion") Integer pourcentageCompletion,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
 }
 
