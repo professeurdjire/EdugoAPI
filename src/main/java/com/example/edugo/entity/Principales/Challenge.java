@@ -1,6 +1,7 @@
 package com.example.edugo.entity.Principales;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,10 +18,12 @@ public class Challenge {
     private String titre;
 
     private String description;
-
+    
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(name = "date_debut")
     private LocalDateTime dateDebut;
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(name = "date_fin")
     private LocalDateTime dateFin;
 

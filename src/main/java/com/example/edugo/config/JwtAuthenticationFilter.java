@@ -59,19 +59,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        final String authHeader = request.getHeader("Authorization");
         final String requestPath = request.getRequestURI();
 
-        // Si pas de header Authorization, on laisse passer (pour les endpoints publics)
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            logger.debug("Pas de token JWT pour la requête: {}", requestPath);
-            filterChain.doFilter(request, response);
-            return;
+        String jwt = null;
+        final String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            jwt = authHeader.substring(7);
+        } else {
+            // Try to read JWT from HttpOnly cookie 'access_token'
+            if (request.getCookies() != null) {
+                for (jakarta.servlet.http.Cookie c : request.getCookies()) {
+                    if ("access_token".equals(c.getName()) && c.getValue() != null && !c.getValue().isBlank()) {
+                        jwt = c.getValue();
+                        break;
+                    }
+                }
+            }
+            if (jwt == null) {
+                logger.debug("Aucun token JWT pour la requête: {} (ni header, ni cookie)", requestPath);
+                filterChain.doFilter(request, response);
+                return;
+            }
         }
 
         try {
-            final String jwt = authHeader.substring(7);
-            logger.debug("Token JWT reçu pour la requête: {}", requestPath);
+            logger.debug("Token JWT présent pour la requête: {} (source: {} )", requestPath, 
+                    (authHeader != null && authHeader.startsWith("Bearer ")) ? "Authorization" : "Cookie access_token");
             
             final String userEmail = jwtUtil.extractUsername(jwt);
             logger.debug("Email extrait du token: {}", userEmail);

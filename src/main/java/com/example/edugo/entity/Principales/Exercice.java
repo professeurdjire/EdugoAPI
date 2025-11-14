@@ -32,6 +32,12 @@ public class Exercice {
     @Column(nullable = false)
     private Boolean active;
 
+    @Column(name = "image_exercice")
+    private String imageExercice;
+
+    @Column(name = "document_exercice")
+    private String documentExercice;
+
     @Column(nullable = true)
     private LocalDateTime dateCreation;
 
@@ -112,6 +118,12 @@ public class Exercice {
         this.dateModification = dateModification;
     }
 
+    public String getImageExercice() { return imageExercice; }
+    public void setImageExercice(String imageExercice) { this.imageExercice = imageExercice; }
+
+    public String getDocumentExercice() { return documentExercice; }
+    public void setDocumentExercice(String documentExercice) { this.documentExercice = documentExercice; }
+
     public Matiere getMatiere() {
         return matiere;
     }
@@ -138,4 +150,15 @@ public class Exercice {
 
     public List<FaireExercice> getFaireExercices() {return faireExercices;}
     public void setFaireExercices(List<FaireExercice> faireExercices) {this.faireExercices = faireExercices;}
+
+    @PrePersist
+    protected void onCreate() {
+        this.dateCreation = LocalDateTime.now();
+        this.dateModification = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.dateModification = LocalDateTime.now();
+    }
 }

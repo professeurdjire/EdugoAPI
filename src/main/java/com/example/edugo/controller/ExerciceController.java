@@ -12,9 +12,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -44,19 +46,23 @@ public class ExerciceController {
         return ResponseEntity.ok(serviceExercice.getExerciceById(id));
     }
 
-    @PostMapping
-    @Operation(summary = "Créer un nouvel exercice", description = "Permet à un administrateur de créer un nouvel exercice")
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Créer un nouvel exercice", description = "Création via multipart: part 'exercice' (JSON), part 'document' (obligatoire), part 'image' (optionnel)")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ExerciceResponse> createExercice(@RequestBody ExerciceRequest exercice) {
-        return ResponseEntity.ok(serviceExercice.createExercice(exercice));
+    public ResponseEntity<ExerciceResponse> createExercice(@RequestPart("exercice") ExerciceRequest exercice,
+                                                           @RequestPart("document") MultipartFile document,
+                                                           @RequestPart(value = "image", required = false) MultipartFile image) throws Exception {
+        return ResponseEntity.ok(serviceExercice.createExercice(exercice, document, image));
     }
 
-    @PutMapping("/{id}")
-    @Operation(summary = "Mettre à jour un exercice", description = "Permet à un administrateur de modifier un exercice")
+    @PutMapping(path = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Mettre à jour un exercice", description = "Mise à jour via multipart: part 'exercice' (JSON), part 'document' (optionnel), part 'image' (optionnel)")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ExerciceResponse> updateExercice(@Parameter(description = "ID de l'exercice") @PathVariable Long id, 
-                                                  @RequestBody ExerciceRequest exerciceDetails) {
-        return ResponseEntity.ok(serviceExercice.updateExercice(id, exerciceDetails));
+    public ResponseEntity<ExerciceResponse> updateExercice(@Parameter(description = "ID de l'exercice") @PathVariable Long id,
+                                                           @RequestPart("exercice") ExerciceRequest exerciceDetails,
+                                                           @RequestPart(value = "document", required = false) MultipartFile document,
+                                                           @RequestPart(value = "image", required = false) MultipartFile image) throws Exception {
+        return ResponseEntity.ok(serviceExercice.updateExercice(id, exerciceDetails, document, image));
     }
 
     @DeleteMapping("/{id}")
