@@ -8,6 +8,8 @@ import com.example.edugo.entity.Principales.*;
 import com.example.edugo.exception.ResourceNotFoundException;
 import com.example.edugo.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ public class ServiceExercice {
     private final LivreRepository livreRepository;
     private final NiveauRepository niveauRepository;
     private final MatiereRepository matiereRepository;
+    private final FileUploadService fileUploadService;
 
     // ==================== CRUD EXERCICES ====================
     @PreAuthorize("hasRole('ADMIN')")
@@ -46,6 +49,36 @@ public class ServiceExercice {
         return toResponse(exerciceRepository.save(ex));
     }
 
+    // Overload: create with files (document required, image optional)
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public ExerciceResponse createExercice(ExerciceRequest req, MultipartFile document, MultipartFile image) throws IOException {
+        if (document == null || document.isEmpty()) {
+            throw new IllegalArgumentException("Un document d'exercice est requis");
+        }
+        Exercice ex = new Exercice();
+        ex.setTitre(req.getTitre());
+        ex.setDescription(req.getDescription());
+        ex.setNiveauDifficulte(req.getNiveauDifficulte());
+        ex.setTempsAlloue(req.getTempsAlloue());
+        ex.setActive(req.getActive());
+        if (req.getMatiereId() != null)
+            ex.setMatiere(matiereRepository.findById(req.getMatiereId()).orElse(null));
+        if (req.getNiveauId() != null)
+            ex.setNiveauScolaire(niveauRepository.findById(req.getNiveauId()).orElse(null));
+        if (req.getLivreId() != null)
+            ex.setLivre(livreRepository.findById(req.getLivreId()).orElse(null));
+
+        // Upload files
+        String docPath = fileUploadService.uploadDocument(document);
+        ex.setDocumentExercice(docPath);
+        if (image != null && !image.isEmpty()) {
+            String imgPath = fileUploadService.uploadImage(image);
+            ex.setImageExercice(imgPath);
+        }
+        return toResponse(exerciceRepository.save(ex));
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ExerciceResponse updateExercice(Long id, ExerciceRequest req) {
@@ -61,6 +94,34 @@ public class ServiceExercice {
             ex.setNiveauScolaire(niveauRepository.findById(req.getNiveauId()).orElse(null));
         if (req.getLivreId() != null)
             ex.setLivre(livreRepository.findById(req.getLivreId()).orElse(null));
+        return toResponse(exerciceRepository.save(ex));
+    }
+
+    // Overload: update with optional new files
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public ExerciceResponse updateExercice(Long id, ExerciceRequest req, MultipartFile document, MultipartFile image) throws IOException {
+        Exercice ex = exerciceRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Exercice", id));
+        ex.setTitre(req.getTitre());
+        ex.setDescription(req.getDescription());
+        ex.setNiveauDifficulte(req.getNiveauDifficulte());
+        ex.setTempsAlloue(req.getTempsAlloue());
+        ex.setActive(req.getActive());
+        if (req.getMatiereId() != null)
+            ex.setMatiere(matiereRepository.findById(req.getMatiereId()).orElse(null));
+        if (req.getNiveauId() != null)
+            ex.setNiveauScolaire(niveauRepository.findById(req.getNiveauId()).orElse(null));
+        if (req.getLivreId() != null)
+            ex.setLivre(livreRepository.findById(req.getLivreId()).orElse(null));
+
+        if (document != null && !document.isEmpty()) {
+            String docPath = fileUploadService.uploadDocument(document);
+            ex.setDocumentExercice(docPath);
+        }
+        if (image != null && !image.isEmpty()) {
+            String imgPath = fileUploadService.uploadImage(image);
+            ex.setImageExercice(imgPath);
+        }
         return toResponse(exerciceRepository.save(ex));
     }
 
