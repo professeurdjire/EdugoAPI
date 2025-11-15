@@ -46,7 +46,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Long countByEstActiveTrue();
     Long countByEstActiveFalse();
     
-    // Trouver par rôle (String)
-    @Query("SELECT u FROM User u WHERE u.role = :role")
-    List<User> findByRole(@Param("role") String role);
+    // Méthode findByRole(Role) suffit pour filtrer par rôle
 }

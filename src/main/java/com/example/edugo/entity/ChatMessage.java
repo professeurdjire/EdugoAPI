@@ -1,5 +1,6 @@
 package com.example.edugo.entity;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -24,6 +25,8 @@ public class ChatMessage {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
+
+
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

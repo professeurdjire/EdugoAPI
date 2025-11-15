@@ -10,6 +10,8 @@ import com.example.edugo.entity.Principales.Niveau;
 import com.example.edugo.entity.Statistique;
 import com.example.edugo.entity.TypeStatistique;
 import com.example.edugo.entity.User;
+import com.example.edugo.entity.Role;
+
 import com.example.edugo.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -48,7 +50,7 @@ public class StatistiqueService {
         stats.setUtilisateursActifs(userRepository.countByEstActiveTrue());
         stats.setUtilisateursInactifs(userRepository.countByEstActiveFalse());
         stats.setTotalEleves((long) eleveRepository.findAll().size());
-        stats.setTotalAdmins((long) userRepository.findByRole("ADMIN").size());
+        stats.setTotalAdmins(userRepository.countByRole(Role.ADMIN));
         
         // Contenu
         stats.setTotalLivres((long) livreRepository.findAll().size());

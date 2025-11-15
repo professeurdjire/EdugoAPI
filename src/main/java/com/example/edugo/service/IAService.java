@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,6 +31,8 @@ public class IAService {
     private final LivreRepository livreRepository;
     private final MatiereRepository matiereRepository;
     private final String geminiApiKey;
+    private final String openrouterApiKey;
+    private final String openrouterModel;
 
     public IAService(ChatSessionRepository chatSessionRepository,
                      ChatMessageRepository chatMessageRepository,
@@ -37,7 +40,9 @@ public class IAService {
                      EleveRepository eleveRepository,
                      LivreRepository livreRepository,
                      MatiereRepository matiereRepository,
-                     @Value("${gemini.apiKey:}") String geminiApiKey) {
+                     @Value("${gemini.apiKey:}") String geminiApiKey,
+                     @Value("${openrouter.apiKey:}") String openrouterApiKey,
+                     @Value("${openrouter.model:openrouter/auto}") String openrouterModel) {
         this.chatSessionRepository = chatSessionRepository;
         this.chatMessageRepository = chatMessageRepository;
         this.ressourceIARepository = ressourceIARepository;
@@ -45,6 +50,8 @@ public class IAService {
         this.livreRepository = livreRepository;
         this.matiereRepository = matiereRepository;
         this.geminiApiKey = geminiApiKey;
+        this.openrouterApiKey = openrouterApiKey;
+        this.openrouterModel = openrouterModel;
     }
 
     @Transactional
@@ -71,56 +78,105 @@ public class IAService {
         userMsg.setContent(req.getMessage());
         chatMessageRepository.save(userMsg);
 
-        // // stub LLM response
-        // ChatMessage assistant = new ChatMessage();
-        // assistant.setSession(session);
-        // assistant.setRole(ChatMessage.Role.ASSISTANT);
-        // assistant.setContent("[IA] Réponse générée (stub) à: " + req.getMessage());
-        // chatMessageRepository.save(assistant);
+        // --- Intégration OpenRouter (Chat Completions compatible OpenAI) ---
+        RestTemplate restTemplate = new RestTemplate();
 
-        // --- Intégration réelle Gemini ---
-RestTemplate restTemplate = new RestTemplate();
+        String OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
-String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + geminiApiKey;
+        // Construire l'historique des messages pour le modèle, avec un message système
+        List<ChatMessage> hist = chatMessageRepository.findBySessionId(session.getId());
 
-// Prépare le corps de la requête
-Map<String, Object> body = Map.of(
-    "contents", List.of(
-        Map.of("parts", List.of(
-            Map.of("text", req.getMessage())
-        ))
-    )
-);
+        List<Map<String, String>> messages = new ArrayList<>();
 
-HttpHeaders headers = new HttpHeaders();
-headers.setContentType(MediaType.APPLICATION_JSON);
-HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+        // Message système: contexte de l'éducation malienne
+        StringBuilder systemContent = new StringBuilder();
+        systemContent.append("Tu es un tuteur pédagogique numérique pour des élèves du système éducatif malien. ");
+        systemContent.append("Explique les notions de façon simple, structurée et progressive, en français clair, ");
+        systemContent.append("en tenant compte des programmes officiels du Mali (école fondamentale, collège, lycée). ");
+        systemContent.append("Quand c'est pertinent, donne des exemples concrets liés au contexte malien (vie quotidienne, économie locale, culture). ");
+        systemContent.append("Adapte le niveau de difficulté au niveau scolaire de l'élève et encourage-le avec un ton bienveillant. ");
+        systemContent.append("Si la question porte sur un livre ou une matière précise, concentre-toi sur ce contenu pour aider à la compréhension et à la révision.");
 
-try {
-    ResponseEntity<Map> response = restTemplate.postForEntity(GEMINI_API_URL, request, Map.class);
+        messages.add(Map.of(
+                "role", "system",
+                "content", systemContent.toString()
+        ));
 
-    // Extraire le texte de la réponse Gemini
-    List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.getBody().get("candidates");
-    Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
-    List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
-    String reponseIA = parts.get(0).get("text").toString();
+        // Ajouter ensuite l'historique utilisateur/assistant
+        messages.addAll(
+                hist.stream()
+                        .map(m -> {
+                            String role = (m.getRole() == ChatMessage.Role.USER)
+                                    ? "user"
+                                    : (m.getRole() == ChatMessage.Role.ASSISTANT ? "assistant" : "system");
+                            String content = m.getContent() != null ? m.getContent() : "";
+                            return Map.<String, String>of(
+                                    "role", role,
+                                    "content", content
+                            );
+                        })
+                        .collect(Collectors.toList())
+        );
 
-    // --- Sauvegarde du message IA ---
-    ChatMessage assistant = new ChatMessage();
-    assistant.setSession(session);
-    assistant.setRole(ChatMessage.Role.ASSISTANT);
-    assistant.setContent(reponseIA);
-    chatMessageRepository.save(assistant);
+        String modelToUse = (openrouterModel != null && !openrouterModel.isBlank()) ? openrouterModel : "openrouter/auto";
 
-} catch (Exception e) {
-    ChatMessage assistant = new ChatMessage();
-    assistant.setSession(session);
-    assistant.setRole(ChatMessage.Role.ASSISTANT);
-    assistant.setContent("[Erreur IA] Impossible de contacter Gemini : " + e.getMessage());
-    chatMessageRepository.save(assistant);
-}
+        Map<String, Object> body = Map.of(
+                "model", modelToUse,
+                "messages", messages
+        );
 
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        if (openrouterApiKey == null || openrouterApiKey.isBlank()) {
+            // fallback explicite d'erreur si clé manquante
+            ChatMessage assistant = new ChatMessage();
+            assistant.setSession(session);
+            assistant.setRole(ChatMessage.Role.ASSISTANT);
+            assistant.setContent("[Erreur IA] openrouter.apiKey manquant côté serveur");
+            chatMessageRepository.save(assistant);
+        } else {
+            headers.set("Authorization", "Bearer " + openrouterApiKey);
+            // Optionnel mais recommandé par OpenRouter: référent et titre
+            headers.set("HTTP-Referer", "http://localhost:8080");
+            headers.set("X-Title", "Edugo Chat");
 
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+            try {
+                ResponseEntity<Map> response = restTemplate.postForEntity(OPENROUTER_URL, request, Map.class);
+                Map<String, Object> respBody = response.getBody();
+                String reponseIA = "";
+                if (respBody != null && respBody.get("choices") instanceof List) {
+                    List choices = (List) respBody.get("choices");
+                    if (!choices.isEmpty()) {
+                        Object first = choices.get(0);
+                        if (first instanceof Map) {
+                            Map firstMap = (Map) first;
+                            Object message = firstMap.get("message");
+                            if (message instanceof Map) {
+                                Object content = ((Map) message).get("content");
+                                if (content != null) reponseIA = content.toString();
+                            }
+                        }
+                    }
+                }
+
+                if (reponseIA == null || reponseIA.isBlank()) {
+                    reponseIA = "[IA] Réponse vide";
+                }
+
+                ChatMessage assistant = new ChatMessage();
+                assistant.setSession(session);
+                assistant.setRole(ChatMessage.Role.ASSISTANT);
+                assistant.setContent(reponseIA);
+                chatMessageRepository.save(assistant);
+            } catch (Exception e) {
+                ChatMessage assistant = new ChatMessage();
+                assistant.setSession(session);
+                assistant.setRole(ChatMessage.Role.ASSISTANT);
+                assistant.setContent("[Erreur IA] OpenRouter: " + e.getMessage());
+                chatMessageRepository.save(assistant);
+            }
+        }
         session.setUpdatedAt(LocalDateTime.now());
         chatSessionRepository.save(session);
 
