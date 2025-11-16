@@ -6,6 +6,12 @@ public class PartenaireRequest {
     private String logoUrl;
     private String siteWeb;
     private Boolean actif = true;
+    private String domaine;
+    private String type;
+    private String email;
+    private String telephone;
+    private String pays;
+    private Boolean newsletter = false;
 
     public PartenaireRequest() {}
 
@@ -29,4 +35,22 @@ public class PartenaireRequest {
 
     public Boolean getActif() { return actif; }
     public void setActif(Boolean actif) { this.actif = actif; }
+
+    public String getDomaine() { return domaine; }
+    public void setDomaine(String domaine) { this.domaine = domaine; }
+
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getTelephone() { return telephone; }
+    public void setTelephone(String telephone) { this.telephone = telephone; }
+
+    public String getPays() { return pays; }
+    public void setPays(String pays) { this.pays = pays; }
+
+    public Boolean getNewsletter() { return newsletter; }
+    public void setNewsletter(Boolean newsletter) { this.newsletter = newsletter; }
 }

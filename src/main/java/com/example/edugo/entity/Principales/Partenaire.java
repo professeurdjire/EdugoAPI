@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "partenaires")
 public class Partenaire {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,6 +21,16 @@ public class Partenaire {
 
     private String siteWeb;
 
+    private String domaine;
+
+    private String type;
+
+    private String email;
+
+    private String telephone;
+
+    private String pays;
+
     @Column(name = "date_creation")
     private LocalDateTime dateCreation;
 
@@ -27,6 +38,8 @@ public class Partenaire {
     private LocalDateTime dateModification;
 
     private Boolean actif = true;
+
+    private Boolean newsletter = false;
 
     // Constructeurs
     public Partenaire() {}
@@ -54,6 +67,21 @@ public class Partenaire {
     public String getSiteWeb() { return siteWeb; }
     public void setSiteWeb(String siteWeb) { this.siteWeb = siteWeb; }
 
+    public String getDomaine() { return domaine; }
+    public void setDomaine(String domaine) { this.domaine = domaine; }
+
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getTelephone() { return telephone; }
+    public void setTelephone(String telephone) { this.telephone = telephone; }
+
+    public String getPays() { return pays; }
+    public void setPays(String pays) { this.pays = pays; }
+
     public LocalDateTime getDateCreation() { return dateCreation; }
     public void setDateCreation(LocalDateTime dateCreation) { this.dateCreation = dateCreation; }
 
@@ -62,6 +90,9 @@ public class Partenaire {
 
     public Boolean getActif() { return actif; }
     public void setActif(Boolean actif) { this.actif = actif; }
+
+    public Boolean getNewsletter() { return newsletter; }
+    public void setNewsletter(Boolean newsletter) { this.newsletter = newsletter; }
 
     @PreUpdate
     public void preUpdate() {

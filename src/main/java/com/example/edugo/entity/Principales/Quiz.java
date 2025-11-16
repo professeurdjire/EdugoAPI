@@ -18,6 +18,9 @@ public class Quiz {
     @Enumerated(EnumType.STRING)
     private StatutQuiz statut = StatutQuiz.ACTIF;
 
+    @Column(name = "titre")
+    private String titre;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -38,8 +41,11 @@ public class Quiz {
     // Constructeurs
     public Quiz() {}
 
-    public Quiz(  Livre livre) {
-               this.livre = livre;
+    public Quiz(Livre livre) {
+        this.livre = livre;
+        if (livre != null) {
+            this.titre = livre.getTitre();
+        }
     }
 
     public int getNombreQuestions() {
@@ -52,6 +58,9 @@ public class Quiz {
 
     public StatutQuiz getStatut() { return statut; }
     public void setStatut(StatutQuiz statut) { this.statut = statut; }
+
+    public String getTitre() { return titre; }
+    public void setTitre(String titre) { this.titre = titre; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

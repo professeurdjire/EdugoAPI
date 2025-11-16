@@ -11,4 +11,10 @@ public class ExerciceResponse {
     private Integer tempsAlloue;
     private Long matiereId;
     private String matiereNom;
+    private String description;
+    private java.time.LocalDateTime dateCreation;
+    private java.time.LocalDateTime dateModification;
+    private Integer nbQuestions;
+    private String fichierUrl;
+    private String imageUrl;
 }

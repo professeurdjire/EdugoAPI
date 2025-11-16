@@ -27,11 +27,13 @@ public class ServiceQuiz {
         if (quiz == null) return null;
         QuizResponse response = new QuizResponse();
         response.setId(quiz.getId());
+        response.setTitre(quiz.getTitre());
         response.setNombreQuestions(quiz.getNombreQuestions());
         // Note: Quiz est lié à Livre, donc titre/description viennent du livre
         if (quiz.getLivre() != null) {
-            response.setTitre(quiz.getLivre().getTitre());
+            response.setTitreLivre(quiz.getLivre().getTitre());
             response.setDescription(quiz.getLivre().getDescription());
+            response.setAuteur(quiz.getLivre().getAuteur());
             if (quiz.getLivre().getMatiere() != null) {
                 response.setMatiereId(quiz.getLivre().getMatiere().getId());
                 response.setMatiereNom(quiz.getLivre().getMatiere().getNom());
@@ -68,6 +70,9 @@ public class ServiceQuiz {
         Livre livre = livreRepository.findById(dto.getLivreId())
                 .orElseThrow(() -> new ResourceNotFoundException("Livre", dto.getLivreId()));
         Quiz quiz = new Quiz(livre);
+        if (dto.getTitre() != null && !dto.getTitre().isBlank()) {
+            quiz.setTitre(dto.getTitre());
+        }
         Quiz saved = quizRepository.save(quiz);
         return toResponse(saved);
     }

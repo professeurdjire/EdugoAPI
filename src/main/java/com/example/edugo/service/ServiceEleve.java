@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -278,5 +279,38 @@ public class ServiceEleve {
         }
         
         return eleveRepository.findByClasseId(eleve.getClasse().getId());
+    }
+
+    // ==================== LISTE PROFILS ÉLÈVES (ADMIN) ====================
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<com.example.edugo.dto.EleveProfileResponse> listProfilsEleves() {
+        return eleveRepository.findAll().stream().map(eleve -> {
+            com.example.edugo.dto.EleveProfileResponse dto = new com.example.edugo.dto.EleveProfileResponse();
+            dto.setId(eleve.getId());
+            dto.setNom(eleve.getNom());
+            dto.setPrenom(eleve.getPrenom());
+            dto.setEmail(eleve.getEmail());
+            dto.setPhotoProfil(eleve.getPhotoProfil());
+            dto.setTelephone(eleve.getTelephone());
+            dto.setVille(eleve.getVille());
+
+            Classe classe = eleve.getClasse();
+            if (classe != null) {
+                dto.setClasseId(classe.getId());
+                dto.setClasseNom(classe.getNom());
+            }
+
+            Niveau niveau = eleve.getNiveau();
+            if (niveau != null) {
+                dto.setNiveauId(niveau.getId());
+                dto.setNiveauNom(niveau.getNom());
+            }
+
+            dto.setPointAccumule(eleve.getPointAccumule());
+            dto.setRole(eleve.getRole() != null ? eleve.getRole().name() : null);
+
+            return dto;
+        }).collect(Collectors.toList());
     }
 }

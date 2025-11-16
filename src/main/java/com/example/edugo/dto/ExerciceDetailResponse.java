@@ -16,4 +16,9 @@ public class ExerciceDetailResponse {
     private String niveauNom;
     private Long livreId;
     private String livreTitre;
+    private java.time.LocalDateTime dateCreation;
+    private java.time.LocalDateTime dateModification;
+    private Integer nbQuestions;
+    private String fichierUrl;
+    private String imageUrl;
 }

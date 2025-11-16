@@ -56,6 +56,14 @@ public class AdminService {
                 partenaire.getDescription(),
                 partenaire.getLogoUrl(),
                 partenaire.getSiteWeb(),
+                partenaire.getDomaine(),
+                partenaire.getType(),
+                partenaire.getEmail(),
+                partenaire.getTelephone(),
+                partenaire.getPays(),
+                deriveStatut(partenaire.getActif()),
+                partenaire.getDateCreation() != null ? partenaire.getDateCreation().toString() : null,
+                partenaire.getNewsletter(),
                 partenaire.getDateCreation(),
                 partenaire.getDateModification(),
                 partenaire.getActif()
@@ -70,6 +78,12 @@ public class AdminService {
         partenaire.setLogoUrl(dto.getLogoUrl());
         partenaire.setSiteWeb(dto.getSiteWeb());
         partenaire.setActif(dto.getActif());
+        partenaire.setDomaine(dto.getDomaine());
+        partenaire.setType(dto.getType());
+        partenaire.setEmail(dto.getEmail());
+        partenaire.setTelephone(dto.getTelephone());
+        partenaire.setPays(dto.getPays());
+        partenaire.setNewsletter(dto.getNewsletter());
         return partenaire;
     }
 

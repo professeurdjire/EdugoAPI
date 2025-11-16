@@ -7,6 +7,8 @@ public class QuizResponse {
     private Long id;
     private String titre;
     private String description;
+    private String auteur;
+    private String titreLivre;
     private Long matiereId;
     private String matiereNom;
     private Long niveauId;

@@ -237,6 +237,12 @@ public class ServiceExercice {
         dto.setActive(ex.getActive());
         dto.setNiveauDifficulte(ex.getNiveauDifficulte());
         dto.setTempsAlloue(ex.getTempsAlloue());
+        dto.setDescription(ex.getDescription());
+        dto.setDateCreation(ex.getDateCreation());
+        dto.setDateModification(ex.getDateModification());
+        dto.setNbQuestions(ex.getQuestionsExercice() != null ? ex.getQuestionsExercice().size() : 0);
+        dto.setFichierUrl(ex.getDocumentExercice());
+        dto.setImageUrl(ex.getImageExercice());
         if (ex.getMatiere() != null) {
             dto.setMatiereId(ex.getMatiere().getId());
             dto.setMatiereNom(ex.getMatiere().getNom());
@@ -257,6 +263,11 @@ public class ServiceExercice {
         dto.setNiveauNom(ex.getNiveauScolaire() != null ? ex.getNiveauScolaire().getNom() : null);
         dto.setLivreId(ex.getLivre() != null ? ex.getLivre().getId() : null);
         dto.setLivreTitre(ex.getLivre() != null ? ex.getLivre().getTitre() : null);
+        dto.setDateCreation(ex.getDateCreation());
+        dto.setDateModification(ex.getDateModification());
+        dto.setNbQuestions(ex.getQuestionsExercice() != null ? ex.getQuestionsExercice().size() : 0);
+        dto.setFichierUrl(ex.getDocumentExercice());
+        dto.setImageUrl(ex.getImageExercice());
         // Map les questions si besoin
         return dto;
     }

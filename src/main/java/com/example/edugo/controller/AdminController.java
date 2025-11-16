@@ -7,6 +7,7 @@ import com.example.edugo.service.AdminService;
 import com.example.edugo.service.ServiceLivre;
 import com.example.edugo.service.ServiceQuiz;
 import com.example.edugo.service.ServiceLangue;
+import com.example.edugo.service.ServiceEleve;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -39,6 +40,7 @@ public class AdminController {
     private final ServiceLivre serviceLivre;
     private final ServiceLangue serviceLangue;
     private final ServiceQuiz serviceQuiz;
+    private final ServiceEleve serviceEleve;
 
 
 
@@ -89,6 +91,14 @@ public class AdminController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         adminService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // ==================== ÉLÈVES (profils combinés User + Eleve) ====================
+
+    @GetMapping("/eleves")
+    @Operation(summary = "Lister tous les élèves avec leurs informations complètes", description = "Retourne une liste de EleveProfileResponse combinant les données User + Eleve + Classe + Niveau")
+    public ResponseEntity<List<EleveProfileResponse>> getAllElevesProfils() {
+        return ResponseEntity.ok(serviceEleve.listProfilsEleves());
     }
 
 
