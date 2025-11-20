@@ -1,8 +1,11 @@
 package com.example.edugo.controller;
 
+import com.example.edugo.dto.StatistiquesClasseResponse;
+import com.example.edugo.dto.StatistiquesNiveauResponse;
 import com.example.edugo.dto.StatistiquesPlateformeResponse;
 import com.example.edugo.service.StatistiqueService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -33,5 +36,21 @@ public class StatistiqueController {
         StatistiquesPlateformeResponse stats = statistiqueService.getStatistiquesPlateforme();
         // On peut filtrer certaines informations sensibles si nécessaire
         return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/niveaux/{id}")
+    @Operation(summary = "Statistiques pour un niveau spécifique")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<StatistiquesNiveauResponse> getStatistiquesNiveau(
+            @Parameter(description = "ID du niveau") @PathVariable Long id) {
+        return ResponseEntity.ok(statistiqueService.getStatistiquesNiveau(id));
+    }
+
+    @GetMapping("/classes/{id}")
+    @Operation(summary = "Statistiques pour une classe spécifique")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<StatistiquesClasseResponse> getStatistiquesClasse(
+            @Parameter(description = "ID de la classe") @PathVariable Long id) {
+        return ResponseEntity.ok(statistiqueService.getStatistiquesClasse(id));
     }
 }

@@ -11,4 +11,7 @@ public class ChallengeRequest {
     private LocalDateTime dateFin;
     private Integer points;
     private String theme;
+    private String typeChallenge; // INTERCLASSE ou INTERNIVEAU
+    private Long niveauId;        // requis pour INTERNIVEAU
+    private Long classeId;        // requis pour INTERCLASSE
 }

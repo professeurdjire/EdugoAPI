@@ -225,6 +225,20 @@ public class AdminService {
         userRepository.delete(user);
     }
 
+    // Changement de mot de passe pour un utilisateur (admin ou autre)
+    @Transactional
+    public void changeUserPassword(Long userId, String oldPassword, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur", userId));
+
+        if (!passwordEncoder.matches(oldPassword, user.getMotDePasse())) {
+            throw new RuntimeException("Ancien mot de passe incorrect");
+        }
+
+        user.setMotDePasse(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -821,6 +835,12 @@ public class AdminService {
                 .orElseThrow(() -> new ResourceNotFoundException("Quiz", id));
     }
     
+    // ====== Helpers ======
+    private String deriveStatut(Boolean actif) {
+        if (actif == null) return "en_attente";
+        return actif ? "actif" : "inactif";
+    }
+
     // ==================== STATISTIQUES ====================
     public StatistiquesPlateformeResponse getStatistiquesPlateforme() {
         return statistiqueService.getStatistiquesPlateforme();

@@ -101,6 +101,44 @@ public class StatistiqueService {
         return stats;
     }
     
+    @Transactional(readOnly = true)
+    public StatistiquesNiveauResponse getStatistiquesNiveau(Long niveauId) {
+        Niveau niveau = niveauRepository.findById(niveauId)
+                .orElseThrow(() -> new RuntimeException("Niveau non trouvé"));
+
+        List<Classe> classes = classeRepository.findByNiveauId(niveau.getId());
+        List<Eleve> eleves = eleveRepository.findByClasseNiveauId(niveau.getId());
+        List<Livre> livres = livreRepository.findByNiveauId(niveau.getId());
+        int pointsMoyens = eleves.isEmpty() ? 0 : eleves.stream().mapToInt(Eleve::getPointAccumule).sum() / eleves.size();
+
+        return new StatistiquesNiveauResponse(
+                niveau.getId(),
+                niveau.getNom(),
+                classes.size(),
+                eleves.size(),
+                livres.size(),
+                pointsMoyens
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public StatistiquesClasseResponse getStatistiquesClasse(Long classeId) {
+        Classe classe = classeRepository.findById(classeId)
+                .orElseThrow(() -> new RuntimeException("Classe non trouvée"));
+
+        List<Eleve> eleves = eleveRepository.findByClasseId(classeId);
+        List<Livre> livres = livreRepository.findByClasseId(classeId);
+        int pointsMoyens = eleves.isEmpty() ? 0 : eleves.stream().mapToInt(Eleve::getPointAccumule).sum() / eleves.size();
+
+        return new StatistiquesClasseResponse(
+                classe.getId(),
+                classe.getNom(),
+                classe.getNiveau() != null ? classe.getNiveau().getNom() : "N/A",
+                eleves.size(),
+                pointsMoyens
+        );
+    }
+    
     // Méthodes utilitaires pour les statistiques détaillées
     private List<StatistiquesNiveauResponse> getStatistiquesParNiveau() {
         List<Niveau> niveaux = niveauRepository.findAll();

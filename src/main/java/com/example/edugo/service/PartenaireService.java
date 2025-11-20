@@ -143,4 +143,10 @@ public class PartenaireService {
     public List<Partenaire> getPartenairesActifs() {
         return partenaireRepository.findByActifTrue();
     }
+
+    // ====== Helpers ======
+    private String deriveStatut(Boolean actif) {
+        if (actif == null) return "en_attente";
+        return actif ? "actif" : "inactif";
+    }
 }

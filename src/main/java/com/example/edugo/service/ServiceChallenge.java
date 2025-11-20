@@ -21,6 +21,8 @@ public class ServiceChallenge {
     private final ParticipationRepository participationRepository;
     private final EleveRepository eleveRepository;
     private final BadgeRepository badgeRepository;
+    private final ClasseRepository classeRepository;
+    private final NiveauRepository niveauRepository;
 
     // ==================== CRUD CHALLENGES ====================
     
@@ -41,6 +43,19 @@ public class ServiceChallenge {
         challenge.setDateFin(dto.getDateFin());
         challenge.setPoints(dto.getPoints());
         challenge.setRewardMode(dto.getTheme());
+        if (dto.getTypeChallenge() != null) {
+            challenge.setTypeChallenge(TypeChallenge.valueOf(dto.getTypeChallenge()));
+        }
+        if (dto.getClasseId() != null) {
+            Classe classe = classeRepository.findById(dto.getClasseId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Classe", dto.getClasseId()));
+            challenge.setClasse(classe);
+        }
+        if (dto.getNiveauId() != null) {
+            Niveau niveau = niveauRepository.findById(dto.getNiveauId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Niveau", dto.getNiveauId()));
+            challenge.setNiveau(niveau);
+        }
         Challenge saved = challengeRepository.save(challenge);
         return toResponse(saved);
     }
@@ -56,6 +71,19 @@ public class ServiceChallenge {
         challenge.setPoints(dto.getPoints());
         // dto.theme not directly mapped in entity; using rewardMode
         challenge.setRewardMode(dto.getTheme());
+        if (dto.getTypeChallenge() != null) {
+            challenge.setTypeChallenge(TypeChallenge.valueOf(dto.getTypeChallenge()));
+        }
+        if (dto.getClasseId() != null) {
+            Classe classe = classeRepository.findById(dto.getClasseId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Classe", dto.getClasseId()));
+            challenge.setClasse(classe);
+        }
+        if (dto.getNiveauId() != null) {
+            Niveau niveau = niveauRepository.findById(dto.getNiveauId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Niveau", dto.getNiveauId()));
+            challenge.setNiveau(niveau);
+        }
         Challenge saved = challengeRepository.save(challenge);
         return toResponse(saved);
     }
@@ -108,9 +136,34 @@ public class ServiceChallenge {
     // ==================== CHALLENGES POUR ÉLÈVES ====================
     
     @PreAuthorize("hasRole('ELEVE')")
-    public List<Challenge> getChallengesDisponibles(Long eleveId) {
+    public List<ChallengeResponse> getChallengesDisponibles(Long eleveId) {
+        Eleve eleve = eleveRepository.findById(eleveId)
+                .orElseThrow(() -> new ResourceNotFoundException("Élève", eleveId));
+
+        Classe classeEleve = eleve.getClasse();
+        Niveau niveauEleve = eleve.getNiveau();
         LocalDateTime maintenant = LocalDateTime.now();
-        return challengeRepository.findActiveChallenges(maintenant);
+
+        List<Challenge> challengesActifs = challengeRepository.findActiveChallenges(maintenant);
+
+        return challengesActifs.stream()
+                .filter(challenge -> {
+                    if (challenge.getTypeChallenge() == TypeChallenge.INTERCLASSE) {
+                        return challenge.getClasse() != null
+                                && classeEleve != null
+                                && challenge.getClasse().getId().equals(classeEleve.getId());
+                    }
+                    if (challenge.getTypeChallenge() == TypeChallenge.INTERNIVEAU) {
+                        return challenge.getNiveau() != null
+                                && niveauEleve != null
+                                && challenge.getNiveau().getId().equals(niveauEleve.getId());
+                    }
+                    // autres types de challenge: visibles pour tous par défaut
+                    return true;
+                })
+                .filter(challenge -> !participationRepository.existsByEleveIdAndChallengeId(eleveId, challenge.getId()))
+                .map(this::toResponse)
+                .toList();
     }
 
     @PreAuthorize("hasRole('ELEVE')")
@@ -222,17 +275,18 @@ public class ServiceChallenge {
     // ==================== CLASSEMENT CHALLENGES ====================
     
     public List<com.example.edugo.dto.ChallengeLeaderboardEntryResponse> getLeaderboardChallenge(Long challengeId) {
-        List<Participation> participationsValidees = participationRepository.findByChallengeId(challengeId);
+        // Récupérer les participations pour ce challenge, triées par score décroissant
+        List<Participation> participations = participationRepository.findByChallengeIdOrderByScoreDesc(challengeId);
 
-        return participationsValidees.stream()
-                .sorted((p1, p2) -> p1.getDateParticipation().compareTo(p2.getDateParticipation()))
+        // Construire le leaderboard en se basant sur le score spécifique au challenge
+        return participations.stream()
                 .limit(10)
                 .map(participation -> new com.example.edugo.dto.ChallengeLeaderboardEntryResponse(
                         participation.getEleve().getId(),
                         participation.getEleve().getNom(),
                         participation.getEleve().getPrenom(),
                         participation.getDateParticipation(),
-                        participation.getEleve().getPointAccumule()
+                        participation.getScore() != null ? participation.getScore() : 0
                 ))
                 .collect(java.util.stream.Collectors.toList());
     }

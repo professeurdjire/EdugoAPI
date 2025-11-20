@@ -87,7 +87,7 @@ public class ChallengeController {
     @GetMapping("/disponibles/{eleveId}")
     @Operation(summary = "Challenges disponibles pour un élève")
     @PreAuthorize("hasRole('ELEVE')")
-    public ResponseEntity<List<Challenge>> getChallengesDisponibles(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId) {
+    public ResponseEntity<List<ChallengeResponse>> getChallengesDisponibles(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId) {
         return ResponseEntity.ok(serviceChallenge.getChallengesDisponibles(eleveId));
     }
 
@@ -105,6 +105,12 @@ public class ChallengeController {
     public ResponseEntity<List<Participation>> getChallengesParticipes(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId) {
         return ResponseEntity.ok(serviceChallenge.getChallengesParticipes(eleveId));
     }
+
+    @GetMapping("/{challengeId}/leaderboard")
+    @Operation(summary = "Classement des élèves pour un challenge")
+    @PreAuthorize("hasAnyRole('ELEVE', 'ADMIN')")
+    public ResponseEntity<List<com.example.edugo.dto.ChallengeLeaderboardEntryResponse>> getChallengeLeaderboard(
+            @Parameter(description = "ID du challenge") @PathVariable Long challengeId) {
+        return ResponseEntity.ok(serviceChallenge.getLeaderboardChallenge(challengeId));
+    }
 }
-
-

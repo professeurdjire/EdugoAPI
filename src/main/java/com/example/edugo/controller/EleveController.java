@@ -36,6 +36,7 @@ public class EleveController {
     private final ServiceChallenge serviceChallenge;
     private final ServiceDefi serviceDefi;
     private final ServiceBadge serviceBadge;
+    private final ServiceMatiere serviceMatiere;
 
     // ==================== PROFIL ====================
     
@@ -183,7 +184,7 @@ public class EleveController {
     
     @GetMapping("/challenges/disponibles/{id}")
     @Operation(summary = "Récupérer les challenges disponibles pour un élève", description = "Permet de récupérer les challenges actifs pour un élève")
-    public ResponseEntity<List<Challenge>> getChallengesDisponibles(@Parameter(description = "ID de l'élève") @PathVariable Long id) {
+    public ResponseEntity<List<ChallengeResponse>> getChallengesDisponibles(@Parameter(description = "ID de l'élève") @PathVariable Long id) {
         return ResponseEntity.ok(serviceChallenge.getChallengesDisponibles(id));
     }
 

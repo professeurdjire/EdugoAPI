@@ -85,11 +85,15 @@ public class ServiceFichierLivre {
     public Resource download(Long fichierId) throws MalformedURLException {
         FichierLivre f = fichierLivreRepository.findById(fichierId)
                 .orElseThrow(() -> new ResourceNotFoundException("FichierLivre", fichierId));
+
         Path path = resolveStoredPath(f.getCheminFichier());
         Resource resource = new UrlResource(path.toUri());
-        if (!resource.exists()) {
-            throw new MalformedURLException("Fichier introuvable: " + path);
+
+        // Si le fichier physique n'existe pas ou n'est pas lisible, on renvoie une 404 métier
+        if (!resource.exists() || !resource.isReadable()) {
+            throw new ResourceNotFoundException("Fichier physique", fichierId);
         }
+
         return resource;
     }
 

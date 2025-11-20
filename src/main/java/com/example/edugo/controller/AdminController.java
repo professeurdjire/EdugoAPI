@@ -8,6 +8,7 @@ import com.example.edugo.service.ServiceLivre;
 import com.example.edugo.service.ServiceQuiz;
 import com.example.edugo.service.ServiceLangue;
 import com.example.edugo.service.ServiceEleve;
+import com.example.edugo.service.ServiceExercice;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -41,6 +42,7 @@ public class AdminController {
     private final ServiceLangue serviceLangue;
     private final ServiceQuiz serviceQuiz;
     private final ServiceEleve serviceEleve;
+    private final ServiceExercice serviceExercice;
 
 
 
@@ -91,6 +93,15 @@ public class AdminController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         adminService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/users/{id}/change-password")
+    @Operation(summary = "Changer le mot de passe d'un utilisateur (admin ou élève)")
+    public ResponseEntity<Map<String, String>> changeUserPassword(
+            @PathVariable Long id,
+            @RequestBody ChangePasswordRequest request) {
+        adminService.changeUserPassword(id, request.getOldPassword(), request.getNewPassword());
+        return ResponseEntity.ok(Map.of("message", "Mot de passe modifié avec succès"));
     }
 
     // ==================== ÉLÈVES (profils combinés User + Eleve) ====================
@@ -299,16 +310,33 @@ public ResponseEntity<LivreResponse> updateLivre(
         return ResponseEntity.ok(adminService.getExerciceByIdDto(id));
     }
 
-    @PostMapping("/exercices")
+    @PostMapping(value = "/exercices", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ExerciceResponse> createExercice(@RequestBody Exercice exercice) {
         Exercice saved = adminService.createExercice(exercice);
         return ResponseEntity.ok(adminService.getExerciceByIdDto(saved.getId()));
     }
 
-    @PutMapping("/exercices/{id}")
+    @PostMapping(value = "/exercices", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ExerciceResponse> createExerciceMultipart(
+            @RequestPart("exercice") com.example.edugo.dto.ExerciceRequest exercice,
+            @RequestPart("document") MultipartFile document,
+            @RequestPart(value = "image", required = false) MultipartFile image) throws Exception {
+        return ResponseEntity.ok(serviceExercice.createExercice(exercice, document, image));
+    }
+
+    @PutMapping(value = "/exercices/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ExerciceResponse> updateExercice(@PathVariable Long id, @RequestBody Exercice exercice) {
         adminService.updateExercice(id, exercice);
         return ResponseEntity.ok(adminService.getExerciceByIdDto(id));
+    }
+
+    @PutMapping(value = "/exercices/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ExerciceResponse> updateExerciceMultipart(
+            @PathVariable Long id,
+            @RequestPart("exercice") com.example.edugo.dto.ExerciceRequest exercice,
+            @RequestPart(value = "document", required = false) MultipartFile document,
+            @RequestPart(value = "image", required = false) MultipartFile image) throws Exception {
+        return ResponseEntity.ok(serviceExercice.updateExercice(id, exercice, document, image));
     }
 
     @DeleteMapping("/exercices/{id}")
