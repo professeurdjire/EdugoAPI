@@ -31,6 +31,8 @@ public class AdminService {
     private final PartenaireRepository partenaireRepository;
     private final QuizRepository quizRepository;
     private final LangueRepository langueRepository;
+    private final NotificationRepository notificationRepository;
+    private final QuestionRepository questionRepository;
     private final StatistiqueService statistiqueService;
     private final PasswordEncoder passwordEncoder;
 
@@ -121,6 +123,17 @@ public class AdminService {
         response.setAuteur(livre.getAuteur());
         response.setImageCouverture(livre.getImageCouverture());
         response.setTotalPages(livre.getTotalPages());
+        // Relations
+        response.setNiveauId(livre.getNiveau() != null ? livre.getNiveau().getId() : null);
+        response.setNiveauNom(livre.getNiveau() != null ? livre.getNiveau().getNom() : null);
+        response.setClasseId(livre.getClasse() != null ? livre.getClasse().getId() : null);
+        response.setClasseNom(livre.getClasse() != null ? livre.getClasse().getNom() : null);
+        response.setMatiereId(livre.getMatiere() != null ? livre.getMatiere().getId() : null);
+        response.setMatiereNom(livre.getMatiere() != null ? livre.getMatiere().getNom() : null);
+        response.setLangueId(livre.getLangue() != null ? livre.getLangue().getId() : null);
+        response.setLangueNom(livre.getLangue() != null ? livre.getLangue().getNom() : null);
+        // Quiz lié
+        response.setQuizId(livre.getQuiz() != null ? livre.getQuiz().getId() : null);
         return response;
     }
 
@@ -168,7 +181,10 @@ public class AdminService {
         response.setDateDebut(challenge.getDateDebut());
         response.setDateFin(challenge.getDateFin());
         response.setPoints(challenge.getPoints());
-        response.setTheme(challenge.getTypeChallenge() != null ? challenge.getTypeChallenge().toString() : null);
+        response.setTheme(challenge.getRewardMode() != null ? challenge.getRewardMode() : (challenge.getTypeChallenge() != null ? challenge.getTypeChallenge().toString() : null));
+        // Compter les questions associées au challenge (optimisé avec COUNT)
+        Long count = questionRepository.countByChallengeId(challenge.getId());
+        response.setNombreQuestions(count != null ? count.intValue() : 0);
         return response;
     }
 
@@ -215,6 +231,13 @@ public class AdminService {
         user.setEmail(userDetails.getEmail());
         user.setEstActive(userDetails.getEstActive());
         user.setPhotoProfil(userDetails.getPhotoProfil());
+        
+        // Gérer le téléphone spécifiquement pour les admins
+        if (user instanceof com.example.edugo.entity.Admin && userDetails instanceof com.example.edugo.entity.Admin) {
+            com.example.edugo.entity.Admin admin = (com.example.edugo.entity.Admin) user;
+            com.example.edugo.entity.Admin adminDetails = (com.example.edugo.entity.Admin) userDetails;
+            admin.setTelephone(adminDetails.getTelephone());
+        }
         
         return userRepository.save(user);
     }
@@ -537,17 +560,18 @@ public class AdminService {
     }
 
     public Livre getLivreById(Long id) {
-        return livreRepository.findById(id)
+        return livreRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Livre", id));
     }
 
     // ==================== GESTION LIVRES DTO ====================
     public List<LivreResponse> getAllLivresDto() {
-        return livreRepository.findAll().stream().map(this::toLivreResponse).collect(Collectors.toList());
+        return livreRepository.findAllWithRelations().stream().map(this::toLivreResponse).collect(Collectors.toList());
     }
 
     public LivreResponse getLivreByIdDto(Long id) {
-        Livre livre = getLivreById(id);
+        Livre livre = livreRepository.findByIdWithRelations(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Livre", id));
         return toLivreResponse(livre);
     }
 
@@ -841,9 +865,100 @@ public class AdminService {
         return actif ? "actif" : "inactif";
     }
 
+    // ==================== NOTIFICATIONS ====================
+    public List<Notification> getAllNotifications() {
+        return notificationRepository.findAll();
+    }
+    
+    public List<Notification> getAllNotificationsNonLues() {
+        return notificationRepository.findAllUnread();
+    }
+    
     // ==================== STATISTIQUES ====================
     public StatistiquesPlateformeResponse getStatistiquesPlateforme() {
         return statistiqueService.getStatistiquesPlateforme();
+    }
+    
+    // ==================== GESTION PROFIL ADMIN ====================
+    
+    /**
+     * Récupère l'administrateur connecté
+     */
+    public AdminProfileResponse getCurrentAdmin(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec email: " + email));
+
+        if (user instanceof com.example.edugo.entity.Admin) {
+            com.example.edugo.entity.Admin admin = (com.example.edugo.entity.Admin) user;
+            return AdminProfileResponse.builder()
+                    .id(admin.getId())
+                    .email(admin.getEmail())
+                    .nom(admin.getNom())
+                    .prenom(admin.getPrenom())
+                    .telephone(admin.getTelephone())
+                    .photoProfil(admin.getPhotoProfil())
+                    .role(admin.getRole().name())
+                    .estActive(admin.getEstActive())
+                    .dateCreation(admin.getDateCreation())
+                    .dateModification(admin.getDateModification())
+                    .build();
+        } else {
+            throw new RuntimeException("L'utilisateur n'est pas un administrateur");
+        }
+    }
+    
+    /**
+     * Met à jour le profil de l'administrateur connecté
+     */
+    @Transactional
+    public AdminProfileResponse updateCurrentAdmin(String email, AdminProfileUpdateRequest request) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec email: " + email));
+
+        if (!(user instanceof com.example.edugo.entity.Admin)) {
+            throw new RuntimeException("L'utilisateur n'est pas un administrateur");
+        }
+
+        com.example.edugo.entity.Admin admin = (com.example.edugo.entity.Admin) user;
+
+        // Mettre à jour les champs si fournis
+        if (request.getNom() != null && !request.getNom().isEmpty()) {
+            admin.setNom(request.getNom());
+        }
+        if (request.getPrenom() != null && !request.getPrenom().isEmpty()) {
+            admin.setPrenom(request.getPrenom());
+        }
+        if (request.getEmail() != null && !request.getEmail().isEmpty() && !request.getEmail().equals(admin.getEmail())) {
+            // Vérifier que le nouvel email n'est pas déjà utilisé
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new RuntimeException("Cet email est déjà utilisé");
+            }
+            admin.setEmail(request.getEmail());
+        }
+        if (request.getTelephone() != null) {
+            admin.setTelephone(request.getTelephone());
+        }
+        if (request.getPhotoProfil() != null) {
+            admin.setPhotoProfil(request.getPhotoProfil());
+        }
+        if (request.getEstActive() != null) {
+            admin.setEstActive(request.getEstActive());
+        }
+
+        com.example.edugo.entity.Admin saved = userRepository.save(admin);
+
+        return AdminProfileResponse.builder()
+                .id(saved.getId())
+                .email(saved.getEmail())
+                .nom(saved.getNom())
+                .prenom(saved.getPrenom())
+                .telephone(saved.getTelephone())
+                .photoProfil(saved.getPhotoProfil())
+                .role(saved.getRole().name())
+                .estActive(saved.getEstActive())
+                .dateCreation(saved.getDateCreation())
+                .dateModification(saved.getDateModification())
+                .build();
     }
 }
 

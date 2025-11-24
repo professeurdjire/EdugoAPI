@@ -126,6 +126,10 @@ public class LivreController {
                                                                @Parameter(description = "ID du livre") @PathVariable Long livreId,
                                                                @RequestBody ProgressionUpdateRequest progressionData) {
         Integer pageActuelle = progressionData.getPageActuelle();
+        // Valeur par défaut si null (première page = 0)
+        if (pageActuelle == null) {
+            pageActuelle = 0;
+        }
         return ResponseEntity.ok(serviceLivre.updateProgressionLecture(eleveId, livreId, pageActuelle));
     }
 
@@ -142,6 +146,15 @@ public class LivreController {
     public ResponseEntity<com.example.edugo.dto.ProgressionResponse> getProgressionLivre(@Parameter(description = "ID de l'élève") @PathVariable Long eleveId,
                                                           @Parameter(description = "ID du livre") @PathVariable Long livreId) {
         com.example.edugo.dto.ProgressionResponse progression = serviceLivre.getProgressionLivre(eleveId, livreId);
+        if (progression == null) {
+            // Retourner une progression vide avec des valeurs par défaut
+            com.example.edugo.dto.ProgressionResponse emptyProgression = new com.example.edugo.dto.ProgressionResponse();
+            emptyProgression.setEleveId(eleveId);
+            emptyProgression.setLivreId(livreId);
+            emptyProgression.setPageActuelle(0);
+            emptyProgression.setPourcentageCompletion(0);
+            return ResponseEntity.ok(emptyProgression);
+        }
         return ResponseEntity.ok(progression);
     }
 

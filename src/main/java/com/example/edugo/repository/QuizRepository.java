@@ -28,6 +28,14 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
     @Query("SELECT q FROM Quiz q LEFT JOIN FETCH q.questionsQuiz WHERE q.id = :quizId")
     Optional<Quiz> findByIdWithQuestions(@Param("quizId") Long quizId);
     
+    // Charger un quiz avec toutes ses relations nécessaires pour les DTOs
+    @Query("SELECT q FROM Quiz q LEFT JOIN FETCH q.livre l LEFT JOIN FETCH l.matiere LEFT JOIN FETCH l.niveau WHERE q.id = :id")
+    Optional<Quiz> findByIdWithRelations(@Param("id") Long id);
+    
+    // Charger tous les quizzes avec leurs relations
+    @Query("SELECT DISTINCT q FROM Quiz q LEFT JOIN FETCH q.livre l LEFT JOIN FETCH l.matiere LEFT JOIN FETCH l.niveau")
+    List<Quiz> findAllWithRelations();
+    
     // Méthodes pour les statistiques
     @Query("SELECT q FROM Quiz q WHERE q.statut = 'ACTIF'")
     List<Quiz> findByStatutActif();

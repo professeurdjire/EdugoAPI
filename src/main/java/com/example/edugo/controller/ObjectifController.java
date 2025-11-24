@@ -28,6 +28,9 @@ public class ObjectifController {
     @GetMapping("/eleve/{eleveId}/en-cours")
     public ResponseEntity<ObjectifResponse> getObjectifEnCours(@PathVariable Long eleveId) {
         ObjectifResponse objectif = serviceObjectif.getObjectifEnCoursDto(eleveId);
+        if (objectif == null) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(objectif);
     }
 

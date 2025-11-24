@@ -3,6 +3,7 @@ package com.example.edugo.controller;
 
 import com.example.edugo.dto.*;
 import com.example.edugo.service.AuthService;
+import com.example.edugo.service.PasswordResetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final PasswordResetService passwordResetService;
 
     @Operation(
             summary = "Inscription d'un nouvel élève",
@@ -141,6 +143,88 @@ public class AuthController {
 
         EleveProfileResponse eleve = authService.getCurrentEleve(email);
         return ResponseEntity.ok(eleve);
+    }
+
+    @Operation(
+            summary = "Demander la réinitialisation de mot de passe",
+            description = "Envoie un email avec un lien de réinitialisation de mot de passe à l'utilisateur (élève ou administrateur). " +
+                         "Fonctionne pour tous les types d'utilisateurs.",
+            tags = {"Authentification"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Email de réinitialisation envoyé (ou message générique si l'email n'existe pas)", 
+                    content = @Content(schema = @Schema(implementation = PasswordResetResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Erreur de validation de l'email")
+    })
+    @PostMapping("/forgot-password")
+    public ResponseEntity<PasswordResetResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        PasswordResetResponse response = passwordResetService.requestPasswordReset(request.getEmail());
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Vérifier un token de réinitialisation",
+            description = "Vérifie si un token de réinitialisation est valide avant de permettre la réinitialisation du mot de passe.",
+            tags = {"Authentification"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Token valide", 
+                    content = @Content(schema = @Schema(implementation = PasswordResetResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Token invalide ou expiré")
+    })
+    @PostMapping("/reset-password/verify")
+    public ResponseEntity<PasswordResetResponse> verifyToken(@Valid @RequestBody VerifyTokenRequest request) {
+        PasswordResetResponse response = passwordResetService.verifyToken(request.getToken());
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Vérifier un token de réinitialisation (GET)",
+            description = "Vérifie si un token de réinitialisation est valide. Utilisé par le frontend pour vérifier le token dans l'URL.",
+            tags = {"Authentification"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Token valide ou invalide", 
+                    content = @Content(schema = @Schema(implementation = PasswordResetResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Token invalide ou expiré")
+    })
+    @GetMapping("/reset-password")
+    public ResponseEntity<PasswordResetResponse> verifyResetToken(@RequestParam("token") String token) {
+        try {
+            PasswordResetResponse response = passwordResetService.verifyToken(token);
+            return ResponseEntity.ok(response);
+        } catch (com.example.edugo.exception.ResourceNotFoundException e) {
+            return ResponseEntity.ok(PasswordResetResponse.builder()
+                    .message("Token de réinitialisation invalide ou expiré")
+                    .success(false)
+                    .build());
+        }
+    }
+
+    @Operation(
+            summary = "Réinitialiser le mot de passe",
+            description = "Réinitialise le mot de passe de l'utilisateur en utilisant un token valide. " +
+                         "Fonctionne pour les élèves et les administrateurs.",
+            tags = {"Authentification"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Mot de passe réinitialisé avec succès", 
+                    content = @Content(schema = @Schema(implementation = PasswordResetResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Erreur de validation (mots de passe ne correspondent pas, token invalide, etc.)"),
+            @ApiResponse(responseCode = "404", description = "Token invalide ou expiré")
+    })
+    @PostMapping("/reset-password")
+    public ResponseEntity<PasswordResetResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        // Vérifier que les mots de passe correspondent
+        if (!request.getNouveauMotDePasse().equals(request.getConfirmationMotDePasse())) {
+            throw new RuntimeException("Les mots de passe ne correspondent pas");
+        }
+
+        PasswordResetResponse response = passwordResetService.resetPassword(
+                request.getToken(), 
+                request.getNouveauMotDePasse()
+        );
+        return ResponseEntity.ok(response);
     }
 
 

@@ -13,4 +13,5 @@ public class DefiResponse {
     private Long classeId;
     private String classeNom;
     private String typeDefi;
+    private Integer nombreQuestions; // Nombre de questions associées au défi
 }

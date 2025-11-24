@@ -25,6 +25,7 @@ public class ServiceDefi {
     private final EleveDefiRepository eleveDefiRepository;
     private final EleveRepository eleveRepository;
     private final BadgeRepository badgeRepository;
+    private final QuestionRepository questionRepository;
 
     // ==================== CRUD DÉFIS ====================
     @PreAuthorize("hasRole('ADMIN')")
@@ -59,7 +60,25 @@ public class ServiceDefi {
     }
 
     public List<DefiResponse> getAllDefis() {
-        return defiRepository.findAll().stream().map(this::toResponse).collect(Collectors.toList());
+        List<Defi> defis = defiRepository.findAll();
+        
+        // Optimisation : compter les questions pour tous les défis en une seule requête
+        java.util.Map<Long, Integer> questionCountsMap = new java.util.HashMap<>();
+        if (!defis.isEmpty()) {
+            List<Long> defiIds = defis.stream().map(Defi::getId).collect(Collectors.toList());
+            List<Object[]> counts = questionRepository.countByDefiIds(defiIds);
+            for (Object[] count : counts) {
+                Long defiId = (Long) count[0];
+                Long countValue = (Long) count[1];
+                questionCountsMap.put(defiId, countValue.intValue());
+            }
+        }
+        
+        // Mapper les défis avec les comptes pré-calculés
+        final java.util.Map<Long, Integer> finalCountsMap = questionCountsMap;
+        return defis.stream()
+                .map(defi -> toResponse(defi, finalCountsMap))
+                .collect(Collectors.toList());
     }
 
     public DefiDetailResponse getDefiById(Long id) {
@@ -71,7 +90,25 @@ public class ServiceDefi {
     // ==================== DÉFIS POUR ÉLÈVES ====================
     @PreAuthorize("hasRole('ELEVE')")
     public List<DefiResponse> getDefisDisponibles(Long eleveId) {
-        return defiRepository.findAll().stream().map(this::toResponse).collect(Collectors.toList());
+        List<Defi> defis = defiRepository.findAll();
+        
+        // Optimisation : compter les questions pour tous les défis en une seule requête
+        java.util.Map<Long, Integer> questionCountsMap = new java.util.HashMap<>();
+        if (!defis.isEmpty()) {
+            List<Long> defiIds = defis.stream().map(Defi::getId).collect(Collectors.toList());
+            List<Object[]> counts = questionRepository.countByDefiIds(defiIds);
+            for (Object[] count : counts) {
+                Long defiId = (Long) count[0];
+                Long countValue = (Long) count[1];
+                questionCountsMap.put(defiId, countValue.intValue());
+            }
+        }
+        
+        // Mapper les défis avec les comptes pré-calculés
+        final java.util.Map<Long, Integer> finalCountsMap = questionCountsMap;
+        return defis.stream()
+                .map(defi -> toResponse(defi, finalCountsMap))
+                .collect(Collectors.toList());
     }
 
     @PreAuthorize("hasRole('ELEVE')")
@@ -115,6 +152,10 @@ public class ServiceDefi {
 
     // ==================== MAPPING ====================
     private DefiResponse toResponse(Defi defi) {
+        return toResponse(defi, null);
+    }
+    
+    private DefiResponse toResponse(Defi defi, java.util.Map<Long, Integer> questionCountsMap) {
         DefiResponse dto = new DefiResponse();
         dto.setId(defi.getId());
         dto.setTitre(defi.getTitre());
@@ -126,6 +167,13 @@ public class ServiceDefi {
             dto.setClasseNom(defi.getClasse().getNom());
         }
         dto.setTypeDefi(defi.getTypeDefi());
+        // Compter les questions associées au défi (utiliser le map si fourni, sinon requête directe)
+        if (questionCountsMap != null && questionCountsMap.containsKey(defi.getId())) {
+            dto.setNombreQuestions(questionCountsMap.get(defi.getId()));
+        } else {
+            Long count = questionRepository.countByDefiId(defi.getId());
+            dto.setNombreQuestions(count != null ? count.intValue() : 0);
+        }
         return dto;
     }
 

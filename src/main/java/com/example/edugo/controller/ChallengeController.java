@@ -29,34 +29,16 @@ public class ChallengeController {
     @GetMapping
     @Operation(summary = "Récupérer tous les challenges")
     public ResponseEntity<List<ChallengeResponse>> getAllChallenges() {
-        // map entities to DTOs using service mapping
-        return ResponseEntity.ok(serviceChallenge.getAllChallenges().stream().map(ch -> {
-            // reuse service private mapper via exposed DTO create/update; fallback manual minimal mapping
-            ChallengeResponse dto = new ChallengeResponse();
-            dto.setId(ch.getId());
-            dto.setTitre(ch.getTitre());
-            dto.setDescription(ch.getDescription());
-            dto.setPoints(ch.getPoints());
-            dto.setTheme(ch.getRewardMode());
-            dto.setDateDebut(ch.getDateDebut());
-            dto.setDateFin(ch.getDateFin());
-            return dto;
-        }).toList());
+        return ResponseEntity.ok(serviceChallenge.getAllChallenges().stream()
+                .map(serviceChallenge::toResponse)
+                .toList());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Récupérer un challenge par ID")
     public ResponseEntity<ChallengeResponse> getChallengeById(@Parameter(description = "ID du challenge") @PathVariable Long id) {
         Challenge ch = serviceChallenge.getChallengeById(id);
-        ChallengeResponse dto = new ChallengeResponse();
-        dto.setId(ch.getId());
-        dto.setTitre(ch.getTitre());
-        dto.setDescription(ch.getDescription());
-        dto.setPoints(ch.getPoints());
-        dto.setTheme(ch.getRewardMode());
-        dto.setDateDebut(ch.getDateDebut());
-        dto.setDateFin(ch.getDateFin());
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(serviceChallenge.toResponse(ch));
     }
 
     @PostMapping
@@ -112,5 +94,14 @@ public class ChallengeController {
     public ResponseEntity<List<com.example.edugo.dto.ChallengeLeaderboardEntryResponse>> getChallengeLeaderboard(
             @Parameter(description = "ID du challenge") @PathVariable Long challengeId) {
         return ResponseEntity.ok(serviceChallenge.getLeaderboardChallenge(challengeId));
+    }
+
+    @GetMapping("/participation/{eleveId}/{challengeId}")
+    @Operation(summary = "Récupérer les détails d'une participation à un challenge")
+    @PreAuthorize("hasRole('ELEVE')")
+    public ResponseEntity<com.example.edugo.dto.ParticipationDetailResponse> getParticipationDetail(
+            @Parameter(description = "ID de l'élève") @PathVariable Long eleveId,
+            @Parameter(description = "ID du challenge") @PathVariable Long challengeId) {
+        return ResponseEntity.ok(serviceChallenge.getParticipationDetail(eleveId, challengeId));
     }
 }

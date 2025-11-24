@@ -10,17 +10,14 @@ import com.example.edugo.service.ServiceLangue;
 import com.example.edugo.service.ServiceEleve;
 import com.example.edugo.service.ServiceExercice;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
@@ -84,6 +81,11 @@ public class AdminController {
         
         if (request.containsKey("estActive")) {
             user.setEstActive((Boolean) request.get("estActive"));
+        }
+        
+        // Gérer le téléphone spécifiquement pour les admins
+        if (user instanceof com.example.edugo.entity.Admin && request.containsKey("telephone")) {
+            ((com.example.edugo.entity.Admin) user).setTelephone((String) request.get("telephone"));
         }
         
         return ResponseEntity.ok(adminService.updateUser(id, user));
@@ -491,11 +493,63 @@ public ResponseEntity<LivreResponse> updateLivre(
         return ResponseEntity.noContent().build();
     }
     
+    // ==================== NOTIFICATIONS ====================
+    
+    @GetMapping("/notifications")
+    @Operation(summary = "Obtenir toutes les notifications")
+    public ResponseEntity<List<com.example.edugo.entity.Principales.Notification>> getAllNotifications() {
+        return ResponseEntity.ok(adminService.getAllNotifications());
+    }
+    
+    @GetMapping("/notifications/non-lues")
+    @Operation(summary = "Obtenir les notifications non lues")
+    public ResponseEntity<List<com.example.edugo.entity.Principales.Notification>> getNotificationsNonLues() {
+        return ResponseEntity.ok(adminService.getAllNotificationsNonLues());
+    }
+    
     // ==================== STATISTIQUES ====================
     
     @GetMapping("/statistiques/plateforme")
     public ResponseEntity<StatistiquesPlateformeResponse> getStatistiquesPlateforme() {
         return ResponseEntity.ok(adminService.getStatistiquesPlateforme());
+    }
+    
+    // ==================== PROFIL ADMIN ====================
+    
+    @GetMapping("/me")
+    @Operation(summary = "Récupérer le profil de l'administrateur connecté", 
+               description = "Retourne les informations de l'administrateur actuellement authentifié")
+    public ResponseEntity<AdminProfileResponse> getCurrentAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        
+        AdminProfileResponse admin = adminService.getCurrentAdmin(email);
+        return ResponseEntity.ok(admin);
+    }
+    
+    @PutMapping("/me")
+    @Operation(summary = "Mettre à jour le profil de l'administrateur connecté", 
+               description = "Permet à l'administrateur de mettre à jour ses informations personnelles")
+    public ResponseEntity<AdminProfileResponse> updateCurrentAdmin(@RequestBody AdminProfileUpdateRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        
+        AdminProfileResponse updated = adminService.updateCurrentAdmin(email, request);
+        return ResponseEntity.ok(updated);
+    }
+    
+    // ==================== PRÉFÉRENCES (Placeholder) ====================
+    
+    @GetMapping("/preferences")
+    @Operation(summary = "Récupérer les préférences de l'administrateur", 
+               description = "Retourne les préférences de l'administrateur (à implémenter selon les besoins)")
+    public ResponseEntity<Map<String, Object>> getPreferences() {
+        // Placeholder - à implémenter selon les besoins
+        Map<String, Object> preferences = new java.util.HashMap<>();
+        preferences.put("theme", "light");
+        preferences.put("notifications", true);
+        preferences.put("language", "fr");
+        return ResponseEntity.ok(preferences);
     }
 }
 

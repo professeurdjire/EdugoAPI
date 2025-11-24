@@ -37,6 +37,8 @@ public class EleveController {
     private final ServiceDefi serviceDefi;
     private final ServiceBadge serviceBadge;
     private final ServiceMatiere serviceMatiere;
+    private final NotificationService notificationService;
+    private final ServiceObjectif serviceObjectif;
 
     // ==================== PROFIL ====================
     
@@ -215,4 +217,35 @@ public class EleveController {
     public ResponseEntity<List<Eleve>> getCamaradesClasse(@Parameter(description = "ID de l'élève") @PathVariable Long id) {
         return ResponseEntity.ok(serviceEleve.getCamaradesClasse(id));
     }
+
+    // ==================== NOTIFICATIONS ====================
+    
+    @GetMapping("/{id}/notifications/unread-count")
+    @Operation(summary = "Récupérer le nombre de notifications non lues", description = "Retourne le nombre de notifications non lues pour un élève")
+    public ResponseEntity<Map<String, Long>> getUnreadNotificationsCount(@Parameter(description = "ID de l'élève") @PathVariable Long id) {
+        Long count = notificationService.getUnreadCount(id);
+        return ResponseEntity.ok(Map.of("count", count));
+    }
+
+    // ==================== OBJECTIFS ====================
+    
+    @PostMapping("/{id}/objectifs")
+    @Operation(summary = "Créer un objectif pour un élève", description = "Permet à un élève de créer un nouvel objectif")
+    @PreAuthorize("hasRole('ELEVE')")
+    public ResponseEntity<ObjectifResponse> createObjectif(@Parameter(description = "ID de l'élève") @PathVariable Long id,
+                                                           @RequestBody ObjectifRequest request) {
+        ObjectifResponse response = serviceObjectif.createObjectifDto(request, id);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/objectifs/en-cours")
+    @Operation(summary = "Récupérer l'objectif en cours d'un élève", description = "Retourne l'objectif actuellement en cours pour un élève, ou null si aucun objectif n'est en cours")
+    public ResponseEntity<ObjectifResponse> getObjectifEnCours(@Parameter(description = "ID de l'élève") @PathVariable Long id) {
+        ObjectifResponse objectif = serviceObjectif.getObjectifEnCoursDto(id);
+        if (objectif == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(objectif);
+    }
+
 }

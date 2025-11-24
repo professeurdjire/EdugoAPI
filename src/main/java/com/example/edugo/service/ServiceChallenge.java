@@ -23,6 +23,9 @@ public class ServiceChallenge {
     private final BadgeRepository badgeRepository;
     private final ClasseRepository classeRepository;
     private final NiveauRepository niveauRepository;
+    private final QuestionRepository questionRepository;
+    private final OneSignalService oneSignalService;
+    private final AdminNotificationService adminNotificationService;
 
     // ==================== CRUD CHALLENGES ====================
     
@@ -84,7 +87,13 @@ public class ServiceChallenge {
                     .orElseThrow(() -> new ResourceNotFoundException("Niveau", dto.getNiveauId()));
             challenge.setNiveau(niveau);
         }
+        
+        // Sauvegarder le challenge
         Challenge saved = challengeRepository.save(challenge);
+        
+        // Notifier les élèves qu'un nouveau challenge est disponible
+        envoyerNotificationNouveauChallenge(saved);
+        
         return toResponse(saved);
     }
 
@@ -121,7 +130,11 @@ public class ServiceChallenge {
                 .orElseThrow(() -> new ResourceNotFoundException("Challenge", id));
     }
 
-    private ChallengeResponse toResponse(Challenge challenge) {
+    public ChallengeResponse toResponse(Challenge challenge) {
+        return toResponse(challenge, null);
+    }
+    
+    public ChallengeResponse toResponse(Challenge challenge, java.util.Map<Long, Integer> questionCountsMap) {
         ChallengeResponse res = new ChallengeResponse();
         res.setId(challenge.getId());
         res.setTitre(challenge.getTitre());
@@ -130,6 +143,13 @@ public class ServiceChallenge {
         res.setTheme(challenge.getRewardMode());
         res.setDateDebut(challenge.getDateDebut());
         res.setDateFin(challenge.getDateFin());
+        // Compter les questions associées au challenge (utiliser le map si fourni, sinon requête directe)
+        if (questionCountsMap != null && questionCountsMap.containsKey(challenge.getId())) {
+            res.setNombreQuestions(questionCountsMap.get(challenge.getId()));
+        } else {
+            Long count = questionRepository.countByChallengeId(challenge.getId());
+            res.setNombreQuestions(count != null ? count.intValue() : 0);
+        }
         return res;
     }
 
@@ -146,7 +166,8 @@ public class ServiceChallenge {
 
         List<Challenge> challengesActifs = challengeRepository.findActiveChallenges(maintenant);
 
-        return challengesActifs.stream()
+        // Filtrer les challenges
+        List<Challenge> challengesFiltres = challengesActifs.stream()
                 .filter(challenge -> {
                     if (challenge.getTypeChallenge() == TypeChallenge.INTERCLASSE) {
                         return challenge.getClasse() != null
@@ -162,7 +183,24 @@ public class ServiceChallenge {
                     return true;
                 })
                 .filter(challenge -> !participationRepository.existsByEleveIdAndChallengeId(eleveId, challenge.getId()))
-                .map(this::toResponse)
+                .toList();
+        
+        // Optimisation : compter les questions pour tous les challenges en une seule requête
+        java.util.Map<Long, Integer> questionCountsMap = new java.util.HashMap<>();
+        if (!challengesFiltres.isEmpty()) {
+            List<Long> challengeIds = challengesFiltres.stream().map(Challenge::getId).toList();
+            List<Object[]> counts = questionRepository.countByChallengeIds(challengeIds);
+            for (Object[] count : counts) {
+                Long challengeId = (Long) count[0];
+                Long countValue = (Long) count[1];
+                questionCountsMap.put(challengeId, countValue.intValue());
+            }
+        }
+        
+        // Mapper les challenges avec les comptes pré-calculés
+        final java.util.Map<Long, Integer> finalCountsMap = questionCountsMap;
+        return challengesFiltres.stream()
+                .map(challenge -> toResponse(challenge, finalCountsMap))
                 .toList();
     }
 
@@ -199,13 +237,40 @@ public class ServiceChallenge {
             throw new RuntimeException("Vous participez déjà à ce challenge");
         }
         
+        // Créer la participation avec les valeurs initiales
         Participation participation = new Participation();
         participation.setEleve(eleve);
         participation.setChallenge(challenge);
         participation.setDateParticipation(LocalDateTime.now());
+        participation.setStatut("EN_COURS"); // Statut initial : en cours
         participation.setaParticiper(true);
+        participation.setScore(0); // Score initial : 0
+        participation.setTempsPasse(0); // Temps passé initial : 0 secondes
+        participation.setRang(null); // Pas encore de classement
         
-        return participationRepository.save(participation);
+        Participation saved = participationRepository.save(participation);
+        
+        // Notifier les administrateurs de la nouvelle participation (OneSignal + Email)
+        try {
+            String titre = "🎯 Nouvelle participation à un challenge";
+            String message = String.format("L'élève %s %s vient de participer au challenge : %s", 
+                eleve.getPrenom(), eleve.getNom(), challenge.getTitre());
+            java.util.Map<String, Object> data = new java.util.HashMap<>();
+            data.put("type", "PARTICIPATION_CHALLENGE");
+            data.put("challengeId", challenge.getId());
+            data.put("eleveId", eleve.getId());
+            data.put("participationId", saved.getId());
+            data.put("eleveNom", eleve.getNom());
+            data.put("elevePrenom", eleve.getPrenom());
+            data.put("challengeTitre", challenge.getTitre());
+            
+            adminNotificationService.notifyAdmins(titre, message, data);
+        } catch (Exception e) {
+            // Log l'erreur mais ne bloque pas la participation
+            System.err.println("Erreur lors de la notification aux administrateurs: " + e.getMessage());
+        }
+        
+        return saved;
     }
 
     @PreAuthorize("hasRole('ELEVE')")
@@ -217,6 +282,81 @@ public class ServiceChallenge {
     public Participation getParticipationChallenge(Long eleveId, Long challengeId) {
         return participationRepository.findByEleveIdAndChallengeId(eleveId, challengeId)
                 .orElse(null);
+    }
+    
+    @PreAuthorize("hasRole('ELEVE')")
+    public com.example.edugo.dto.ParticipationDetailResponse getParticipationDetail(Long eleveId, Long challengeId) {
+        Participation participation = participationRepository.findByEleveIdAndChallengeId(eleveId, challengeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Participation", challengeId));
+        
+        Challenge challenge = participation.getChallenge();
+        Eleve eleve = participation.getEleve();
+        
+        // Calculer le total de points du challenge (somme des points des questions)
+        List<Question> questions = questionRepository.findByChallengeId(challengeId);
+        Integer totalPoints = questions.stream()
+                .map(q -> q.getPoints() != null ? q.getPoints() : 0)
+                .mapToInt(Integer::intValue)
+                .sum();
+        
+        // Si aucune question, utiliser challenge.getPoints() comme total
+        if (totalPoints == 0) {
+            totalPoints = challenge.getPoints() != null ? challenge.getPoints() : 0;
+        }
+        
+        // Calculer le pourcentage de réussite
+        Double pourcentageReussite = null;
+        if (participation.getScore() != null && totalPoints > 0) {
+            pourcentageReussite = (double) participation.getScore() / totalPoints * 100;
+        }
+        
+        // Calculer les points gagnés (estimation basée sur le score et le rang)
+        Integer pointsGagnes = 0;
+        if (participation.getScore() != null && totalPoints > 0) {
+            double pourcentage = pourcentageReussite;
+            if (pourcentage >= 90) {
+                pointsGagnes = challenge.getPoints() != null ? challenge.getPoints() : 0;
+            } else if (pourcentage >= 80) {
+                pointsGagnes = (challenge.getPoints() != null ? challenge.getPoints() : 0) * 8 / 10;
+            } else if (pourcentage >= 70) {
+                pointsGagnes = (challenge.getPoints() != null ? challenge.getPoints() : 0) * 6 / 10;
+            } else if (pourcentage >= 50) {
+                pointsGagnes = (challenge.getPoints() != null ? challenge.getPoints() : 0) * 4 / 10;
+            }
+            
+            // Bonus de classement
+            Integer rang = participation.getRang();
+            if (rang != null && rang <= 3) {
+                if (rang == 1) {
+                    pointsGagnes += (challenge.getPoints() != null ? challenge.getPoints() : 0) / 2;
+                } else if (rang == 2) {
+                    pointsGagnes += (challenge.getPoints() != null ? challenge.getPoints() : 0) / 3;
+                } else if (rang == 3) {
+                    pointsGagnes += (challenge.getPoints() != null ? challenge.getPoints() : 0) / 4;
+                }
+            }
+        }
+        
+        com.example.edugo.dto.ParticipationDetailResponse dto = new com.example.edugo.dto.ParticipationDetailResponse();
+        dto.setId(participation.getId());
+        dto.setEleveId(eleve.getId());
+        dto.setEleveNom(eleve.getNom());
+        dto.setElevePrenom(eleve.getPrenom());
+        dto.setChallengeId(challenge.getId());
+        dto.setChallengeTitre(challenge.getTitre());
+        dto.setScore(participation.getScore());
+        dto.setTotalPoints(totalPoints);
+        dto.setRang(participation.getRang());
+        dto.setTempsPasse(participation.getTempsPasse());
+        dto.setStatut(participation.getStatut());
+        dto.setDateParticipation(participation.getDateParticipation());
+        dto.setBadgeId(participation.getBadge() != null ? participation.getBadge().getId() : null);
+        dto.setBadgeNom(participation.getBadge() != null ? participation.getBadge().getNom() : null);
+        dto.setBadgeIcone(participation.getBadge() != null ? participation.getBadge().getIcone() : null);
+        dto.setPourcentageReussite(pourcentageReussite);
+        dto.setPointsGagnes(pointsGagnes);
+        
+        return dto;
     }
 
     // ==================== GESTION DES PARTICIPATIONS ====================
@@ -311,5 +451,41 @@ public class ServiceChallenge {
 
     public List<Challenge> getChallengesByRewardMode(String rewardMode) {
         return challengeRepository.findByRewardMode(rewardMode);
+    }
+
+    /**
+     * Envoie une notification push aux élèves lorsqu'un nouveau challenge est créé
+     * et notifie également les administrateurs
+     */
+    private void envoyerNotificationNouveauChallenge(Challenge challenge) {
+        try {
+            String titre = "🎯 Nouveau Challenge disponible !";
+            String message = challenge.getTitre() + "\n" + 
+                            (challenge.getDescription() != null && !challenge.getDescription().isEmpty() 
+                                ? challenge.getDescription().substring(0, Math.min(100, challenge.getDescription().length()))
+                                : "Participez dès maintenant !");
+
+            java.util.Map<String, Object> data = new java.util.HashMap<>();
+            data.put("type", "NOUVEAU_CHALLENGE");
+            data.put("challengeId", challenge.getId());
+            data.put("titre", challenge.getTitre());
+
+            // Envoyer à tous les élèves
+            oneSignalService.sendNotificationToRole("ELEVE", titre, message, data);
+            
+            // Notifier les administrateurs (email + OneSignal)
+            String adminTitre = "✅ Nouveau Challenge créé";
+            String adminMessage = "Un nouveau challenge a été créé : " + challenge.getTitre();
+            java.util.Map<String, Object> adminData = new java.util.HashMap<>();
+            adminData.put("type", "NOUVEAU_CHALLENGE_CREE");
+            adminData.put("challengeId", challenge.getId());
+            adminData.put("titre", challenge.getTitre());
+            adminData.put("points", challenge.getPoints());
+            
+            adminNotificationService.notifyAdmins(adminTitre, adminMessage, adminData);
+        } catch (Exception e) {
+            // Log l'erreur mais ne bloque pas la création du challenge
+            System.err.println("Erreur lors de l'envoi de notification nouveau challenge: " + e.getMessage());
+        }
     }
 }

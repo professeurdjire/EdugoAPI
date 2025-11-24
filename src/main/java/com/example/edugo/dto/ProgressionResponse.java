@@ -1,7 +1,9 @@
 package com.example.edugo.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProgressionResponse {
     private Long id;
     private Long eleveId;

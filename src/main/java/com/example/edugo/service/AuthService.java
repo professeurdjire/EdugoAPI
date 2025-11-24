@@ -31,6 +31,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final EmailService emailService;
+    private final AdminNotificationService adminNotificationService;
 
     public LoginResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -68,6 +69,23 @@ public class AuthService {
         } catch (Exception e) {
             // Log l'erreur mais ne bloque pas l'inscription
             System.err.println("Erreur lors de l'envoi de l'email de bienvenue: " + e.getMessage());
+        }
+        
+        // Notifier les administrateurs du nouvel élève inscrit (OneSignal + Email)
+        try {
+            String titre = "👤 Nouvel élève inscrit";
+            String message = String.format("Un nouvel élève vient de s'inscrire : %s %s", eleve.getPrenom(), eleve.getNom());
+            java.util.Map<String, Object> data = new java.util.HashMap<>();
+            data.put("type", "NOUVEL_ELEVE");
+            data.put("eleveId", eleve.getId());
+            data.put("nom", eleve.getNom());
+            data.put("prenom", eleve.getPrenom());
+            data.put("email", eleve.getEmail());
+            
+            adminNotificationService.notifyAdmins(titre, message, data);
+        } catch (Exception e) {
+            // Log l'erreur mais ne bloque pas l'inscription
+            System.err.println("Erreur lors de la notification aux administrateurs: " + e.getMessage());
         }
         
         String token = jwtUtil.generateToken(eleve);

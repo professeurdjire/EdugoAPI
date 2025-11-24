@@ -13,27 +13,37 @@ import java.util.Optional;
 public interface LivreRepository extends JpaRepository<Livre, Long> {
     Optional <Livre> findByTitre(String titre);
 
-    // Added for ELEVE/domain flows
-    @Query("SELECT l FROM Livre l WHERE l.classe.id = :classeId OR ( :niveauId IS NOT NULL AND l.niveau.id = :niveauId )")
+    // Added for ELEVE/domain flows - avec relations chargées
+    @Query("SELECT DISTINCT l FROM Livre l LEFT JOIN FETCH l.niveau LEFT JOIN FETCH l.classe LEFT JOIN FETCH l.matiere LEFT JOIN FETCH l.langue LEFT JOIN FETCH l.quiz WHERE l.classe.id = :classeId OR ( :niveauId IS NOT NULL AND l.niveau.id = :niveauId )")
     List<Livre> findByClasseIdOrNiveauId(@Param("classeId") Long classeId, @Param("niveauId") Long niveauId);
 
-    @Query("SELECT l FROM Livre l WHERE l.matiere.id = :matiereId")
+    @Query("SELECT DISTINCT l FROM Livre l LEFT JOIN FETCH l.niveau LEFT JOIN FETCH l.classe LEFT JOIN FETCH l.matiere LEFT JOIN FETCH l.langue LEFT JOIN FETCH l.quiz WHERE l.matiere.id = :matiereId")
     List<Livre> findByMatiereId(@Param("matiereId") Long matiereId);
 
-    @Query("SELECT l FROM Livre l WHERE l.niveau.id = :niveauId")
+    @Query("SELECT DISTINCT l FROM Livre l LEFT JOIN FETCH l.niveau LEFT JOIN FETCH l.classe LEFT JOIN FETCH l.matiere LEFT JOIN FETCH l.langue LEFT JOIN FETCH l.quiz WHERE l.niveau.id = :niveauId")
     List<Livre> findByNiveauId(@Param("niveauId") Long niveauId);
 
-    @Query("SELECT l FROM Livre l WHERE l.classe.id = :classeId")
+    @Query("SELECT DISTINCT l FROM Livre l LEFT JOIN FETCH l.niveau LEFT JOIN FETCH l.classe LEFT JOIN FETCH l.matiere LEFT JOIN FETCH l.langue LEFT JOIN FETCH l.quiz WHERE l.classe.id = :classeId")
     List<Livre> findByClasseId(@Param("classeId") Long classeId);
 
-    @Query(value = "SELECT * FROM livres ORDER BY id DESC LIMIT 10", nativeQuery = true)
+    @Query("SELECT DISTINCT l FROM Livre l LEFT JOIN FETCH l.niveau LEFT JOIN FETCH l.classe LEFT JOIN FETCH l.matiere LEFT JOIN FETCH l.langue LEFT JOIN FETCH l.quiz ORDER BY l.id DESC")
     List<Livre> findTop10ByOrderByIdDesc();
 
-    List<Livre> findByTitreContainingIgnoreCase(String titre);
+    @Query("SELECT DISTINCT l FROM Livre l LEFT JOIN FETCH l.niveau LEFT JOIN FETCH l.classe LEFT JOIN FETCH l.matiere LEFT JOIN FETCH l.langue LEFT JOIN FETCH l.quiz WHERE LOWER(l.titre) LIKE LOWER(CONCAT('%', :titre, '%'))")
+    List<Livre> findByTitreContainingIgnoreCase(@Param("titre") String titre);
 
-    List<Livre> findByAuteurContainingIgnoreCase(String auteur);
+    @Query("SELECT DISTINCT l FROM Livre l LEFT JOIN FETCH l.niveau LEFT JOIN FETCH l.classe LEFT JOIN FETCH l.matiere LEFT JOIN FETCH l.langue LEFT JOIN FETCH l.quiz WHERE LOWER(l.auteur) LIKE LOWER(CONCAT('%', :auteur, '%'))")
+    List<Livre> findByAuteurContainingIgnoreCase(@Param("auteur") String auteur);
 
     Optional<Livre> findByIsbn(String isbn);
     boolean existsByIsbn(String isbn);
     boolean existsByIsbnAndIdNot(String isbn, Long id);
+    
+    // Charger un livre avec toutes ses relations nécessaires pour les DTOs
+    @Query("SELECT l FROM Livre l LEFT JOIN FETCH l.niveau LEFT JOIN FETCH l.classe LEFT JOIN FETCH l.matiere LEFT JOIN FETCH l.langue LEFT JOIN FETCH l.quiz WHERE l.id = :id")
+    Optional<Livre> findByIdWithRelations(@Param("id") Long id);
+    
+    // Charger tous les livres avec leurs relations
+    @Query("SELECT DISTINCT l FROM Livre l LEFT JOIN FETCH l.niveau LEFT JOIN FETCH l.classe LEFT JOIN FETCH l.matiere LEFT JOIN FETCH l.langue LEFT JOIN FETCH l.quiz")
+    List<Livre> findAllWithRelations();
 }

@@ -1,15 +1,17 @@
 package com.example.edugo.service;
 
 import com.example.edugo.dto.StatistiquesClasseResponse;
+import com.example.edugo.dto.StatistiquesMatiereResponse;
 import com.example.edugo.dto.StatistiquesNiveauResponse;
 import com.example.edugo.dto.StatistiquesPlateformeResponse;
 import com.example.edugo.entity.Principales.Classe;
 import com.example.edugo.entity.Principales.Eleve;
+import com.example.edugo.entity.Principales.Exercice;
 import com.example.edugo.entity.Principales.Livre;
+import com.example.edugo.entity.Principales.Matiere;
 import com.example.edugo.entity.Principales.Niveau;
 import com.example.edugo.entity.Statistique;
 import com.example.edugo.entity.TypeStatistique;
-import com.example.edugo.entity.User;
 import com.example.edugo.entity.Role;
 
 import com.example.edugo.repository.*;
@@ -40,6 +42,7 @@ public class StatistiqueService {
     private final ParticipationRepository participationRepository;
     private final NiveauRepository niveauRepository;
     private final ClasseRepository classeRepository;
+    private final MatiereRepository matiereRepository;
     
     @Transactional(readOnly = true)
     public StatistiquesPlateformeResponse getStatistiquesPlateforme() {
@@ -94,9 +97,10 @@ public class StatistiqueService {
         // Dates
         stats.setDateDerniereMiseAJour(LocalDateTime.now());
         
-        // Statistiques par niveau et classe
+        // Statistiques par niveau, classe et matière
         stats.setStatistiquesParNiveau(getStatistiquesParNiveau());
         stats.setStatistiquesParClasse(getStatistiquesParClasse());
+        stats.setStatistiquesParMatiere(getStatistiquesParMatiere());
         
         return stats;
     }
@@ -173,6 +177,44 @@ public class StatistiqueService {
                             classe.getNiveau() != null ? classe.getNiveau().getNom() : "N/A",
                             eleves.size(),
                             pointsMoyens
+                    );
+                })
+                .collect(Collectors.toList());
+    }
+    
+    private List<StatistiquesMatiereResponse> getStatistiquesParMatiere() {
+        List<Matiere> matieres = matiereRepository.findAll();
+        return matieres.stream()
+                .map(matiere -> {
+                    List<Livre> livres = livreRepository.findByMatiereId(matiere.getId());
+                    List<Exercice> exercices = exerciceRepository.findByMatiereId(matiere.getId());
+                    List<Exercice> exercicesActifs = exercices.stream()
+                            .filter(e -> Boolean.TRUE.equals(e.getActive()))
+                            .collect(Collectors.toList());
+                    
+                    // Compter les élèves qui ont accès à cette matière via leurs livres
+                    // Un élève a accès à une matière s'il a des livres de cette matière dans sa classe/niveau
+                    long nombreEleves = eleveRepository.findAll().stream()
+                            .filter(eleve -> {
+                                if (eleve.getClasse() == null) return false;
+                                Long classeId = eleve.getClasse().getId();
+                                Long niveauId = eleve.getClasse().getNiveau() != null ? eleve.getClasse().getNiveau().getId() : null;
+                                
+                                // Vérifier si l'élève a accès à des livres de cette matière
+                                return livres.stream().anyMatch(livre -> 
+                                    (livre.getClasse() != null && livre.getClasse().getId().equals(classeId)) ||
+                                    (livre.getNiveau() != null && niveauId != null && livre.getNiveau().getId().equals(niveauId))
+                                );
+                            })
+                            .count();
+                    
+                    return new StatistiquesMatiereResponse(
+                            matiere.getId(),
+                            matiere.getNom(),
+                            (int) nombreEleves,
+                            livres.size(),
+                            exercices.size(),
+                            exercicesActifs.size()
                     );
                 })
                 .collect(Collectors.toList());

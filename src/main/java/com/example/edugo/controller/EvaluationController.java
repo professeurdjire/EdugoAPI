@@ -40,4 +40,11 @@ public class EvaluationController {
     public ResponseEntity<SubmitResultResponse> submitExercice(@PathVariable Long exerciceId, @RequestBody SubmitRequest request) {
         return ResponseEntity.ok(serviceEvaluation.submitExercice(exerciceId, request));
     }
+
+    @PostMapping("/defis/{defiId}/submit")
+    @PreAuthorize("hasRole('ELEVE')")
+    @Operation(summary = "Soumettre les réponses d'un défi (QCU/QCM/VRAI_FAUX)")
+    public ResponseEntity<SubmitResultResponse> submitDefi(@PathVariable Long defiId, @RequestBody SubmitRequest request) {
+        return ResponseEntity.ok(serviceEvaluation.submitDefi(defiId, request));
+    }
 }

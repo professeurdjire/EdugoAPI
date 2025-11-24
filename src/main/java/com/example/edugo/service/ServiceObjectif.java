@@ -79,10 +79,9 @@ public class ServiceObjectif {
             Objectif objectifEnCours = getObjectifEnCours(eleveId)
                     .orElseThrow(() -> new RuntimeException("Erreur de vérification d'objectif en cours"));
 
-            throw new RuntimeException(
-                    "Vous avez déjà un objectif " + objectifEnCours.getTypeObjectif() +
-                            " en cours. Terminez-le avant de créer un nouvel objectif. " +
-                            "Jours restants: " + calculerJoursRestants(objectifEnCours.getDateFin())
+            long joursRestants = calculerJoursRestants(objectifEnCours.getDateFin());
+            throw new com.example.edugo.exception.ObjectifEnCoursException(
+                    objectifEnCours.getTypeObjectif().toString(), joursRestants
             );
         }
 
@@ -102,7 +101,8 @@ public class ServiceObjectif {
             mettreAJourProgression(objectif);
             return toResponse(objectif);
         } else {
-            throw new ResourceNotFoundException("Aucun objectif en cours trouvé pour cet élève");
+            // Retourner null si aucun objectif en cours (cas normal, pas une erreur)
+            return null;
         }
     }
 
@@ -159,7 +159,7 @@ public class ServiceObjectif {
 
         // Empêcher la suppression d'un objectif en cours
         if ("EN_COURS".equals(objectif.getStatut())) {
-            throw new RuntimeException("Impossible de supprimer un objectif en cours");
+            throw new IllegalArgumentException("Impossible de supprimer un objectif en cours. Terminez-le d'abord.");
         }
 
         objectifRepository.delete(objectif);

@@ -1,10 +1,12 @@
 package com.example.edugo.entity.Principales;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "participationsChallenge")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Participation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,14 +28,17 @@ public class Participation {
 
     @ManyToOne
     @JoinColumn(name = "eleve_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "participations", "defis", "challenges"})
     private Eleve eleve;
 
     @ManyToOne
     @JoinColumn(name = "challenge_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "participations", "questions"})
     private Challenge challenge;
 
     @ManyToOne
     @JoinColumn(name = "badge_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Badge badge;
 
     @PrePersist

@@ -29,29 +29,29 @@ public class QuestionController {
     }
 
     @GetMapping("/by-quiz/{quizId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Lister les questions d'un quiz")
+    @PreAuthorize("hasAnyRole('ELEVE', 'ADMIN')")
+    @Operation(summary = "Lister les questions d'un quiz", description = "Accessible aux élèves et admins. Les réponses correctes sont masquées pour les élèves.")
     public ResponseEntity<List<QuestionResponse>> listByQuiz(@PathVariable Long quizId) {
         return ResponseEntity.ok(serviceQuestion.listByQuiz(quizId));
     }
 
     @GetMapping("/by-exercices/{exerciceId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Lister les questions d'un exercice")
+    @PreAuthorize("hasAnyRole('ELEVE', 'ADMIN')")
+    @Operation(summary = "Lister les questions d'un exercice", description = "Accessible aux élèves et admins. Les réponses correctes sont masquées pour les élèves.")
     public ResponseEntity<List<QuestionResponse>> listByExercice(@PathVariable Long exerciceId) {
         return ResponseEntity.ok(serviceQuestion.listByExercice(exerciceId));
     }
 
     @GetMapping("/by-challenges/{challengeId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Lister les questions d'un challenge")
+    @PreAuthorize("hasAnyRole('ELEVE', 'ADMIN')")
+    @Operation(summary = "Lister les questions d'un challenge", description = "Accessible aux élèves et admins. Les réponses correctes sont masquées pour les élèves.")
     public ResponseEntity<List<QuestionResponse>> listByChallenge(@PathVariable Long challengeId) {
         return ResponseEntity.ok(serviceQuestion.listByChallenge(challengeId));
     }
 
     @GetMapping("/by-defis/{defiId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Lister les questions d'un défi")
+    @PreAuthorize("hasAnyRole('ELEVE', 'ADMIN')")
+    @Operation(summary = "Lister les questions d'un défi", description = "Accessible aux élèves et admins. Les réponses correctes sont masquées pour les élèves.")
     public ResponseEntity<List<QuestionResponse>> listByDefi(@PathVariable Long defiId) {
         return ResponseEntity.ok(serviceQuestion.listByDefi(defiId));
     }

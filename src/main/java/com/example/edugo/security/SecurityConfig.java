@@ -77,10 +77,20 @@ public class SecurityConfig {
                                         "/api/docs",
                                         "/api/swagger").permitAll()
                         
-                        // Endpoints d'authentification publics
-                        .requestMatchers("/auth/**", "/api/auth/**").permitAll()
+                        // Endpoints d'authentification publics (y compris réinitialisation de mot de passe)
+                        // Exclure /auth/me et /api/auth/me qui nécessitent une authentification
+                        .requestMatchers("/auth/login", "/api/auth/login").permitAll()
+                        .requestMatchers("/auth/register", "/api/auth/register").permitAll()
+                        .requestMatchers("/auth/refresh", "/api/auth/refresh").permitAll()
+                        .requestMatchers("/auth/logout", "/api/auth/logout").permitAll()
+                        .requestMatchers("/auth/forgot-password", "/api/auth/forgot-password").permitAll()
+                        .requestMatchers("/auth/reset-password", "/api/auth/reset-password").permitAll()
+                        .requestMatchers("/auth/reset-password/verify", "/api/auth/reset-password/verify").permitAll()
+                        .requestMatchers("/reset-password", "/api/reset-password").permitAll()
                         .requestMatchers("/public/**", "/api/public/**").permitAll()
-                        // PUBLIC ENDPOINTS
+                        
+                        // ========== ENDPOINTS PUBLICS (ORIGINAUX) ==========
+                        // Seuls les niveaux et classes étaient publics à l'origine
                         .requestMatchers(HttpMethod.GET, "/niveaux/**", "/api/niveaux/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/classes/**", "/api/classes/**").permitAll()
 
@@ -90,7 +100,35 @@ public class SecurityConfig {
                         // Admin endpoints - require ADMIN role
                         .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
                         
-                        // Eleve endpoints - require ELEVE or ADMIN role
+                        // ========== ENDPOINTS DE SOUMISSION (ELEVE) ==========
+                        // IMPORTANT: Ces règles DOIVENT être AVANT la règle générale /eleve/**
+                        // L'ordre est critique : Spring Security évalue les règles dans l'ordre et la première correspondance gagne
+                        // Si on met /eleve/** avant, il va matcher tous les endpoints /eleve/... et bloquer les soumissions
+                        
+                        // Soumissions via EvaluationController (QCU/QCM/VRAI_FAUX)
+                        // Utiliser /*/submit au lieu de /**/submit car PathPattern ne supporte pas ** au milieu
+                        .requestMatchers(HttpMethod.POST, "/quizzes/*/submit", "/api/quizzes/*/submit").hasAnyRole("ELEVE", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/challenges/*/submit", "/api/challenges/*/submit").hasAnyRole("ELEVE", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/exercices/*/submit", "/api/exercices/*/submit").hasAnyRole("ELEVE", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/defis/*/submit", "/api/defis/*/submit").hasAnyRole("ELEVE", "ADMIN")
+                        
+                        // Soumissions via ExerciceController (texte libre)
+                        .requestMatchers(HttpMethod.POST, "/exercices/soumettre/**", "/api/exercices/soumettre/**").hasAnyRole("ELEVE", "ADMIN")
+                        
+                        // Participations via DefiController et ChallengeController
+                        .requestMatchers(HttpMethod.POST, "/defis/participer/**", "/api/defis/participer/**").hasAnyRole("ELEVE", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/challenges/participer/**", "/api/challenges/participer/**").hasAnyRole("ELEVE", "ADMIN")
+                        
+                        // Soumissions via EleveController (DOIT être avant la règle générale /eleve/**)
+                        .requestMatchers(HttpMethod.POST, "/eleve/exercices/soumettre/**", "/api/eleve/exercices/soumettre/**").hasAnyRole("ELEVE", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/eleve/defis/participer/**", "/api/eleve/defis/participer/**").hasAnyRole("ELEVE", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/eleve/challenges/participer/**", "/api/eleve/challenges/participer/**").hasAnyRole("ELEVE", "ADMIN")
+                        
+                        // Progression de lecture - accessible aux ELEVE (DOIT être avant la règle générale /livres/**)
+                        .requestMatchers(HttpMethod.POST, "/livres/progression/**", "/api/livres/progression/**").hasAnyRole("ELEVE", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/livres/progression/**", "/api/livres/progression/**").hasAnyRole("ELEVE", "ADMIN")
+                        
+                        // Eleve endpoints - require ELEVE or ADMIN role (APRÈS les règles de soumission)
                         .requestMatchers("/eleve/**", "/api/eleve/**").hasAnyRole("ELEVE", "ADMIN")
                         .requestMatchers("/objectifs/**", "/api/objectifs/**").hasAnyRole("ELEVE", "ADMIN")
                         .requestMatchers("/suggestions/**", "/api/suggestions/**").hasAnyRole("ELEVE", "ADMIN")
@@ -99,22 +137,37 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/conversions/**", "/api/conversions/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/conversions/**", "/api/conversions/**").hasAnyRole("ELEVE", "ADMIN")
                         
-                        // General data endpoints - accessible to authenticated users (GET operations)
-                        // Support both /matieres/** (si frontend appelle /api/matieres) et /api/matieres/** (si frontend appelle /api/api/matieres)
-                        .requestMatchers(HttpMethod.GET, "/matieres/**",  "/users/**",
-                                        "/livres/**", "/exercices/**", "/defis/**", "/challenges/**", 
-                                        "/badges/**", "/quizzes/**",
-                                         "/api/matieres/**", "/api/users/**",
-                                        "/api/livres/**", "/api/exercices/**", "/api/defis/**", "/api/challenges/**", 
-                                        "/api/badges/**", "/api/quizzes/**", "/api/auth/me").authenticated()
+                        // Endpoints nécessitant une authentification (GET operations)
+                        .requestMatchers("/auth/me", "/api/auth/me").authenticated() // Profil utilisateur connecté
+                        .requestMatchers(HttpMethod.GET, "/users/**", "/api/users/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/matieres/**", "/api/matieres/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/livres/**", "/api/livres/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/exercices/**", "/api/exercices/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/defis/**", "/api/defis/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/challenges/**", "/api/challenges/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/quizzes/**", "/api/quizzes/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/badges/**", "/api/badges/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/eleve/**", "/api/eleve/**").hasAnyRole("ELEVE", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/conversions/**", "/api/conversions/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/partenaires/**", "/api/partenaires/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/statistiques/**", "/api/statistiques/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/notifications/**", "/api/notifications/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/notifications/**", "/api/notifications/**").hasAnyRole("ELEVE", "ADMIN")
                         
                         // General data endpoints - POST/PUT/DELETE require ADMIN role
+                        // IMPORTANT: Les règles de soumission sont définies AVANT, donc elles sont évaluées en premier
                         .requestMatchers(HttpMethod.POST, "/classes/**", "/matieres/**", "/niveaux/**", "/users/**",
-                                        "/livres/**", "/exercices/**", "/defis/**", "/challenges/**",
-                                        "/badges/**", "/quizzes/**",
+                                        "/livres/**", "/badges/**",
                                         "/api/classes/**", "/api/matieres/**", "/api/niveaux/**", "/api/users/**",
-                                        "/api/livres/**", "/api/exercices/**", "/api/defis/**", "/api/challenges/**",
-                                        "/api/badges/**", "/api/quizzes/**").hasRole("ADMIN")
+                                        "/api/livres/**", "/api/badges/**").hasRole("ADMIN")
+                        // Pour exercices, defis, challenges, quizzes - seuls les POST de création/correction nécessitent ADMIN
+                        // ATTENTION: Ne pas utiliser /** car cela bloquerait les soumissions même si elles sont définies avant
+                        // Les soumissions sont gérées ci-dessus avec hasAnyRole("ELEVE", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/exercices", "/api/exercices").hasRole("ADMIN") // Créer exercice (exact match)
+                        .requestMatchers(HttpMethod.POST, "/exercices/corriger/**", "/api/exercices/corriger/**").hasRole("ADMIN") // Corriger exercice
+                        .requestMatchers(HttpMethod.POST, "/defis", "/api/defis").hasRole("ADMIN") // Créer défi (exact match)
+                        .requestMatchers(HttpMethod.POST, "/challenges", "/api/challenges").hasRole("ADMIN") // Créer challenge (exact match)
+                        .requestMatchers(HttpMethod.POST, "/quizzes", "/api/quizzes").hasRole("ADMIN") // Créer quiz (exact match)
                         .requestMatchers(HttpMethod.PUT, "/classes/**", "/matieres/**", "/niveaux/**", "/users/**",
                                         "/livres/**", "/exercices/**", "/defis/**", "/challenges/**",
                                         "/badges/**", "/quizzes/**",

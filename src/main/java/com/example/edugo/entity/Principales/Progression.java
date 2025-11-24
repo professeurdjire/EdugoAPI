@@ -30,6 +30,13 @@ public class Progression {
     @JoinColumn(name = "livre_id", nullable = false)
     private Livre livre;
 
+    @PrePersist
+    protected void onCreate() {
+        if (dateDerniereLecture == null) {
+            dateDerniereLecture = LocalDateTime.now();
+        }
+    }
+
     @PreUpdate
     protected void onUpdate() {
         dateDerniereLecture = LocalDateTime.now();

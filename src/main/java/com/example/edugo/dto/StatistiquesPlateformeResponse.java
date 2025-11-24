@@ -54,6 +54,9 @@ public class StatistiquesPlateformeResponse {
     // Statistiques par classe
     private List<StatistiquesClasseResponse> statistiquesParClasse;
     
+    // Statistiques par matière
+    private List<StatistiquesMatiereResponse> statistiquesParMatiere;
+    
     public StatistiquesPlateformeResponse() {}
     
     // Getters et Setters
@@ -158,4 +161,7 @@ public class StatistiquesPlateformeResponse {
     
     public List<StatistiquesClasseResponse> getStatistiquesParClasse() { return statistiquesParClasse; }
     public void setStatistiquesParClasse(List<StatistiquesClasseResponse> statistiquesParClasse) { this.statistiquesParClasse = statistiquesParClasse; }
+    
+    public List<StatistiquesMatiereResponse> getStatistiquesParMatiere() { return statistiquesParMatiere; }
+    public void setStatistiquesParMatiere(List<StatistiquesMatiereResponse> statistiquesParMatiere) { this.statistiquesParMatiere = statistiquesParMatiere; }
 }

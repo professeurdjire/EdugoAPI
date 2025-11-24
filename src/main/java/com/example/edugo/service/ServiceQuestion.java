@@ -7,10 +7,13 @@ import com.example.edugo.dto.ReponsePossibleResponse;
 import com.example.edugo.entity.Principales.*;
 import com.example.edugo.exception.ResourceNotFoundException;
 import com.example.edugo.repository.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -69,10 +72,20 @@ public class ServiceQuestion {
             Challenge ch = challengeRepository.findById(req.getChallengeId())
                     .orElseThrow(() -> new ResourceNotFoundException("Challenge", req.getChallengeId()));
             q.setChallenge(ch);
+            // Synchroniser la relation bidirectionnelle
+            if (ch.getQuestionsChallenge() == null) {
+                ch.setQuestionsChallenge(new ArrayList<>());
+            }
+            ch.getQuestionsChallenge().add(q);
         } else if (req.getDefiId() != null) {
             Defi df = defiRepository.findById(req.getDefiId())
                     .orElseThrow(() -> new ResourceNotFoundException("Défi", req.getDefiId()));
             q.setDefi(df);
+            // Synchroniser la relation bidirectionnelle
+            if (df.getQuestionsDefi() == null) {
+                df.setQuestionsDefi(new ArrayList<>());
+            }
+            df.getQuestionsDefi().add(q);
         }
 
         // Map responses for MCQ types
@@ -126,34 +139,82 @@ public class ServiceQuestion {
     }
 
     private QuestionResponse toResponse(Question q) {
+        return toResponse(q, false);
+    }
+    
+    private QuestionResponse toResponse(Question q, boolean hideCorrectAnswers) {
         QuestionResponse dto = new QuestionResponse();
         dto.setId(q.getId());
         dto.setIntitule(q.getEnonce());
         dto.setType(q.getType() != null ? q.getType().getLibelleType() : null);
+        
+        // Vérifier le rôle de l'utilisateur connecté
+        boolean isEleve = hideCorrectAnswers || isCurrentUserEleve();
+        
         dto.setReponsesPossibles(q.getReponsesPossibles() == null ? List.of() : q.getReponsesPossibles().stream()
-                .map(r -> new ReponsePossibleResponse(r.getId(), r.getLibelleReponse(), r.isEstCorrecte()))
+                .map(r -> {
+                    ReponsePossibleResponse resp = new ReponsePossibleResponse(r.getId(), r.getLibelleReponse(), null);
+                    // Ne masquer estCorrecte que pour les élèves
+                    if (!isEleve) {
+                        resp.setEstCorrecte(r.isEstCorrecte());
+                    }
+                    return resp;
+                })
                 .collect(Collectors.toList()));
         return dto;
+    }
+    
+    private boolean isCurrentUserEleve() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || authentication.getAuthorities() == null) {
+                return true; // Par défaut, masquer les réponses (sécurité)
+            }
+            
+            boolean hasAdminRole = authentication.getAuthorities().stream()
+                    .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+            
+            boolean hasEleveRole = authentication.getAuthorities().stream()
+                    .anyMatch(auth -> auth.getAuthority().equals("ROLE_ELEVE"));
+            
+            // Si l'utilisateur est un élève mais pas un admin, masquer les réponses correctes
+            return hasEleveRole && !hasAdminRole;
+        } catch (Exception e) {
+            // En cas d'erreur, par défaut masquer les réponses correctes (sécurité)
+            return true;
+        }
     }
 
     @Transactional(readOnly = true)
     public List<QuestionResponse> listByQuiz(Long quizId) {
-        return questionRepository.findByQuizId(quizId).stream().map(this::toResponse).collect(Collectors.toList());
+        boolean isEleve = isCurrentUserEleve();
+        return questionRepository.findByQuizId(quizId).stream()
+                .map(q -> toResponse(q, isEleve))
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<QuestionResponse> listByExercice(Long exerciceId) {
-        return questionRepository.findByExerciceId(exerciceId).stream().map(this::toResponse).collect(Collectors.toList());
+        boolean isEleve = isCurrentUserEleve();
+        return questionRepository.findByExerciceId(exerciceId).stream()
+                .map(q -> toResponse(q, isEleve))
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<QuestionResponse> listByChallenge(Long challengeId) {
-        return questionRepository.findByChallengeId(challengeId).stream().map(this::toResponse).collect(Collectors.toList());
+        boolean isEleve = isCurrentUserEleve();
+        return questionRepository.findByChallengeId(challengeId).stream()
+                .map(q -> toResponse(q, isEleve))
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<QuestionResponse> listByDefi(Long defiId) {
-        return questionRepository.findByDefiId(defiId).stream().map(this::toResponse).collect(Collectors.toList());
+        boolean isEleve = isCurrentUserEleve();
+        return questionRepository.findByDefiId(defiId).stream()
+                .map(q -> toResponse(q, isEleve))
+                .collect(Collectors.toList());
     }
 }
 

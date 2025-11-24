@@ -23,14 +23,41 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     //  Liste des endpoints publics qui ne nécessitent pas de JWT
+    // Seuls les endpoints d'authentification, niveaux, classes et documentation sont publics
     private static final String[] PUBLIC_ENDPOINTS = {
             "/auth/",
+            "/api/auth/",
+            "/reset-password",
+            "/api/reset-password",
             "/public/",
+            "/api/public/",
+            // Structures scolaires (seulement niveaux et classes étaient publics à l'origine)
             "/api/niveaux/",
             "/api/classes/",
+            // Documentation
             "/swagger-ui/",
             "/v3/api-docs/"
     };
+    
+    /**
+     * Vérifie si un endpoint est public (ne nécessite pas d'authentification)
+     */
+    private boolean isPublicEndpoint(String requestPath) {
+        // Normaliser le chemin (gérer le double /api/api/)
+        String normalizedPath = requestPath.replace("/api/api/", "/api/");
+        
+        // Exclure /auth/me et /api/auth/me qui nécessitent une authentification
+        if (normalizedPath.equals("/auth/me") || normalizedPath.equals("/api/auth/me")) {
+            return false;
+        }
+        
+        for (String publicEndpoint : PUBLIC_ENDPOINTS) {
+            if (normalizedPath.startsWith(publicEndpoint)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     
@@ -60,6 +87,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final String requestPath = request.getRequestURI();
+        
+        // Normaliser le chemin pour gérer le double /api/api/ et enlever les query parameters
+        String normalizedPath = requestPath.replace("/api/api/", "/api/");
+        // Enlever les query parameters pour la vérification
+        if (normalizedPath.contains("?")) {
+            normalizedPath = normalizedPath.substring(0, normalizedPath.indexOf("?"));
+        }
+
+        // Si c'est un endpoint public, passer sans authentification
+        // Ne pas essayer de valider un token JWT même s'il est présent
+        if (isPublicEndpoint(normalizedPath)) {
+            logger.debug("Endpoint public détecté: {}, passage sans authentification", normalizedPath);
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String jwt = null;
         final String authHeader = request.getHeader("Authorization");
@@ -76,14 +118,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
             if (jwt == null) {
-                logger.debug("Aucun token JWT pour la requête: {} (ni header, ni cookie)", requestPath);
+                logger.debug("Aucun token JWT pour la requête: {} (ni header, ni cookie)", normalizedPath);
                 filterChain.doFilter(request, response);
                 return;
             }
         }
 
         try {
-            logger.debug("Token JWT présent pour la requête: {} (source: {} )", requestPath, 
+            logger.debug("Token JWT présent pour la requête: {} (source: {} )", normalizedPath, 
                     (authHeader != null && authHeader.startsWith("Bearer ")) ? "Authorization" : "Cookie access_token");
             
             final String userEmail = jwtUtil.extractUsername(jwt);
@@ -112,15 +154,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 logger.debug("Authentification déjà présente dans le contexte pour: {}", userEmail);
             }
         } catch (io.jsonwebtoken.ExpiredJwtException e) {
-            logger.error("Token JWT expiré pour la requête: {}", requestPath, e);
+            logger.error("Token JWT expiré pour la requête: {}", normalizedPath, e);
         } catch (io.jsonwebtoken.security.SignatureException e) {
-            logger.error("Signature JWT invalide pour la requête: {}", requestPath, e);
+            logger.error("Signature JWT invalide pour la requête: {}", normalizedPath, e);
         } catch (io.jsonwebtoken.MalformedJwtException e) {
-            logger.error("Token JWT malformé pour la requête: {}", requestPath, e);
+            logger.error("Token JWT malformé pour la requête: {}", normalizedPath, e);
         } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
-            logger.error("Utilisateur non trouvé pour la requête: {}", requestPath, e);
+            // Ne logger qu'en DEBUG pour les endpoints publics, ERROR pour les autres
+            if (isPublicEndpoint(normalizedPath)) {
+                logger.debug("Utilisateur non trouvé pour endpoint public: {} (normal, pas d'erreur)", normalizedPath);
+            } else {
+                logger.error("Utilisateur non trouvé pour la requête: {}", normalizedPath, e);
+            }
         } catch (Exception e) {
-            logger.error("Erreur lors de la validation du token JWT pour la requête: {}", requestPath, e);
+            logger.error("Erreur lors de la validation du token JWT pour la requête: {}", normalizedPath, e);
         }
         
         filterChain.doFilter(request, response);

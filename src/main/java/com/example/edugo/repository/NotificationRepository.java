@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
@@ -15,13 +14,16 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Query("SELECT n FROM Notification n WHERE n.idEleve = :eleveId")
     List<Notification> findByEleveId(@Param("eleveId") Long eleveId);
     
-    @Query("SELECT n FROM Notification n WHERE n.idEleve = :eleveId AND n.estVu = false")
+    @Query("SELECT n FROM Notification n WHERE n.idEleve = :eleveId AND (n.estVu IS NULL OR n.estVu = false)")
     List<Notification> findUnreadByEleveId(@Param("eleveId") Long eleveId);
     
-    @Query("SELECT COUNT(n) FROM Notification n WHERE n.idEleve = :eleveId AND n.estVu = false")
+    @Query("SELECT COUNT(n) FROM Notification n WHERE n.idEleve = :eleveId AND (n.estVu IS NULL OR n.estVu = false)")
     Long countUnreadByEleveId(@Param("eleveId") Long eleveId);
     
     @Query("SELECT n FROM Notification n WHERE n.idEleve = :eleveId ORDER BY n.dateExplication DESC")
     List<Notification> findByEleveIdOrderByDateDesc(@Param("eleveId") Long eleveId);
+    
+    @Query("SELECT n FROM Notification n WHERE (n.estVu IS NULL OR n.estVu = false) ORDER BY n.dateExplication DESC")
+    List<Notification> findAllUnread();
 }
 

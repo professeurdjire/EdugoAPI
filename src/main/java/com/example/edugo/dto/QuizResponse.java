@@ -9,6 +9,7 @@ public class QuizResponse {
     private String description;
     private String auteur;
     private String titreLivre;
+    private Long livreId;
     private Long matiereId;
     private String matiereNom;
     private Long niveauId;

@@ -86,13 +86,16 @@ public class ServiceLivre {
         if (req.getLangueId() != null)
             livre.setLangue(serviceLangue.findById(req.getLangueId())
                     .orElseThrow(() -> new ResourceNotFoundException("Langue", req.getLangueId())));
-        return toResponse(livreRepository.save(livre));
+        Livre saved = livreRepository.save(livre);
+        // Recharger avec les relations pour le mapping DTO
+        return toResponse(livreRepository.findByIdWithRelations(saved.getId())
+                .orElse(saved));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public LivreResponse updateLivre(Long id, LivreRequest req, MultipartFile image) {
-        Livre livre = livreRepository.findById(id)
+        Livre livre = livreRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Livre", id));
         livre.setTitre(req.getTitre());
         livre.setIsbn(req.getIsbn());
@@ -127,23 +130,26 @@ public class ServiceLivre {
         if (req.getLangueId() != null)
             livre.setLangue(serviceLangue.findById(req.getLangueId())
                     .orElseThrow(() -> new ResourceNotFoundException("Langue", req.getLangueId())));
-        return toResponse(livreRepository.save(livre));
+        Livre saved = livreRepository.save(livre);
+        // Recharger avec les relations pour le mapping DTO
+        return toResponse(livreRepository.findByIdWithRelations(saved.getId())
+                .orElse(saved));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deleteLivre(Long id) {
-        Livre livre = livreRepository.findById(id)
+        Livre livre = livreRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Livre", id));
         livreRepository.delete(livre);
     }
 
     public List<LivreResponse> getAllLivres() {
-        return livreRepository.findAll().stream().map(this::toResponse).collect(Collectors.toList());
+        return livreRepository.findAllWithRelations().stream().map(this::toResponse).collect(Collectors.toList());
     }
 
     public LivreDetailResponse getLivreById(Long id) {
-        Livre livre = livreRepository.findById(id)
+        Livre livre = livreRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Livre", id));
         return toDetailResponse(livre, null, null); // Progression, stats si besoin
     }
@@ -184,6 +190,17 @@ public class ServiceLivre {
         dto.setAuteur(l.getAuteur());
         dto.setImageCouverture(l.getImageCouverture());
         dto.setTotalPages(l.getTotalPages());
+        // Relations
+        dto.setNiveauId(l.getNiveau() != null ? l.getNiveau().getId() : null);
+        dto.setNiveauNom(l.getNiveau() != null ? l.getNiveau().getNom() : null);
+        dto.setClasseId(l.getClasse() != null ? l.getClasse().getId() : null);
+        dto.setClasseNom(l.getClasse() != null ? l.getClasse().getNom() : null);
+        dto.setMatiereId(l.getMatiere() != null ? l.getMatiere().getId() : null);
+        dto.setMatiereNom(l.getMatiere() != null ? l.getMatiere().getNom() : null);
+        dto.setLangueId(l.getLangue() != null ? l.getLangue().getId() : null);
+        dto.setLangueNom(l.getLangue() != null ? l.getLangue().getNom() : null);
+        // Quiz lié
+        dto.setQuizId(l.getQuiz() != null ? l.getQuiz().getId() : null);
         return dto;
     }
     private LivreDetailResponse toDetailResponse(Livre l, Double progression, Object stats) {
@@ -204,8 +221,8 @@ public class ServiceLivre {
         dto.setClasseNom(l.getClasse() != null ? l.getClasse().getNom() : null);
         dto.setMatiereId(l.getMatiere() != null ? l.getMatiere().getId() : null);
         dto.setMatiereNom(l.getMatiere() != null ? l.getMatiere().getNom() : null);
-        dto.setLangueId(null);
-        dto.setLangueNom(null);
+        dto.setLangueId(l.getLangue() != null ? l.getLangue().getId() : null);
+        dto.setLangueNom(l.getLangue() != null ? l.getLangue().getNom() : null);
         dto.setProgression(progression);
         dto.setStatistiques(stats);
         return dto;
@@ -215,21 +232,44 @@ public class ServiceLivre {
     @PreAuthorize("hasRole('ELEVE')")
     @Transactional
     public com.example.edugo.dto.ProgressionResponse updateProgressionLecture(Long eleveId, Long livreId, Integer pageActuelle) {
-    Eleve eleve = eleveRepository.findById(eleveId)
-        .orElseThrow(() -> new ResourceNotFoundException("Élève", eleveId));
-    Livre livre = livreRepository.findById(livreId)
-        .orElseThrow(() -> new ResourceNotFoundException("Livre", livreId));
-    Integer pourcentageCompletion = (pageActuelle != null && livre.getTotalPages() != null && livre.getTotalPages() > 0) ? (pageActuelle * 100) / livre.getTotalPages() : 0;
-    Progression progression = progressionRepository
-        .findByEleveIdAndLivreId(eleveId, livreId)
-        .orElse(new Progression());
-    progression.setEleve(eleve);
-    progression.setLivre(livre);
-    progression.setPageActuelle(pageActuelle);
-    progression.setPourcentageCompletion(pourcentageCompletion);
-    progression.setDateMiseAJour(java.time.LocalDateTime.now());
-    Progression saved = progressionRepository.save(progression);
-    return toProgressionResponse(saved);
+        // Validation des paramètres
+        // Accepter 0 car c'est une page valide dans un PDF (première page indexée à 0)
+        if (pageActuelle == null) {
+            throw new IllegalArgumentException("La page actuelle ne peut pas être null");
+        }
+        if (pageActuelle < 0) {
+            throw new IllegalArgumentException("La page actuelle doit être un nombre positif ou zéro (0 pour la première page)");
+        }
+        
+        Eleve eleve = eleveRepository.findById(eleveId)
+            .orElseThrow(() -> new ResourceNotFoundException("Élève", eleveId));
+        Livre livre = livreRepository.findById(livreId)
+            .orElseThrow(() -> new ResourceNotFoundException("Livre", livreId));
+        
+        // Calculer le pourcentage de completion
+        Integer pourcentageCompletion = 0;
+        if (livre.getTotalPages() != null && livre.getTotalPages() > 0) {
+            // S'assurer que le pourcentage ne dépasse pas 100%
+            pourcentageCompletion = Math.min(100, Math.max(0, (pageActuelle * 100) / livre.getTotalPages()));
+        }
+        
+        // Chercher ou créer la progression
+        Progression progression = progressionRepository
+            .findByEleveIdAndLivreId(eleveId, livreId)
+            .orElse(new Progression());
+        
+        // Mettre à jour les champs
+        progression.setEleve(eleve);
+        progression.setLivre(livre);
+        progression.setPageActuelle(pageActuelle);
+        progression.setPourcentageCompletion(pourcentageCompletion);
+        
+        // Définir la date (sera aussi mise à jour par @PreUpdate/@PrePersist)
+        progression.setDateDerniereLecture(java.time.LocalDateTime.now());
+        
+        // Sauvegarder avec flush pour s'assurer que la transaction est commitée
+        Progression saved = progressionRepository.saveAndFlush(progression);
+        return toProgressionResponse(saved);
     }
 
     @PreAuthorize("hasRole('ELEVE')")
@@ -294,7 +334,7 @@ public class ServiceLivre {
         if (eleve.getClasse() != null) {
             return livreRepository.findByClasseId(eleve.getClasse().getId()).stream().map(this::toResponse).collect(java.util.stream.Collectors.toList());
         }
-        return livreRepository.findAll().stream().map(this::toResponse).collect(java.util.stream.Collectors.toList());
+        return livreRepository.findAllWithRelations().stream().map(this::toResponse).collect(java.util.stream.Collectors.toList());
     }
     public java.util.List<LivreResponse> searchLivresByTitre(String titre) {
         return livreRepository.findByTitreContainingIgnoreCase(titre).stream().map(this::toResponse).collect(java.util.stream.Collectors.toList());
@@ -305,7 +345,10 @@ public class ServiceLivre {
     }
 
     public java.util.List<LivreResponse> getLivresRecents() {
-        return livreRepository.findTop10ByOrderByIdDesc().stream().map(this::toResponse).collect(java.util.stream.Collectors.toList());
+        return livreRepository.findTop10ByOrderByIdDesc().stream()
+                .limit(10)
+                .map(this::toResponse)
+                .collect(java.util.stream.Collectors.toList());
     }
 
     // Helper mapping for progression -> DTO

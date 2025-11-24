@@ -1,10 +1,12 @@
 package com.example.edugo.entity.Principales;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "eleve_defis")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class EleveDefi {
 
     @Id
@@ -20,11 +22,13 @@ public class EleveDefi {
     // Relation entre EleveDefi et  élève
     @ManyToOne
     @JoinColumn(name = "eleve_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "defis", "challenges", "participations"})
     private Eleve eleve;
 
     // Relation entre EleveDefi et  défi
     @ManyToOne
     @JoinColumn(name = "defi_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "eleveDefis", "questions"})
     private Defi defi;
 
     // --- Constructeurs ---

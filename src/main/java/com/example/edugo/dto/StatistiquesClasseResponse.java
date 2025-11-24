@@ -1,28 +1,26 @@
 package com.example.edugo.dto;
 
-public class StatistiquesClasseResponse {
-    private Long classeId;
-    private String nomClasse;
-    private String niveau;
-    private Integer nombreEleves;
-    private Integer pointsMoyens;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-    public StatistiquesClasseResponse() {}
-    public StatistiquesClasseResponse(Long classeId, String nomClasse, String niveau, Integer nombreEleves, Integer pointsMoyens) {
-        this.classeId = classeId;
-        this.nomClasse = nomClasse;
-        this.niveau = niveau;
-        this.nombreEleves = nombreEleves;
-        this.pointsMoyens = pointsMoyens;
-    }
-    public Long getClasseId() { return classeId; }
-    public void setClasseId(Long classeId) { this.classeId = classeId; }
-    public String getNomClasse() { return nomClasse; }
-    public void setNomClasse(String nomClasse) { this.nomClasse = nomClasse; }
-    public String getNiveau() { return niveau; }
-    public void setNiveau(String niveau) { this.niveau = niveau; }
-    public Integer getNombreEleves() { return nombreEleves; }
-    public void setNombreEleves(Integer nombreEleves) { this.nombreEleves = nombreEleves; }
-    public Integer getPointsMoyens() { return pointsMoyens; }
-    public void setPointsMoyens(Integer pointsMoyens) { this.pointsMoyens = pointsMoyens; }
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class StatistiquesClasseResponse {
+    @JsonProperty("classeId")
+    private Long classeId;
+    
+    @JsonProperty("nomClasse")
+    private String nomClasse;
+    
+    @JsonProperty("niveau")
+    private String niveau;
+    
+    @JsonProperty("nombreEleves")
+    private Integer nombreEleves;
+    
+    @JsonProperty("pointsMoyens")
+    private Integer pointsMoyens;
 }

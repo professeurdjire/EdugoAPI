@@ -40,6 +40,11 @@ public class Defi {
     @JsonIgnore
     private List<EleveDefi> eleveDefis = new ArrayList<>();
 
+    // Relation entre défi et questions
+    @OneToMany(mappedBy = "defi", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Question> questionsDefi = new ArrayList<>();
+
     // --- Constructeurs ---
     public Defi() {}
 
@@ -80,4 +85,7 @@ public class Defi {
 
     public List<EleveDefi> getEleveDefis() { return eleveDefis; }
     public void setEleveDefis(List<EleveDefi> eleveDefis) { this.eleveDefis = eleveDefis; }
+
+    public List<Question> getQuestionsDefi() { return questionsDefi; }
+    public void setQuestionsDefi(List<Question> questionsDefi) { this.questionsDefi = questionsDefi; }
 }

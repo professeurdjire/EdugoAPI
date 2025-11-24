@@ -1,5 +1,8 @@
 package com.example.edugo.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReponsePossibleResponse {
     private Long id;
     private String libelle;

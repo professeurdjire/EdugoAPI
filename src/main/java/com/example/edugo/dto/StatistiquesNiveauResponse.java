@@ -1,32 +1,30 @@
 package com.example.edugo.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class StatistiquesNiveauResponse {
+    @JsonProperty("niveauId")
     private Long niveauId;
+    
+    @JsonProperty("nomNiveau")
     private String nomNiveau;
+    
+    @JsonProperty("nombreClasses")
     private Integer nombreClasses;
+    
+    @JsonProperty("nombreEleves")
     private Integer nombreEleves;
+    
+    @JsonProperty("nombreLivres")
     private Integer nombreLivres;
+    
+    @JsonProperty("pointsMoyens")
     private Integer pointsMoyens;
 
-    public StatistiquesNiveauResponse() {}
-    public StatistiquesNiveauResponse(Long niveauId, String nomNiveau, Integer nombreClasses, Integer nombreEleves, Integer nombreLivres, Integer pointsMoyens) {
-        this.niveauId = niveauId;
-        this.nomNiveau = nomNiveau;
-        this.nombreClasses = nombreClasses;
-        this.nombreEleves = nombreEleves;
-        this.nombreLivres = nombreLivres;
-        this.pointsMoyens = pointsMoyens;
-    }
-    public Long getNiveauId() { return niveauId; }
-    public void setNiveauId(Long niveauId) { this.niveauId = niveauId; }
-    public String getNomNiveau() { return nomNiveau; }
-    public void setNomNiveau(String nomNiveau) { this.nomNiveau = nomNiveau; }
-    public Integer getNombreClasses() { return nombreClasses; }
-    public void setNombreClasses(Integer nombreClasses) { this.nombreClasses = nombreClasses; }
-    public Integer getNombreEleves() { return nombreEleves; }
-    public void setNombreEleves(Integer nombreEleves) { this.nombreEleves = nombreEleves; }
-    public Integer getNombreLivres() { return nombreLivres; }
-    public void setNombreLivres(Integer nombreLivres) { this.nombreLivres = nombreLivres; }
-    public Integer getPointsMoyens() { return pointsMoyens; }
-    public void setPointsMoyens(Integer pointsMoyens) { this.pointsMoyens = pointsMoyens; }
 }

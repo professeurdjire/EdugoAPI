@@ -12,4 +12,5 @@ public class ChallengeResponse {
     private String theme;
     private LocalDateTime dateDebut;
     private LocalDateTime dateFin;
+    private Integer nombreQuestions; // Nombre de questions associées au challenge
 }
